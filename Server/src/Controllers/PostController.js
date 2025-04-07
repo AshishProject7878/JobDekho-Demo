@@ -23,23 +23,38 @@ export const createdPost = async (req, res) => {
     }
 };
 
-// Get all posts or filter by userId
+
+// Get all posts or filter by userId or search query
 export const getPosts = async (req, res) => {
-    try {
-        const { userId } = req.query;
-        let posts;
+  try {
+    const { userId, search } = req.query;
 
-        if (userId) {
-            posts = await Post.find({userId}).sort({createdAt: -1});
-        } else {
-            posts = await Post.find().sort({createdAt: -1});
+    const searchFilter = search
+      ? {
+          $or: [
+            { title: { $regex: search, $options: "i" } },
+            { description: { $regex: search, $options: "i" } },
+            { company: { $regex: search, $options: "i" } },
+            { location: { $regex: search, $options: "i" } },
+          ],
         }
+      : {};
 
-        res.status(200).json(posts);
-    } catch (error) {
-        res.status(500).json({ message: "Error fetching posts", error: error.message });
-    }
+    const userFilter = userId ? { userId } : {};
+
+    const finalFilter = { ...searchFilter, ...userFilter };
+
+    const posts = await Post.find(finalFilter).sort({ createdAt: -1 });
+
+    res.status(200).json(posts);
+  } catch (error) {
+    res.status(500).json({
+      message: "Error fetching posts",
+      error: error.message,
+    });
+  }
 };
+
 
 
 // Update post
