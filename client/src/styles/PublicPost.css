@@ -91,3 +91,29 @@
     background-color: #0056b3;
   }
   
+  .pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 1rem;
+    gap: 0.5rem;
+  }
+  
+  .page-btn {
+    padding: 6px 12px;
+    border: 1px solid #aaa;
+    background-color: white;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background 0.2s;
+  }
+  
+  .page-btn:hover {
+    background-color: #f0f0f0;
+  }
+  
+  .page-btn.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+  }
+  
