@@ -73,6 +73,6 @@ function PublicPost() {
       )}
     </div>
   );
-}
+} 
 
 export default PublicPost;
