@@ -1,0 +1,131 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body {
+    margin-top: 50px;
+    background-color: #d9d7d7;
+    font-family: Poppins, sans-serif;
+  }
+  
+  /* Login Section */
+  .login-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 200px;
+  }
+  
+  .loginForm {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .login-txt {
+    font-weight: bold;
+    font-size: 60px;
+    color: rgb(62, 62, 181);
+  }
+  
+  /* Input Fields */
+  .email-field {
+    background-color: #fff;
+    padding: 15px 10px;
+    width: 500px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+    border-radius: 8px;
+  }
+  
+  .login-input {
+    border: none;
+    outline: none;
+    width: 100%;
+  }
+  
+  /* Buttons */
+  .btn,
+  .g-btn {
+    text-align: center;
+    padding: 15px 10px;
+    margin-top: 20px;
+    border-radius: 8px;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .btn {
+    background-color: rgb(62, 62, 181);
+  }
+  
+  .btn:hover {
+    background-color: blue;
+    transform: translateY(-5%);
+  }
+  
+  .g-btn {
+    background-color: rgb(193, 38, 35);
+  }
+  
+  .g-btn:hover {
+    background-color: rgb(238, 13, 10);
+    transform: translateY(-5%);
+  }
+  
+  .acc {
+    margin-top: 10px;
+  }
+  
+  .acc span {
+    color: blue;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  
+  /* Image */
+  .img-container img {
+    margin-top: 50px;
+    height: 500px;
+  }
+  
+  /* Responsive */
+  @media (max-width: 768px) {
+    .nav-links {
+      display: none;
+    }
+  
+    .login-container {
+      flex-direction: column;
+      align-items: center;
+      padding: 10px 30px;
+      text-align: center;
+    }
+  
+    .login-txt {
+      font-size: 30px;
+    }
+  
+    .email-field {
+      width: 300px;
+      padding: 10px;
+      margin-top: 10px;
+    }
+  
+    .btn,
+    .g-btn {
+      padding: 10px 5px;
+      margin-top: 10px;
+    }
+  
+    .img-container img {
+      height: 300px;
+    }
+  }
+  

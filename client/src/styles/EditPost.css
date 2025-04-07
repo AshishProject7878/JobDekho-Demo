@@ -1,0 +1,64 @@
+.post-form-container {
+    max-width: 600px;
+    margin: 50px auto;
+    background: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  .post-form-container h2 {
+    text-align: center;
+    margin-bottom: 25px;
+    font-size: 24px;
+    color: #333;
+  }
+  
+  .post-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .post-form input,
+  .post-form textarea,
+  .post-form select {
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+    font-family: inherit;
+    resize: vertical;
+  }
+  
+  .post-form textarea {
+    min-height: 100px;
+  }
+  
+  .post-form select {
+    background-color: #f9f9f9;
+  }
+  
+  .post-form input:focus,
+  .post-form textarea:focus,
+  .post-form select:focus {
+    border-color: #007bff;
+    outline: none;
+  }
+  
+  .btn {
+    padding: 12px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    font-size: 16px;
+    font-weight: 500;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+  
+  .btn:hover {
+    background-color: #0056b3;
+  }
+  

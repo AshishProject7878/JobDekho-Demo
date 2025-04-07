@@ -1,0 +1,135 @@
+@import url('https://fonts.googleapis.com/css2?family=Emblema+One&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.Nv-main {
+    width: 100%;
+}
+
+.Nv-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+    background-color: #fff;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.Nv-logo {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.Lg-left {
+    padding: 10px 20px;
+    background-color: #6a11cb;
+    color: white;
+    font-size: 24px;
+    font-family: "Emblema One", system-ui;
+    font-weight: bolder;
+    border-radius: 8px;
+}
+
+.Lg-right {
+    color: #6a11cb;
+    font-size: 20px;
+    letter-spacing: 2px;
+    font-weight: 500;
+    font-family: "Emblema One", system-ui;
+}
+
+.slogan {
+    font-size: 7px;
+    color: #787575;
+    font-family: 'Poppins', sans-serif;
+}
+
+.Nv-links {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    list-style: none;
+}
+
+.Nv-links li a {
+    text-decoration: none;
+}
+
+.NVL-tags a {
+    color: black;
+    text-decoration: none;
+    position: relative;
+    transition: all 0.5s ease-in-out;
+}
+
+.NVL-tags a::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -2px;
+    width: 0;
+    height: 2px;
+    background-color: #6a11cb;
+    transition: width 0.5s ease-in-out;
+}
+
+.NVL-tags a:hover::after {
+    width: 70%;
+}
+
+.Lg-profile {
+    background-color: #6a11cb;
+    padding: 5px 13px;
+    border-radius: 50%;
+}
+
+.Lg-profile a {
+    color: #fff;
+    font-size: 15px;
+}
+
+/* Menu Icon */
+.menu-icon {
+    display: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #6a11cb;
+}
+
+/* Responsive Design */
+@media only screen and (max-width: 768px) {
+    .Nv-links {
+        display: none;
+        flex-direction: column;
+        position: absolute;
+        top: 80px;
+        right: 0;
+        border-radius: 12px;
+        background: #fff;
+        width: 50%;
+        text-align: center;
+        padding: 20px 0;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .Nv-links.active {
+        display: flex;
+    }
+
+   
+
+    .menu-icon {
+        display: block;
+    }
+}
