@@ -1,0 +1,16 @@
+# CLIENT ignores
+Client/node_modules/
+Client/build/
+Client/.env
+Client/.DS_Store
+
+# SERVER ignores
+Server/node_modules/
+Server/dist/    # or /build/ if you build your server
+Server/.env
+Server/.DS_Store
+
+# Common ignores
+*.log
+.env
+.DS_Store

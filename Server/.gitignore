@@ -1,0 +1,15 @@
+# dependencies
+/node_modules
+.env
+
+# production (if you're using a build tool like Babel or TypeScript)
+dist/
+build/
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS-specific
+.DS_Store
