@@ -32,7 +32,7 @@ function ProfilePage() {
         <button className="btn logout" onClick={handleLogout}>
           Logout
         </button>
-        <Link to="/post">
+        <Link to="/jobPostingForm">
           <button className='btn'>Post Job</button>
         </Link>
         <Link to="/postList">

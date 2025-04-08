@@ -31,7 +31,7 @@ function JobDetail() {
           <div className="timeline-item">
             <div className="content">
               <h3>
-                Bachelors in Fine Arts <span className="year">2012 - 2014</span>
+                Bachelors in Fine Arts 
               </h3>
               <p className="college">Modern College</p>
               <p className="description">
@@ -44,7 +44,7 @@ function JobDetail() {
           <div className="timeline-item">
             <div className="content">
               <h3>
-                Computer Science <span className="year">2008 - 2012</span>
+                Computer Science 
               </h3>
               <p className="college">Harvard University</p>
               <p className="description">
@@ -64,7 +64,7 @@ function JobDetail() {
           <div className="timeline-item">
             <div className="content">
               <h3>
-                Bachelors in Fine Arts <span className="year">2012 - 2014</span>
+                Bachelors in Fine Arts 
               </h3>
               <p className="college">Modern College</p>
               <p className="description">
@@ -77,7 +77,7 @@ function JobDetail() {
           <div className="timeline-item">
             <div className="content">
               <h3>
-                Computer Science <span className="year">2008 - 2012</span>
+                Computer Science 
               </h3>
               <p className="college">Harvard University</p>
               <p className="description">
@@ -174,7 +174,7 @@ function JobDetail() {
 
                   <p className="short-dets">
                     <i className="fa-solid fa-sack-dollar"></i>
-                    <span style={{ marginLeft: "20px" }}>Expected Salary</span>
+                    <span style={{ marginLeft: "20px" }}>Salary</span>
                   </p>
                   <p className="dets">3 LPA to 6 LPA</p>
 

@@ -10,6 +10,7 @@ import PostList from './Pages/PostList';
 import EditPost from './Pages/EditPost';
 import PublicPost from './Pages/PublicPost';
 import JobDetail from './Pages/JobDetail';
+import JobPostingForm from './Pages/JobPostingForm';
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
         
         {/* Protected routes */}
         <Route element={<ProtectedRoute />}>
+        <Route path="/jobPostingForm" element={<JobPostingForm />}/>
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/post" element={<PostForm />} />
           <Route path="/edit-post/:id" element={<EditPost />} />

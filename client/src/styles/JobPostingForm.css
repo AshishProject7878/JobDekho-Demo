@@ -1,0 +1,292 @@
+.job-posting-container {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 30px;
+    background: #ffffff;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  }
+  
+  .form-header {
+    margin-bottom: 30px;
+  }
+  
+  .form-header h2 {
+    color: #2c3e50;
+    font-size: 28px;
+    margin-bottom: 15px;
+  }
+  
+  .progress-bar {
+    height: 6px;
+    background: #ecf0f1;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(45deg, #3498db, #2ecc71);
+    transition: width 0.3s ease;
+  }
+  
+  .section-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 30px;
+    overflow-x: auto;
+    padding-bottom: 10px;
+  }
+  
+  .tab-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 25px;
+    background: #ecf0f1;
+    color: #7f8c8d;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .tab-btn .tab-number {
+    width: 20px;
+    height: 20px;
+    background: #bdc3c7;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: white;
+    transition: all 0.3s ease;
+  }
+  
+  .tab-btn.active {
+    background: #3498db;
+    color: white;
+  }
+  
+  .tab-btn.active .tab-number {
+    background: #2ecc71;
+  }
+  
+  .tab-btn:hover:not(.active) {
+    background: #dfe6e9;
+  }
+  
+  .form-section {
+    padding: 25px;
+    background: #f9fbfc;
+    border-radius: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .form-section h3 {
+    color: #2c3e50;
+    margin-bottom: 20px;
+    font-size: 22px;
+  }
+  
+  .form-group {
+    margin-bottom: 20px;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #34495e;
+    font-weight: 600;
+    font-size: 14px;
+  }
+  
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #ecf0f1;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: border-color 0.3s ease;
+  }
+  
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    border-color: #3498db;
+    outline: none;
+  }
+  
+  .salary-inputs {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+  
+  .salary-inputs input {
+    width: 45%;
+  }
+  
+  .skills-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  
+  .skill-tag {
+    background: #3498db;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+  }
+  
+  .skill-tag:hover {
+    background: #2980b9;
+  }
+  
+  .remove-skill {
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 16px;
+  }
+  
+  .form-navigation {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+  }
+  
+  .nav-btn {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    font-size: 16px;
+  }
+  
+  .prev-btn {
+    background: #95a5a6;
+    color: white;
+  }
+  
+  .next-btn {
+    background: #3498db;
+    color: white;
+  }
+  
+  .submit-btn {
+    background: #2ecc71;
+    color: white;
+  }
+  
+  .nav-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .review-section .review-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 25px;
+  }
+  
+  .review-block {
+    padding: 15px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  }
+  
+  .review-block h4 {
+    color: #2c3e50;
+    margin-bottom: 15px;
+    font-size: 18px;
+  }
+  
+  .review-block p {
+    margin: 8px 0;
+    color: #7f8c8d;
+    font-size: 14px;
+  }
+  
+  .review-block p span {
+    color: #34495e;
+    font-weight: 600;
+    margin-right: 8px;
+  }
+  
+  .formatting-controls {
+    margin-bottom: 10px;
+    display: flex;
+    gap: 8px;
+  }
+  
+  .formatting-controls button {
+    width: 35px;
+    height: 35px;
+    border: 2px solid #ecf0f1;
+    border-radius: 5px;
+    background: #ffffff;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.3s ease;
+  }
+  
+  .formatting-controls button:hover {
+    background: #3498db;
+    color: white;
+    border-color: #3498db;
+  }
+  
+  .formatted-text {
+    display: inline;
+    color: #7f8c8d;
+  }
+  
+  .formatted-list {
+    margin: 8px 0 8px 20px;
+    padding: 0;
+    list-style-type: disc;
+  }
+  
+  .formatted-list li {
+    margin: 5px 0;
+    color: #7f8c8d;
+  }
+  
+  .animate-in {
+    animation: fadeIn 0.3s ease-in;
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .error-message {
+    color: red;
+    margin-bottom: 10px;
+  }
+  
+  .success-message {
+    color: green;
+    margin-bottom: 10px;
+  }

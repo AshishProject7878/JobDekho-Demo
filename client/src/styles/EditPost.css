@@ -1,64 +1,182 @@
-.post-form-container {
-    max-width: 600px;
-    margin: 50px auto;
-    background: #fff;
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
+/* EditPost.css */
+.job-posting-container {
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 20px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.job-posting-container h2 {
+  font-size: 24px;
+  color: #333;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.job-posting-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-section {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.form-section h3 {
+  font-size: 18px;
+  color: #007bff;
+  margin-bottom: 15px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: 10px;
+  font-size: 14px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color 0.3s;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.form-group select {
+  appearance: none;
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"><path fill="%23333" d="M7 10l5 5 5-5z"/></svg>') no-repeat right 10px center;
+  background-size: 12px;
+}
+
+.salary-group .salary-inputs {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.salary-group .salary-inputs input {
+  width: 100px;
+}
+
+.salary-group .salary-inputs span {
+  font-size: 16px;
+  color: #666;
+}
+
+.skills-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.skill-tag {
+  background: #e9ecef;
+  padding: 5px 10px;
+  border-radius: 15px;
+  font-size: 12px;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.remove-skill {
+  cursor: pointer;
+  font-size: 14px;
+  color: #dc3545;
+  font-weight: bold;
+}
+
+.remove-skill:hover {
+  color: #c82333;
+}
+
+.nav-btn {
+  padding: 10px 20px;
+  font-size: 14px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.submit-btn {
+  background-color: #28a745;
+  color: white;
+}
+
+.submit-btn:hover {
+  background-color: #218838;
+}
+
+.nav-btn:not(.submit-btn) {
+  background-color: #6c757d;
+  color: white;
+}
+
+.nav-btn:not(.submit-btn):hover {
+  background-color: #5a6268;
+}
+
+.error-message {
+  color: #dc3545;
+  font-size: 14px;
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.success-message {
+  color: #28a745;
+  font-size: 14px;
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 600px) {
+  .job-posting-container {
+    padding: 15px;
   }
-  
-  .post-form-container h2 {
-    text-align: center;
-    margin-bottom: 25px;
-    font-size: 24px;
-    color: #333;
+
+  .form-section {
+    padding: 15px;
   }
-  
-  .post-form {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
+
+  .salary-group .salary-inputs input {
+    width: 80px;
   }
-  
-  .post-form input,
-  .post-form textarea,
-  .post-form select {
-    padding: 12px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    font-size: 16px;
-    font-family: inherit;
-    resize: vertical;
+
+  .nav-btn {
+    width: 100%;
   }
-  
-  .post-form textarea {
-    min-height: 100px;
-  }
-  
-  .post-form select {
-    background-color: #f9f9f9;
-  }
-  
-  .post-form input:focus,
-  .post-form textarea:focus,
-  .post-form select:focus {
-    border-color: #007bff;
-    outline: none;
-  }
-  
-  .btn {
-    padding: 12px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    font-size: 16px;
-    font-weight: 500;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background 0.2s ease;
-  }
-  
-  .btn:hover {
-    background-color: #0056b3;
-  }
-  
+}

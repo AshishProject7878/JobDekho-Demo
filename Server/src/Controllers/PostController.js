@@ -2,25 +2,64 @@ import Post from "../Models/PostModel.js";
 
 // Create a new post
 export const createdPost = async (req, res) => {
-    try {
-        const {title, description, company, location, salary, requirements, type} = req.body;
-        const userId = req.user._id;
-        const newPost = new Post({
-            title,
-            description,
-            company,
-            location,
-            salary,
-            requirements,
-            type,
-            userId
-        });
+  try {
+    console.log("👉 Req.user:", req.user);
+    console.log("👉 Req.body:", req.body);
+      const {
+          title,
+          description,
+          company,
+          location,
+          salary,
+          experience,
+          educationLevel,
+          languages,
+          responsibilities,
+          roleExperience,
+          skills,
+          type,
+          applicationDeadline,
+          remote,
+          contactEmail
+      } = req.body;
+      const userId = req.user._id;
 
-        await newPost.save();
-        res.status(201).json(newPost);
-    } catch (error) {
-        res.status(500).json({ message: "Error creating Post", error: error.message });
-    }
+      console.log("Request Body:", req.body);
+
+      const { min: salaryMin, max: salaryMax, currency } = salary || {};
+
+      const newPost = new Post({
+          title,
+          description,
+          company,
+          location,
+          salary: {
+              min: salaryMin,
+              max: salaryMax,
+              currency: currency || "LPA"
+          },
+          experience,
+          educationLevel,
+          languages: languages ? languages.split(',').map(lang => lang.trim()) : [],
+          responsibilities,
+          roleExperience,
+          skills: skills || [],
+          type,
+          userId,
+          status: "Draft",
+          applicationDeadline: applicationDeadline ? new Date(applicationDeadline) : undefined,
+          remote: remote || false,
+          contactEmail,
+          views: 0
+      });
+
+      // console.log("New Post Object:", newPost); 
+      await newPost.save();
+      res.status(201).json(newPost);
+  } catch (error) {
+    console.error("🔥 Error in createdPost:", error);  // FULL error
+    res.status(500).json({ message: "Error creating Post", error: error.message });
+  }
 };
 
 

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
-import "../styles/PostList.css"; // ⬅️ Add this line
+import "../styles/PostList.css"; // Assuming the same CSS file
 
 function PostList() {
   const [posts, setPosts] = useState([]);
@@ -44,6 +44,15 @@ function PostList() {
   const truncate = (str, max = 35) =>
     str?.length > max ? str.substring(0, max) + "..." : str;
 
+  const formatSalary = (salary) => {
+    if (!salary || (!salary.min && !salary.max)) return "Not Disclosed";
+    const { min, max, currency } = salary;
+    if (min && max) return `${min} - ${max} ${currency}`;
+    if (min) return `${min} ${currency} (min)`;
+    if (max) return `${max} ${currency} (max)`;
+    return "Not Disclosed";
+  };
+
   if (!user) {
     return <p className="info-message">Please log in to view your job posts.</p>;
   }
@@ -56,7 +65,7 @@ function PostList() {
     <div className="post-list-container">
       <div className="header">
         <h2>My Job Posts</h2>
-        <Link to="/post">
+        <Link to="/jobPostingForm">
           <button className="post-btn">Post New Job</button>
         </Link>
       </div>
@@ -70,7 +79,16 @@ function PostList() {
               <div className="post-meta">
                 <span>🏢 {post.company}</span>
                 <span>📍 {post.location}</span>
-                <span>💰 {post.salary || "Not Disclosed"}</span>
+                <span>💰 {formatSalary(post.salary)}</span>
+                <span>🕒 {post.type}</span>
+                <span>🏠 {post.remote ? "Remote" : "On-site"}</span>
+              </div>
+              <div className="post-details">
+                <p><strong>Skills:</strong> {post.skills?.length > 0 ? post.skills.join(", ") : "None listed"}</p>
+                <p><strong>Experience:</strong> {post.experience || "Not specified"}</p>
+                <p><strong>Education:</strong> {post.educationLevel || "Not specified"}</p>
+                <p><strong>Languages:</strong> {post.languages || "Not specified"}</p>
+                <p><strong>Deadline:</strong> {post.applicationDeadline ? new Date(post.applicationDeadline).toLocaleDateString() : "Open"}</p>
               </div>
               <div className="card-actions">
                 <button

@@ -1,154 +1,331 @@
-import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
-import "../styles/PostForm.css";
+import { useParams, useNavigate } from "react-router-dom";
+import "../styles/JobPostingForm.css"; // Reuse styling
 
 function EditPost() {
-  const { id } = useParams();
+  const { id } = useParams(); // Get postId from URL
   const navigate = useNavigate();
-
   const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    company: "",
+    jobTitle: "",
+    companyName: "",
     location: "",
-    salary: "",
-    requirements: "",
+    experience: "",
+    salaryMin: "",
+    salaryMax: "",
+    educationLevel: "",
+    languages: "",
+    email: "",
+    description: "",
+    responsibilities: "",
+    roleExperience: "",
+    skills: [],
     type: "",
+    applicationDeadline: "",
+    remote: false,
   });
-
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
 
   const jobTypes = ["Full-time", "Part-time", "Internship", "Contract"];
 
   useEffect(() => {
-    const fetchPost = async () => {
-      try {
-        const res = await axios.get(`http://localhost:5000/api/posts/${id}`, {
-          withCredentials: true,
-        });
+    axios
+      .get(`http://localhost:5000/api/posts/${id}`, {
+        withCredentials: true,
+      })
+      .then((res) => {
         const post = res.data;
-
         setFormData({
-          title: post.title || "",
-          description: post.description || "",
-          company: post.company || "",
+          jobTitle: post.title || "",
+          companyName: post.company || "",
           location: post.location || "",
-          salary: post.salary || "",
-          requirements: post.requirements?.join(", ") || "",
+          experience: post.experience || "",
+          salaryMin: post.salary?.min || "",
+          salaryMax: post.salary?.max || "",
+          educationLevel: post.educationLevel || "",
+          languages: post.languages || "",
+          email: post.contactEmail || "",
+          description: post.description || "",
+          responsibilities: post.responsibilities || "",
+          roleExperience: post.roleExperience || "",
+          skills: post.skills || [],
           type: post.type || "",
+          applicationDeadline: post.applicationDeadline
+            ? post.applicationDeadline.split("T")[0]
+            : "",
+          remote: post.remote || false,
         });
-
         setLoading(false);
-      } catch (error) {
-        console.error("Error fetching post:", error);
-        setError("Unauthorized or post not found.");
-        navigate("/post"); // Or redirect to 404
-      }
-    };
-
-    fetchPost();
-  }, [id, navigate]);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch post:", err);
+        setError("Failed to load post data.");
+        setLoading(false);
+      });
+  }, [id]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
-  const handleUpdate = async (e) => {
+  const handleSkillAdd = (e) => {
+    if (e.key === "Enter" && e.target.value.trim()) {
+      e.preventDefault();
+      setFormData((prev) => ({
+        ...prev,
+        skills: [...prev.skills, e.target.value.trim()],
+      }));
+      e.target.value = "";
+    }
+  };
+
+  const handleSkillRemove = (skillToRemove) => {
+    setFormData((prev) => ({
+      ...prev,
+      skills: prev.skills.filter((skill) => skill !== skillToRemove),
+    }));
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const updatedData = {
-      ...formData,
-      requirements: formData.requirements
-        .split(",")
-        .map((r) => r.trim())
-        .filter(Boolean),
+    setError(null);
+    setSuccess(null);
+
+    if (!formData.type) {
+      setError("Please select a job type.");
+      return;
+    }
+
+    const postData = {
+      title: formData.jobTitle,
+      description: formData.description,
+      company: formData.companyName,
+      location: formData.location,
+      salary: {
+        min: formData.salaryMin ? Number(formData.salaryMin) : undefined,
+        max: formData.salaryMax ? Number(formData.salaryMax) : undefined,
+        currency: "LPA",
+      },
+      experience: formData.experience,
+      educationLevel: formData.educationLevel,
+      languages: formData.languages,
+      responsibilities: formData.responsibilities,
+      roleExperience: formData.roleExperience,
+      skills: formData.skills,
+      type: formData.type,
+      applicationDeadline: formData.applicationDeadline || undefined,
+      remote: formData.remote,
+      contactEmail: formData.email,
     };
 
     try {
-      const res = await axios.put(
+      await axios.put(
         `http://localhost:5000/api/posts/${id}`,
-        updatedData,
-        {
-          withCredentials: true,
-        }
+        postData,
+        { withCredentials: true }
       );
-      alert("Post updated successfully!");
-      navigate("/postList");
-    } catch (error) {
-      console.error("Update error:", error);
-      const msg =
-        error.response?.data?.message || "Something went wrong while updating.";
-      alert(msg);
+      setSuccess("Job updated successfully!");
+      setTimeout(() => navigate("/postList"), 1500); // Redirect after 1.5s
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to update post.");
     }
   };
 
   if (loading) return <p>Loading post...</p>;
-  if (error) return <p className="error-message">{error}</p>;
+  if (error && !formData.jobTitle) return <p>{error}</p>;
 
   return (
-    <div className="post-form-container">
-      <h2>Edit Job Post</h2>
-      <form className="post-form" onSubmit={handleUpdate}>
-        <input
-          type="text"
-          name="title"
-          placeholder="Job Title"
-          value={formData.title}
-          onChange={handleChange}
-          required
-        />
-        <textarea
-          name="description"
-          placeholder="Job Description"
-          value={formData.description}
-          onChange={handleChange}
-          required
-        />
-        <input
-          type="text"
-          name="company"
-          placeholder="Company Name"
-          value={formData.company}
-          onChange={handleChange}
-          required
-        />
-        <input
-          type="text"
-          name="location"
-          placeholder="Job Location"
-          value={formData.location}
-          onChange={handleChange}
-          required
-        />
-        <input
-          type="text"
-          name="salary"
-          placeholder="Salary (optional)"
-          value={formData.salary}
-          onChange={handleChange}
-        />
-        <input
-          type="text"
-          name="requirements"
-          placeholder="Requirements (comma-separated)"
-          value={formData.requirements}
-          onChange={handleChange}
-        />
-        <select name="type" value={formData.type} onChange={handleChange}>
-          <option value="">Select Job Type</option>
-          {jobTypes.map((type) => (
-            <option key={type} value={type}>
-              {type}
-            </option>
-          ))}
-        </select>
-        <button type="submit" className="btn">
-          Update Post
+    <div className="job-posting-container">
+      <h2>Edit Job Posting</h2>
+      {error && <p className="error-message">{error}</p>}
+      {success && <p className="success-message">{success}</p>}
+      <form onSubmit={handleSubmit} className="job-posting-form">
+        <div className="form-section">
+          <h3>Basic Information</h3>
+          <div className="form-group">
+            <label>Job Title</label>
+            <input
+              type="text"
+              name="jobTitle"
+              value={formData.jobTitle}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label>Company Name</label>
+            <input
+              type="text"
+              name="companyName"
+              value={formData.companyName}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label>Location</label>
+            <input
+              type="text"
+              name="location"
+              value={formData.location}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label>Contact Email</label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label>Job Type</label>
+            <select name="type" value={formData.type} onChange={handleChange} required>
+              <option value="">Select Job Type</option>
+              {jobTypes.map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="form-group">
+            <label>Remote</label>
+            <input
+              type="checkbox"
+              name="remote"
+              checked={formData.remote}
+              onChange={handleChange}
+            />
+          </div>
+          <div className="form-group">
+            <label>Experience</label>
+            <input
+              type="text"
+              name="experience"
+              value={formData.experience}
+              onChange={handleChange}
+            />
+          </div>
+          <div className="form-group salary-group">
+            <label>Salary Range (LPA)</label>
+            <div className="salary-inputs">
+              <input
+                type="number"
+                name="salaryMin"
+                value={formData.salaryMin}
+                onChange={handleChange}
+                placeholder="Min"
+              />
+              <span>-</span>
+              <input
+                type="number"
+                name="salaryMax"
+                value={formData.salaryMax}
+                onChange={handleChange}
+                placeholder="Max"
+              />
+            </div>
+          </div>
+          <div className="form-group">
+            <label>Education Level</label>
+            <select
+              name="educationLevel"
+              value={formData.educationLevel}
+              onChange={handleChange}
+            >
+              <option value="">Select Education Level</option>
+              <option value="High School">High School</option>
+              <option value="Graduate">Graduate</option>
+              <option value="Post Graduate">Post Graduate</option>
+            </select>
+          </div>
+          <div className="form-group">
+            <label>Languages</label>
+            <input
+              type="text"
+              name="languages"
+              value={formData.languages}
+              onChange={handleChange}
+            />
+          </div>
+          <div className="form-group">
+            <label>Application Deadline</label>
+            <input
+              type="date"
+              name="applicationDeadline"
+              value={formData.applicationDeadline}
+              onChange={handleChange}
+            />
+          </div>
+          <div className="form-group">
+            <label>Skills</label>
+            <input
+              type="text"
+              onKeyDown={handleSkillAdd}
+              placeholder="Type a skill and press Enter"
+            />
+            <div className="skills-list">
+              {formData.skills.map((skill) => (
+                <div key={skill} className="skill-tag">
+                  {skill}
+                  <span
+                    className="remove-skill"
+                    onClick={() => handleSkillRemove(skill)}
+                  >
+                    ×
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="form-group">
+            <label>Description</label>
+            <textarea
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              rows="4"
+            />
+          </div>
+          <div className="form-group">
+            <label>Responsibilities</label>
+            <textarea
+              name="responsibilities"
+              value={formData.responsibilities}
+              onChange={handleChange}
+              rows="4"
+            />
+          </div>
+          <div className="form-group">
+            <label>Role & Experience</label>
+            <textarea
+              name="roleExperience"
+              value={formData.roleExperience}
+              onChange={handleChange}
+              rows="4"
+            />
+          </div>
+        </div>
+        <button type="submit" className="nav-btn submit-btn">
+          Update Job
+        </button>
+        <button
+          type="button"
+          className="nav-btn"
+          onClick={() => navigate("/postList")}
+        >
+          Cancel
         </button>
       </form>
     </div>
