@@ -38,6 +38,9 @@ function ProfilePage() {
         <Link to="/postList">
           <button className='btn'>Post List</button>
         </Link>
+        <Link to='/jobDetail'>
+          <button className='btn'>Job Detail</button>
+        </Link>
       </div>
     </div>
   );

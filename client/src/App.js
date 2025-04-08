@@ -9,6 +9,7 @@ import PostForm from './Pages/PostForm';
 import PostList from './Pages/PostList';
 import EditPost from './Pages/EditPost';
 import PublicPost from './Pages/PublicPost';
+import JobDetail from './Pages/JobDetail';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route path="/" element={<PublicPost />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/jobDetail" element={<JobDetail />}/>
         {/* <Route path="/public-posts" element={<PublicPost />} /> */}
         
         {/* Protected routes */}
