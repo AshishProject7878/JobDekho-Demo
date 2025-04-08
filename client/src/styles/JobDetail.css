@@ -5,19 +5,32 @@
 }
 
 body {
-    background-color: #f5f5f5;
+    background-color: #ccc;
     flex-direction: column;
     min-height: 100vh; /* Ensures footer stays at bottom */
 }
 
-h2{
+h2 {
     color: #6a11cb;
 }
 
 /* ---- Profile Container ------------------ */
 
+.JobTitle {
+    font-size: 24px; /* Increase font size; adjust as needed */
+    color: rgb(75, 82, 105);
+    font-weight: bold;
+    margin: 0;
+}
+
+h3 {
+    color: rgb(75, 82, 105);
+    font-size: 18px;
+    font-weight: bold;
+    margin: 0;
+}
+
 .job-detail-container {
-    background-color: #ccc;
     min-height: 100vh;
 }
 
@@ -51,42 +64,41 @@ h2{
     border-radius: 50%;
 }
 
-.jobLocation{
+.jobLocation {
     display: flex;
     flex-wrap: nowrap;
     gap: 5px;
     color: #676666;
+    margin-top: 5px;
+}
+
+.CompName{
+    margin-top: 5px;
+    margin-bottom: 5px;
 }
 
 .jobDetail-dets {
     flex-grow: 1;
-    /* line-height: 1.5; */
     display: flex;
+    line-height: 1.5;
     flex-direction: column;
 }
 
-.jobDetail-dets span{
+.jobDetail-dets span {
     margin-right: 10px;
     color: #555;
     font-size: 18px;
     width: 20px;
 }
 
-.editJobDetail{
+.editJobDetail {
     display: flex;
     margin-top: 50px;
     gap: 20px;
 }
 
-.jobDetail-dets p {
-    margin: 10px 0;
-}
 
-/* .btn-cv{
-    margin-top: 50px;
-} */
-
-.Jobbtn1{
+.Jobbtn1 {
     border: 1px solid transparent;
     padding: 10px 20px;
     width: 200px;
@@ -98,7 +110,7 @@ h2{
     overflow: hidden;
 }
 
-.Jobbtn1:hover{
+.Jobbtn1:hover {
     background-color: #8345c4;
 }
 
@@ -110,28 +122,28 @@ h2{
     background-color: transparent;
     color: #000;
     padding: 0;
-  }
+}
 
-  .SM{
+.SM {
     width: 100%;
-  }
-  
-  /* Active Tab Styling */
-  .active-tab {
+}
+
+/* Active Tab Styling */
+.active-tab {
     background-color: #6a11cb;
     color: white;
     padding: 10px 20px;
     border-radius: 3px;
-  }
-  
-  /* Inactive Tab Styling */
-  .inactive-tab:hover {
+}
+
+/* Inactive Tab Styling */
+.inactive-tab:hover {
     background-color: #f0f0f0;
     padding: 10px 20px;
     border-radius: 3px;
-  }
-  
-.section-buttons{
+}
+
+.section-buttons {
     display: flex;
     gap: 20px;
 }
@@ -142,7 +154,6 @@ h2{
     transition: all .3s ease-in-out;
 }
 
-
 /* Tablets (max-width: 1024px) */
 @media (max-width: 1024px) {
     .jobDetail-holder {
@@ -151,7 +162,7 @@ h2{
         width: 90%;
     }
 
-    .img-container {
+    .img-container1 {
         width: 120px;
         height: 120px;
     }
@@ -170,18 +181,13 @@ h2{
         margin-top: 20px;
     }
 
-    
-    .img-container {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin: 0 auto 20px auto; 
+    .img-container1 {
+        margin: 0 auto 20px auto;
         width: 100px;
         height: 100px;
     }
 
-    .editJobDetail{
-        display: flex;
+    .editJobDetail {
         justify-content: center;
         gap: 50px;
     }
@@ -192,22 +198,22 @@ h2{
         padding: 12px;
     }
 
-    .btn-cv{
+    .btn-cv {
         width: 250px;
         padding: 10px 40px;
     }
 }
 
-/* ----- Section2------ */
+/* ----- Section2 ------ */
 
-.section2{
-    display: flex;
+.section2 {
+    /* display: flex; */
     background-color: #fff;
     min-height: 100vh;
     padding: 10px 40px;
 }
 
-.first-links{
+.first-links {
     display: flex;
     align-items: center;
     list-style: none;
@@ -215,7 +221,7 @@ h2{
     margin-bottom: 10px;
 }
 
-.first-links .active{
+.first-links .active {
     padding: 10px 20px;
     background-color: rgb(93, 104, 139);
     color: white;
@@ -225,17 +231,17 @@ h2{
     transition: all .5s ease;
 }
 
-.first-links .active:hover{
+.first-links .active:hover {
     background-color: #456ba0;
 }
 
-.first-links li{
+.first-links li {
     cursor: pointer;
     border: 1px solid transparent;
     transition: all .5s ease;
 }
 
-.first-links li:hover{
+.first-links li:hover {
     background-color: #7799c7;
     color: white;
     padding: 10px 20px;
@@ -243,24 +249,28 @@ h2{
     border: 1px solid #ccc;
 }
 
-.about-me{
+.about-me {
     display: flex;
     gap: 47px;
     line-height: 1.5;
     width: 100%;
 }
 
-.about-me p{
+.about-holder {
+    width: 70%; /* Main content takes 70% of the width */
+    text-align: justify;
+}
+
+.adv {
+    width: 30%; /* Sidebar takes 30% of the width */
+}
+
+.about-me p {
     color: rgb(75, 82, 105);
 }
 
-.about-me h2{
-    /* margin-top: 50px; */
+.about-me h2 {
     margin-bottom: 15px;
-}
-
-.about-holder{
-    text-align: justify;
 }
 
 /* ------------- Exp section start here ------------------ */
@@ -270,14 +280,13 @@ h2{
     padding-left: 25px;
 }
 
-/* Dotted timeline line */
 .timeline::before {
     content: "";
     position: absolute;
     left: 5px;
     top: 0;
     bottom: 0;
-    border-left: 3px dotted #7799c7; 
+    border-left: 3px dotted #7799c7;
 }
 
 .timeline-item {
@@ -289,7 +298,7 @@ h2{
     flex: 1;
 }
 
-.content p{
+.content p {
     color: rgb(75, 82, 105);
 }
 
@@ -308,13 +317,6 @@ h2{
     margin-right: 15px;
 }
 
-h3 {
-    color: rgb(75, 82, 105);
-    font-size: 18px;
-    font-weight: bold;
-    margin: 0;
-}
-
 .year {
     background-color: #3875c7;
     color: #fff;
@@ -331,7 +333,7 @@ h3 {
     margin: 5px 0;
 }
 
-.education-container h2{
+.education-container h2 {
     color: #007bff;
 }
 
@@ -343,8 +345,7 @@ h3 {
 
 /* Edu ends here */
 
-
-.overview{
+.overview {
     border: 1px solid #ccc;
     border-radius: 5px;
     padding: 20px 30px;
@@ -352,17 +353,17 @@ h3 {
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-.title{
-    margin-bottom: 20xp;
+.title {
+    margin-bottom: 20px; /* Fixed typo: '20xp' to '20px' */
     color: #8345c4;
 }
 
-.short-dets{
+.short-dets {
     margin-bottom: 10px;
     margin-top: 20px;
 }
 
-.dets{
+.dets {
     margin-top: -8px;
     font-weight: bold;
     margin-left: 35px;
@@ -374,9 +375,9 @@ h3 {
     gap: 10px;
     margin-bottom: 20px;
     margin-top: 10px;
-  }
-  
-  .skillColor {
+}
+
+.skillColor {
     font-size: 14px;
     color: white;
     background-color: #3875c7;
@@ -384,102 +385,99 @@ h3 {
     border-radius: 20px;
     text-align: center;
     transition: background-color 0.3s ease;
-  }
-  
-  .skillColor:hover {
+}
+
+.skillColor:hover {
     background-color: #2e5ca3;
-  }
+}
 
-
-.ad-card img{
+.ad-card img {
     width: 19rem;
     height: 400px;
 }
 
-.grad{
+.grad {
     margin-left: 40px;
 }
 
-.lang{
+.lang {
     margin-left: 35px;
 }
 
-.ad-card{
+.ad-card {
     margin-top: 50px;
 }
 
+/* Mobile adjustments */
 @media (max-width: 768px) {
-    .about-me{
+    .about-me {
         flex-wrap: wrap;
     }
 
-    .certi-card{
+    .about-holder {
+        width: 100%; /* Full width on mobile */
+        order: 2;
+    }
+
+    .adv {
+        width: 100%; /* Full width on mobile */
+        order: 1;
+    }
+
+    .certi-card {
         flex-wrap: wrap;
     }
-    
-    .skills-section{
+
+    .skills-section {
         display: block;
     }
 
-    .box{
+    .box {
         margin-bottom: 30px;
         width: 100%;
     }
 
-    .btn-cv{
+    .btn-cv {
         width: 150px;
         font-size: 15px;
     }
 
-    .btn{
+    .btn {
         font-size: 10px;
     }
 
-    .first-links{
+    .first-links {
         font-size: 12px;
     }
 
-    .wExp{
+    .wExp {
         gap: 1px;
     }
 
-    .exp-card h3{
+    .exp-card h3 {
         margin-top: 5px;
         margin-bottom: 5px;
     }
 
-    .experience-container p{
+    .experience-container p {
         font-size: 13px;
     }
 
-    .experience-container h3{
+    .experience-container h3 {
         font-size: 15px;
         margin-top: 10px;
     }
 
-    .experience-container li{
+    .experience-container li {
         font-size: 13px;
         text-align: justify;
     }
 
-    .certi-card{
+    .certi-card {
         gap: 20px;
     }
 
-    .about-holder{
-        order: 2;
-    }
-
-    .adv{
-        order: 1;
-        width: 100%;
-    }
-
-    .ad-card{
+    .ad-card {
         display: none;
     }
 }
-
-
-
-

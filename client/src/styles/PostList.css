@@ -121,3 +121,26 @@
   color: #666;
   margin-top: 20px;
 }
+
+/* Add this to your existing PostList.css */
+
+.view-btn {
+  padding: 8px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  background-color: #007bff; /* Blue to match your theme */
+  color: white;
+  transition: background-color 0.3s;
+}
+
+.view-btn:hover {
+  background-color: #0056b3;
+}
+
+/* Adjust card-actions to fit three buttons */
+.card-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: space-between; /* Optional: spreads buttons evenly */
+}

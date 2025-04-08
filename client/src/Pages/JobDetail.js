@@ -1,96 +1,37 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { useParams } from "react-router-dom";
 import "../styles/JobDetail.css";
-import CompImg from "../Assests/CompLogo.png"
+import CompImg from "../Assests/CompLogo.png";
+
 function JobDetail() {
+  const { id } = useParams();
+  const [job, setJob] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [sectionOrder, setSectionOrder] = useState([
     "Description",
     "Key Responsibilities",
     "Role & Experience",
   ]);
 
-  const sections = {
-    "Description": (
-      <>
-        <h2>Description</h2>
-        <p>
-          I am a Full Stack Web Developer with 2+ years of experience in
-          building high-performance web applications. My expertise lies in HTML,
-          CSS, JavaScript, and React.js, and I have a strong understanding of
-          both frontend and backend development. Over the years, I have worked
-          on a variety of projects, ranging from dynamic web applications to
-          e-commerce platforms and interactive user interfaces. My primary focus
-          has always been on creating seamless, responsive, and visually
-          appealing websites that enhance user experience and functionality.
-        </p>
-      </>
-    ),
-    "Key Responsibilities": (
-      <>
-        <h2>Key Responsibilities</h2>
-        <div className="timeline">
-          <div className="timeline-item">
-            <div className="content">
-              <h3>
-                Bachelors in Fine Arts 
-              </h3>
-              <p className="college">Modern College</p>
-              <p className="description">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin a
-                ipsum tellus. Interdum et malesuada fames ac ante ipsum primis
-                in faucibus.
-              </p>
-            </div>
-          </div>
-          <div className="timeline-item">
-            <div className="content">
-              <h3>
-                Computer Science 
-              </h3>
-              <p className="college">Harvard University</p>
-              <p className="description">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin a
-                ipsum tellus. Interdum et malesuada fames ac ante ipsum primis
-                in faucibus.
-              </p>
-            </div>
-          </div>
-        </div>
-      </>
-    ),
-    "Role & Experience": (
-      <>
-        <h2>Role & Experience</h2>
-        <div className="timeline">
-          <div className="timeline-item">
-            <div className="content">
-              <h3>
-                Bachelors in Fine Arts 
-              </h3>
-              <p className="college">Modern College</p>
-              <p className="description">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin a
-                ipsum tellus. Interdum et malesuada fames ac ante ipsum primis
-                in faucibus.
-              </p>
-            </div>
-          </div>
-          <div className="timeline-item">
-            <div className="content">
-              <h3>
-                Computer Science 
-              </h3>
-              <p className="college">Harvard University</p>
-              <p className="description">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin a
-                ipsum tellus. Interdum et malesuada fames ac ante ipsum primis
-                in faucibus.
-              </p>
-            </div>
-          </div>
-        </div>
-      </>
-    ),
-  };
+  useEffect(() => {
+    const fetchJob = async () => {
+      try {
+        const response = await axios.get(`http://localhost:5000/api/posts/${id}`, {
+          withCredentials: true,
+        });
+        setJob(response.data);
+        setLoading(false);
+      } catch (err) {
+        console.error("Failed to fetch job:", err);
+        setError("Failed to load job details.");
+        setLoading(false);
+      }
+    };
+
+    fetchJob();
+  }, [id]);
 
   const handleTabClick = (tab) => {
     setSectionOrder((prevOrder) => {
@@ -104,116 +45,181 @@ function JobDetail() {
     });
   };
 
-  return (
-    <div className="main-container">
-      <div className="jobDetail-container">
-        <div className="jobDetail-holder">
-          <div className="img-container1">
-            <img src={CompImg} alt="" />
-          </div>
-          <div className="jobDetail-dets">
-            <h3>Full Stack Web Developer</h3>
-            <p>Wrogan Tech Support</p>
-            <h3>⭐⭐⭐⭐⭐</h3>
-            <div className="jobLocation">
-            <p><span><i class="fa-solid fa-location-dot"></i></span></p>
-            <p>John Doe resides at 123 Maplewood Drive, Springfield, Illinois, 62704, in the United States</p>
+  const renderTimeline = (text) => {
+    if (!text) return <p>Not provided</p>;
+
+    const lines = text.split("\n").filter((line) => line.trim());
+    return (
+      <div className="timeline">
+        {lines.map((line, index) => {
+          // Process markdown formatting
+          const formatted = line
+            .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>") // Bold
+            .replace(/\*(.*?)\*/g, "<em>$1</em>") // Italic
+            .replace(/<u>(.*?)<\/u>/g, "<u>$1</u>") // Underline
+            .replace(/^- /, ""); // Remove bullet prefix
+
+          return (
+            <div key={index} className="timeline-item">
+              <div className="circle">{index + 1}</div>
+              <div className="content">
+                <h3 dangerouslySetInnerHTML={{ __html: formatted }} />
+                {/* Only show description if there's more context; adjust as needed */}
+                {lines.length > 1 && (
+                  <p className="description" dangerouslySetInnerHTML={{ __html: formatted }} />
+                )}
+              </div>
             </div>
-          </div>
-          <div className="editJobDetail">
-            <button className="Jobbtn1">Apply</button>
-            <button className="Jobbtn1 btn-cv">Share</button>
+          );
+        })}
+      </div>
+    );
+  };
+
+  const renderDescription = (text) => {
+    if (!text) return <p>Not provided</p>;
+    return (
+      <p
+        dangerouslySetInnerHTML={{
+          __html: text
+            .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+            .replace(/\*(.*?)\*/g, "<em>$1</em>")
+            .replace(/<u>(.*?)<\/u>/g, "<u>$1</u>"),
+        }}
+      />
+    );
+  };
+
+  if (loading) return <div className="job-detail-container"><p>Loading job details...</p></div>;
+  if (error) return <div className="job-detail-container"><p>{error}</p></div>;
+  if (!job) return <div className="job-detail-container"><p>Job not found.</p></div>;
+
+  const sections = {
+    Description: (
+      <>
+        <h2>Description</h2>
+        {renderDescription(job.description)}
+      </>
+    ),
+    "Key Responsibilities": (
+      <>
+        <h2>Key Responsibilities</h2>
+        {renderTimeline(job.responsibilities)}
+      </>
+    ),
+    "Role & Experience": (
+      <>
+        <h2>Role & Experience</h2>
+        {renderTimeline(job.roleExperience)}
+      </>
+    ),
+  };
+
+  return (
+    <div className="job-detail-container">
+      <div className="jobDetail-holder">
+        <div className="img-container1">
+          <img src={CompImg} alt={`${job.company} Logo`} />
+        </div>
+        <div className="jobDetail-dets">
+          <h3 className="JobTitle">{job.title}</h3>
+          <p className="CompName">{job.company}</p>
+          <p>⭐⭐⭐⭐⭐</p>
+          <div className="jobLocation">
+            <span><i className="fa-solid fa-location-dot"></i></span>
+            <p>{job.location}</p>
           </div>
         </div>
+        <div className="editJobDetail">
+          <button className="Jobbtn1">Apply</button>
+          <button className="Jobbtn1 btn-cv">Share</button>
+        </div>
+      </div>
 
-        <div className="section2">
-          <div className="list-first">
-            <div className="section-buttons" style={{ marginBottom: "20px" }}>
-              {["Description", "Key Responsibilities", "Role & Experience"].map(
-                (tab) => {
-                  const isActive = tab === sectionOrder[0];
-                  return (
-                    <button
-                      key={tab}
-                      onClick={() => handleTabClick(tab)}
-                      className={isActive ? "Jobbtn active-tab" : "Jobbtn inactive-tab"}
-                    >
-                      {tab}
-                    </button>
+      <div className="section2">
+        <div className="section-buttons" style={{ marginBottom: "20px" }}>
+          {["Description", "Key Responsibilities", "Role & Experience"].map((tab) => {
+            const isActive = tab === sectionOrder[0];
+            return (
+              <button
+                key={tab}
+                onClick={() => handleTabClick(tab)}
+                className={isActive ? "Jobbtn active-tab" : "Jobbtn inactive-tab"}
+              >
+                {tab}
+              </button>
+            );
+          })}
+        </div>
 
-                  );
-                }
-              )}
+        <hr style={{ marginBottom: "25px" }} />
+
+        <div className="about-me">
+          <div className="about-holder">
+            {sectionOrder.map((tab) => (
+              <div key={tab} className="section-block" style={{ marginBottom: "30px" }}>
+                {sections[tab]}
+              </div>
+            ))}
+          </div>
+
+          <div className="adv">
+            <div className="overview">
+              <h3 className="title">Overview</h3>
+              <hr />
+              <p className="short-dets">
+                <i className="fa-solid fa-briefcase"></i>
+                <span style={{ marginLeft: "20px" }}>Experience</span>
+              </p>
+              <p className="dets">{job.experience || "Not specified"}</p>
+
+              <p className="short-dets">
+                <i className="fa-solid fa-sack-dollar"></i>
+                <span style={{ marginLeft: "20px" }}>Salary</span>
+              </p>
+              <p className="dets">
+                {job.salary && (job.salary.min || job.salary.max)
+                  ? `${job.salary.min || "N/A"} - ${job.salary.max || "N/A"} ${job.salary.currency || "LPA"}`
+                  : "Not disclosed"}
+              </p>
+
+              <p className="short-dets">
+                <i className="fa-solid fa-graduation-cap"></i>
+                <span style={{ marginLeft: "20px" }}>Education Level</span>
+              </p>
+              <p className="dets grad">{job.educationLevel || "Not specified"}</p>
+
+              <p className="short-dets">
+                <i className="fa-solid fa-microphone"></i>
+                <span style={{ marginLeft: "20px" }}>Language</span>
+              </p>
+              <p className="dets lang">{job.languages || "Not specified"}</p>
+
+              <p className="short-dets">
+                <i className="fa-solid fa-envelope"></i>
+                <span style={{ marginLeft: "20px" }}>Email</span>
+              </p>
+              <p className="dets lang">{job.contactEmail || "Not specified"}</p>
+
+              <button className="Jobbtn1 SM" style={{ marginTop: "20px" }}>
+                Send Message
+              </button>
             </div>
 
-            <hr style={{ marginBottom: "25px" }} />
-
-            <div className="about-me">
-              <div className="about-holder">
-                {sectionOrder.map((tab) => (
-                  <div
-                    key={tab}
-                    className="section-block"
-                    style={{ marginBottom: "30px" }}
-                  >
-                    {sections[tab]}
-                  </div>
-                ))}
+            <div className="overview">
+              <h3 className="title">Skills</h3>
+              <hr />
+              <div className="skills-list">
+                {job.skills && job.skills.length > 0 ? (
+                  job.skills.map((skill, index) => (
+                    <div key={index} className="skillColor">
+                      {skill}
+                    </div>
+                  ))
+                ) : (
+                  <p>No skills listed</p>
+                )}
               </div>
-
-              {/* Right Panel - DO NOT TOUCH */}
-              <div className="adv">
-                <div className="overview">
-                  <h3 className="title">Overview</h3>
-                  <hr />
-                  <p className="short-dets">
-                    <i className="fa-solid fa-briefcase"></i>
-                    <span style={{ marginLeft: "20px" }}>Experience</span>
-                  </p>
-                  <p className="dets">2-4 years</p>
-
-                  <p className="short-dets">
-                    <i className="fa-solid fa-sack-dollar"></i>
-                    <span style={{ marginLeft: "20px" }}>Salary</span>
-                  </p>
-                  <p className="dets">3 LPA to 6 LPA</p>
-
-                  <p className="short-dets">
-                    <i className="fa-solid fa-graduation-cap"></i>
-                    <span style={{ marginLeft: "20px" }}>Education Level</span>
-                  </p>
-                  <p className="dets grad">Graduate</p>
-
-                  <p className="short-dets">
-                    <i className="fa-solid fa-microphone"></i>
-                    <span style={{ marginLeft: "20px" }}>Language</span>
-                  </p>
-                  <p className="dets lang">English, Hindi, Gujarati</p>
-
-                  <p className="short-dets">
-                    <i className="fa-solid fa-envelope"></i>
-                    <span style={{ marginLeft: "20px" }}>Email</span>
-                  </p>
-                  <p className="dets lang">johndoe787@gmail.com</p>
-
-                  <button className="Jobbtn1 SM" style={{ marginTop: "20px" }}>
-                    Send Message
-                  </button>
-                </div>
-
-                <div className="overview">
-                  <h3 className="title">Skills</h3>
-                  <hr />
-                  <div className="skills-list">
-                    <div className="skillColor">FrontEnd</div>
-                    <div className="skillColor">FrontEnd</div>
-                    <div className="skillColor">FrontEnd</div>
-                    <div className="skillColor">FrontEnd</div>
-                    <div className="skillColor">FrontEnd</div>
-                  </div>
-                </div>
-              </div>
-              {/* End Right Panel */}
             </div>
           </div>
         </div>

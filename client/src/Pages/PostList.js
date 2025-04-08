@@ -92,6 +92,12 @@ function PostList() {
               </div>
               <div className="card-actions">
                 <button
+                  className="view-btn"
+                  onClick={() => navigate(`/job/${post._id}`)}
+                >
+                  View Job
+                </button>
+                <button
                   className="edit-btn"
                   onClick={() => navigate(`/edit-post/${post._id}`)}
                 >

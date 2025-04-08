@@ -20,7 +20,7 @@ function App() {
         <Route path="/" element={<PublicPost />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/jobDetail" element={<JobDetail />}/>
+        <Route path="/job/:id" element={<JobDetail />} />
         {/* <Route path="/public-posts" element={<PublicPost />} /> */}
         
         {/* Protected routes */}
