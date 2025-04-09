@@ -11,4 +11,5 @@ router.put("/:id", protectRoute, updatePost);
 router.delete("/:id", protectRoute, deletePost);
 
 
+
 export default router;

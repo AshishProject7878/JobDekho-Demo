@@ -24,7 +24,7 @@ export const createdPost = async (req, res) => {
       } = req.body;
       const userId = req.user._id;
 
-      // console.log("Request Body:", req.body);
+      console.log("Request Body:", req.body);
 
       const { min: salaryMin, max: salaryMax, currency } = salary || {};
 

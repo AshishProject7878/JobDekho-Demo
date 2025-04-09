@@ -89,6 +89,7 @@ const postSchema = new mongoose.Schema({
         type: Number,
         default: 0, // To track how many times the job post has been viewed
     },
+    
 }, {
     timestamps: true,
 });
