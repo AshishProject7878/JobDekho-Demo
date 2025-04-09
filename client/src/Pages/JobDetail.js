@@ -21,6 +21,7 @@ function JobDetail() {
         const response = await axios.get(`http://localhost:5000/api/posts/${id}`, {
           withCredentials: true,
         });
+        console.log("API Response:", response.data); // Debug: Log the full response
         setJob(response.data);
         setLoading(false);
       } catch (err) {
@@ -52,19 +53,16 @@ function JobDetail() {
     return (
       <div className="timeline">
         {lines.map((line, index) => {
-          // Process markdown formatting
           const formatted = line
-            .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>") // Bold
-            .replace(/\*(.*?)\*/g, "<em>$1</em>") // Italic
-            .replace(/<u>(.*?)<\/u>/g, "<u>$1</u>") // Underline
-            .replace(/^- /, ""); // Remove bullet prefix
-
+            .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+            .replace(/\*(.*?)\*/g, "<em>$1</em>")
+            .replace(/<u>(.*?)<\/u>/g, "<u>$1</u>")
+            .replace(/^- /, "");
           return (
             <div key={index} className="timeline-item">
-              <div className="circle">{index + 1}</div>
+              {/* <div className="circle">{index + 1}</div> */}
               <div className="content">
                 <h3 dangerouslySetInnerHTML={{ __html: formatted }} />
-                {/* Only show description if there's more context; adjust as needed */}
                 {lines.length > 1 && (
                   <p className="description" dangerouslySetInnerHTML={{ __html: formatted }} />
                 )}
@@ -88,6 +86,25 @@ function JobDetail() {
         }}
       />
     );
+  };
+
+  // Updated formatLanguages to handle different types
+  const formatLanguages = (languages) => {
+    console.log("Languages value:", languages); // Debug: Log the value of languages
+    if (!languages) return "Not specified";
+
+    // Handle different types of languages input
+    if (Array.isArray(languages)) {
+      return languages.length > 0 ? languages.join(", ") : "Not specified";
+    } else if (typeof languages === "string") {
+      return languages
+        .split(/[\s,]+/)
+        .map(lang => lang.trim())
+        .filter(lang => lang)
+        .join(", ");
+    } else {
+      return "Not specified"; // Fallback for unexpected types (object, number, etc.)
+    }
   };
 
   if (loading) return <div className="job-detail-container"><p>Loading job details...</p></div>;
@@ -193,7 +210,7 @@ function JobDetail() {
                 <i className="fa-solid fa-microphone"></i>
                 <span style={{ marginLeft: "20px" }}>Language</span>
               </p>
-              <p className="dets lang">{job.languages || "Not specified"}</p>
+              <p className="dets lang">{formatLanguages(job.languages)}</p>
 
               <p className="short-dets">
                 <i className="fa-solid fa-envelope"></i>

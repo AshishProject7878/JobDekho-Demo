@@ -3,8 +3,8 @@ import Post from "../Models/PostModel.js";
 // Create a new post
 export const createdPost = async (req, res) => {
   try {
-    console.log("👉 Req.user:", req.user);
-    console.log("👉 Req.body:", req.body);
+    // console.log("👉 Req.user:", req.user);
+    // console.log("👉 Req.body:", req.body);
       const {
           title,
           description,
@@ -24,7 +24,7 @@ export const createdPost = async (req, res) => {
       } = req.body;
       const userId = req.user._id;
 
-      console.log("Request Body:", req.body);
+      // console.log("Request Body:", req.body);
 
       const { min: salaryMin, max: salaryMax, currency } = salary || {};
 
