@@ -41,6 +41,9 @@ function ProfilePage() {
         <Link to='/jobDetail'>
           <button className='btn'>Job Detail</button>
         </Link>
+        <Link to="/profileComp">
+        <button className='btn'>Profile Component</button>
+        </Link>
       </div>
     </div>
   );

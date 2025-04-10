@@ -11,6 +11,8 @@ import EditPost from './Pages/EditPost';
 import PublicPost from './Pages/PublicPost';
 import JobDetail from './Pages/JobDetail';
 import JobPostingForm from './Pages/JobPostingForm';
+import ProfileForm from './Pages/ProfileForm';
+import CompProfile from './Pages/CompProfile';
 
 function App() {
   return (
@@ -27,9 +29,11 @@ function App() {
         <Route element={<ProtectedRoute />}>
         <Route path="/jobPostingForm" element={<JobPostingForm />}/>
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/profileForm" element={<ProfileForm />} />
           <Route path="/post" element={<PostForm />} />
           <Route path="/edit-post/:id" element={<EditPost />} />
           <Route path="/postList" element={<PostList />} />
+          <Route path="/profileComp" element={<CompProfile />} />
         </Route>
 
         {/* Fallback route */}

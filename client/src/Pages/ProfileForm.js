@@ -21,27 +21,23 @@ function ProfileForm() {
   const [roleInput, setRoleInput] = useState('');
   const [locationInput, setLocationInput] = useState('');
 
-  const API_URL = 'http://localhost:5000/api/profile'; // Adjust port as needed
+  const API_URL = 'http://localhost:5000/api/profile/';
 
   useEffect(() => {
     const fetchProfile = async () => {
       setIsLoading(true);
       try {
         const response = await axios.get(API_URL, {
-          withCredentials: true, // This allows cookies to be sent automatically
+          withCredentials: true // Using cookie-based auth like JobPostingForm.js
         });
-        
-        if (response.data.success && response.data.data) {
-          setFormData(response.data.data);
-        }
+        setFormData(response.data);
       } catch (error) {
         console.error('Failed to fetch profile:', error);
-        setErrorMessage(error.message || 'Failed to load profile');
+        setErrorMessage(error.response?.data?.message || 'Failed to load profile');
       } finally {
         setIsLoading(false);
       }
     };
-  
     fetchProfile();
   }, []);
 
@@ -80,7 +76,6 @@ function ProfileForm() {
         }
       }
     }
-
     setErrors(newErrors);
     return !newErrors[fieldKey];
   };
@@ -110,7 +105,6 @@ function ProfileForm() {
         }
       });
     }
-
     setErrors(prev => ({ ...prev, ...newErrors }));
     return isValid;
   };
@@ -286,17 +280,28 @@ function ProfileForm() {
     if (step === 5 && validateStep(4)) {
       setIsSubmitting(true);
       try {
+        // Using JobPostingForm.js backend logic: single PUT request with withCredentials
         const response = await axios.put(API_URL, formData, {
-          withCredentials: true, // Send cookies with the request
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          withCredentials: true,
+          headers: { 'Content-Type': 'application/json' }
         });
-  
-        if (response.data.success) {
-          console.log('Profile updated:', response.data.data);
-          alert('Profile successfully updated!');
-        }
+
+        console.log('Profile updated:', response.data);
+        alert(response.data.message || 'Profile successfully updated!');
+
+        // Reset form like JobPostingForm.js (optional: adjust based on your needs)
+        setFormData({
+          personal: { fullName: '', email: '', dob: '', gender: '' },
+          isFresher: false,
+          jobHistory: [{ company: '', position: '', startDate: '', endDate: '', description: '' }],
+          educationHistory: [{ degree: '', institution: '', field: '', graduationYear: '' }],
+          professional: { jobTitle: '', company: '', experience: '', skills: [] },
+          jobPrefs: { roles: [], locations: [], salary: '', employmentType: '' }
+        });
+        setStep(0); // Reset to first step
+        setErrors({});
+        setTouched({});
+        setErrorMessage(null);
       } catch (error) {
         console.error('Profile update failed:', error);
         setErrorMessage(error.response?.data?.message || 'Profile update failed');
@@ -724,22 +729,14 @@ function ProfileForm() {
           <div className="form-section summary-section">
             <h3 className="pre-title">Profile Summary</h3>
             <div className="summary-content">
-              <SummarySection 
-                title="Personal Information" 
-                stepToEdit={0}
-                setStep={setStep}
-              >
+              <SummarySection title="Personal Information" stepToEdit={0} setStep={setStep}>
                 <p><strong>Name:</strong> {formData.personal.fullName || 'Not provided'}</p>
                 <p><strong>Email:</strong> {formData.personal.email || 'Not provided'}</p>
                 <p><strong>Date of Birth:</strong> {formData.personal.dob || 'Not provided'}</p>
                 <p><strong>Gender:</strong> {formData.personal.gender || 'Not provided'}</p>
               </SummarySection>
 
-              <SummarySection 
-                title="Job History" 
-                stepToEdit={1}
-                setStep={setStep}
-              >
+              <SummarySection title="Job History" stepToEdit={1} setStep={setStep}>
                 {formData.isFresher ? (
                   <p className="no-data">Fresher - No job history provided</p>
                 ) : formData.jobHistory.length > 0 ? (
@@ -756,11 +753,7 @@ function ProfileForm() {
                 )}
               </SummarySection>
 
-              <SummarySection 
-                title="Education History" 
-                stepToEdit={2}
-                setStep={setStep}
-              >
+              <SummarySection title="Education History" stepToEdit={2} setStep={setStep}>
                 {formData.educationHistory.length > 0 ? (
                   formData.educationHistory.map((edu, index) => (
                     <div key={index} className="summary-entry">
@@ -775,11 +768,7 @@ function ProfileForm() {
                 )}
               </SummarySection>
 
-              <SummarySection 
-                title="Professional Details" 
-                stepToEdit={3}
-                setStep={setStep}
-              >
+              <SummarySection title="Professional Details" stepToEdit={3} setStep={setStep}>
                 <p><strong>Job Title:</strong> {formData.professional.jobTitle || 'Not provided'}</p>
                 <p><strong>Company:</strong> {formData.professional.company || 'Not provided'}</p>
                 <p><strong>Experience:</strong> {formData.professional.experience || '0'} years</p>
@@ -790,11 +779,7 @@ function ProfileForm() {
                 </p>
               </SummarySection>
 
-              <SummarySection 
-                title="Job Preferences" 
-                stepToEdit={4}
-                setStep={setStep}
-              >
+              <SummarySection title="Job Preferences" stepToEdit={4} setStep={setStep}>
                 <p><strong>Roles:</strong> 
                   {formData.jobPrefs.roles.length > 0 
                     ? formData.jobPrefs.roles.join(', ') 
