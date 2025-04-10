@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import "../styles/Navbar.css";
-import { FaBars, FaTimes } from "react-icons/fa"; // Importing icons
+import { FaBars, FaTimes } from "react-icons/fa";
+import { Link } from 'react-router-dom';
 
 function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -25,10 +26,14 @@ function Navbar() {
 
         <ul className={`Nv-links ${menuOpen ? "active" : ""}`}>
           <li className='NVL-tags'><a href='#'>Home</a></li>
-          <li className='NVL-tags'><a href='#'>Search</a></li>
+          <li className='NVL-tags'>
+            <Link to="/">Search</Link> {/* Use Link directly */}
+          </li>
           <li className='NVL-tags'><a href='#'>Trending-Jobs</a></li>
           <li className='NVL-tags'><a href='#'>Dashboard</a></li>
-          <li className='Lg-profile'><a href='#'>P</a></li>
+          <li className='Lg-profile'>
+            <Link to="/profile">P</Link> {/* Use Link directly */}
+          </li>
         </ul>
       </div>
     </div>

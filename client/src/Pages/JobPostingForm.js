@@ -17,6 +17,7 @@ function JobPostingForm() {
     responsibilities: "",
     roleExperience: "",
     skills: [],
+    category: "", // Added as a single string
     type: "",
     applicationDeadline: "",
     remote: false,
@@ -26,6 +27,231 @@ function JobPostingForm() {
   const [activeSection, setActiveSection] = useState("Basic Information");
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  const [suggestedSkills] = useState([
+    // Tech & IT
+    "JavaScript", "Python", "React", "Node.js", "Java", "SQL", "NoSQL", "HTML", "CSS", "TypeScript",
+    "AWS", "Azure", "Docker", "Kubernetes", "Git", "Machine Learning", "TensorFlow", "Cybersecurity", 
+    "CI/CD", "Figma",
+  
+    // Business, Sales & Marketing
+    "SEO", "Google Ads", "Meta Ads", "CRM", "Salesforce", "HubSpot", "A/B Testing", "Lead Generation",
+    "Email Marketing", "Copywriting", "Market Research", "Cold Calling", "E-commerce Tools",
+  
+    // Creative & Media
+    "Adobe Photoshop", "Illustrator", "Premiere Pro", "After Effects", "Video Editing", "Photography",
+    "Storyboarding", "Figma", "Content Writing", "Scriptwriting", "Canva",
+  
+    // Education & Research
+    "Lesson Planning", "Google Classroom", "Zoom", "Moodle", "Academic Writing", "Curriculum Design", 
+    "Critical Thinking", "Research Methods",
+  
+    // Finance & Legal
+    "Excel", "QuickBooks", "Tally", "Taxation", "Auditing", "Legal Research", "Contract Drafting", 
+    "Financial Modelling", "Compliance", "Risk Analysis",
+  
+    // HR & Admin
+    "Recruitment", "Payroll", "HRIS", "Conflict Resolution", "MS Excel", "Employee Engagement", 
+    "Office Management", "Data Entry",
+  
+    // Healthcare & Wellness
+    "Patient Care", "Medical Records", "EMR", "Diagnosis Coding", "Mental Health Support", 
+    "Nutrition Planning", "Pharmacology", "CPR Certification",
+  
+    // Engineering
+    "AutoCAD", "MATLAB", "SolidWorks", "PLC Programming", "Circuit Design", "Thermodynamics", 
+    "Structural Analysis", "Project Management",
+  
+    // Architecture & Construction
+    "Revit", "Urban Planning", "SketchUp", "Blueprint Reading", "3D Modeling", "Cost Estimation", 
+    "GIS", "Construction Scheduling",
+  
+    // Manufacturing, Logistics & Operations
+    "Lean Manufacturing", "Six Sigma", "Inventory Management", "Procurement", "Logistics", 
+    "Supply Chain", "ERP", "Warehouse Operations", "Quality Control",
+  
+    // Government & Nonprofit
+    "Public Policy", "Stakeholder Management", "Grant Writing", "Community Outreach", 
+    "Research Writing", "NGO Tools",
+  
+    // Hospitality, Tourism & Events
+    "Event Planning", "Guest Services", "Food Safety", "Hospitality Management", 
+    "Reservations Systems", "Multilingual Communication", "Vendor Management",
+  
+    // Skilled Trades & Technical Jobs
+    "Blueprint Reading", "Electrical Wiring", "Plumbing", "CNC Operation", "Machining", 
+    "Welding", "HVAC", "Preventive Maintenance",
+  
+    // Other / Emerging
+    "Remote Collaboration", "Time Management", "Notion", "Slack", "Freelancing", "Portfolio Design", 
+    "Client Communication", "Entry-Level Tools"
+  ]);
+  
+
+  // Define categories matching your backend enum (simplified for brevity)
+  const categories = [
+    // --- Tech & IT ---
+          "Software Development",
+          "Web Development",
+          "Mobile App Development",
+          "Frontend Development",
+          "Backend Development",
+          "Full Stack Development",
+          "Data Science",
+          "Machine Learning",
+          "Artificial Intelligence",
+          "Cybersecurity",
+          "Cloud Computing",
+          "DevOps",
+          "Blockchain",
+          "IT Support",
+          "Database Administration",
+          "Network Engineering",
+          "Game Development",
+          "Quality Assurance",
+          "UI/UX Design",
+          "Product Management",
+          "Project Management",
+          
+          // --- Business, Sales & Marketing ---
+          "Digital Marketing",
+          "Social Media Management",
+          "Content Marketing",
+          "SEO/SEM",
+          "Marketing Strategy",
+          "Business Development",
+          "Sales",
+          "Retail",
+          "Customer Support",
+          "Technical Sales",
+          "Telemarketing",
+          "E-commerce",
+          "Brand Management",
+          "Market Research",
+          
+          // --- Creative & Media ---
+          "Graphic Design",
+          "Visual Design",
+          "Animation",
+          "Illustration",
+          "Video Editing",
+          "Photography",
+          "Content Writing",
+          "Copywriting",
+          "Blogging",
+          "Scriptwriting",
+          "Journalism",
+          "Media & Broadcasting",
+          "Public Relations",
+          "Film Production",
+          
+          // --- Education & Research ---
+          "Teaching",
+          "Online Tutoring",
+          "Curriculum Design",
+          "Research",
+          "Academic Writing",
+          "Educational Counseling",
+          "Library Science",
+          
+          // --- Finance & Legal ---
+          "Accounting",
+          "Auditing",
+          "Bookkeeping",
+          "Taxation",
+          "Finance",
+          "Banking",
+          "Insurance",
+          "Investment Management",
+          "Legal Advisory",
+          "Law Practice",
+          "Paralegal",
+          "Compliance",
+          
+          // --- HR & Admin ---
+          "Human Resources",
+          "Recruitment",
+          "Training & Development",
+          "Payroll Management",
+          "Office Administration",
+          "Executive Assistant",
+          "Data Entry",
+          
+          // --- Healthcare & Wellness ---
+          "Healthcare",
+          "Medical",
+          "Nursing",
+          "Physiotherapy",
+          "Pharmacy",
+          "Dentistry",
+          "Mental Health",
+          "Nutritionist",
+          "Lab Technician",
+          "Veterinary",
+          
+          // --- Engineering ---
+          "Mechanical Engineering",
+          "Electrical Engineering",
+          "Civil Engineering",
+          "Chemical Engineering",
+          "Environmental Engineering",
+          "Industrial Engineering",
+          "Biomedical Engineering",
+          "Structural Engineering",
+          
+          // --- Architecture & Construction ---
+          "Architecture",
+          "Urban Planning",
+          "Interior Design",
+          "Construction Management",
+          "Site Engineering",
+          "Surveying",
+          
+          // --- Manufacturing, Logistics & Operations ---
+          "Manufacturing",
+          "Production Management",
+          "Warehouse Operations",
+          "Supply Chain Management",
+          "Procurement",
+          "Inventory Management",
+          "Logistics",
+          "Transportation",
+          "Quality Control",
+          
+          // --- Government & Nonprofit ---
+          "Government",
+          "Public Policy",
+          "Civil Services",
+          "Defense & Military",
+          "Nonprofit",
+          "NGO",
+          "Social Work",
+          
+          // --- Hospitality, Tourism & Events ---
+          "Hospitality",
+          "Hotel Management",
+          "Travel & Tourism",
+          "Event Management",
+          "Food & Beverage",
+          
+          // --- Skilled Trades & Technical Jobs ---
+          "Electrician",
+          "Plumber",
+          "Carpenter",
+          "Mechanic",
+          "Welding",
+          "HVAC Technician",
+          "Machinist",
+          "CNC Operator",
+          
+          // --- Other / Emerging ---
+          "Remote Jobs",
+          "Freelance",
+          "Internships",
+          "Entry-Level",
+          "Others"
+  ];
 
   const descriptionRef = useRef(null);
   const responsibilitiesRef = useRef(null);
@@ -49,15 +275,20 @@ function JobPostingForm() {
     }));
   };
 
-  const handleSkillAdd = (e) => {
-    if (e.key === "Enter" && newSkill.trim()) {
-      e.preventDefault(); // Prevent form submission
+  const handleSkillAdd = (skill) => {
+    if (skill.trim() && !formData.skills.includes(skill.trim())) {
       setFormData((prev) => ({
         ...prev,
-        skills: [...prev.skills, newSkill.trim()],
+        skills: [...prev.skills, skill.trim()],
       }));
       setNewSkill("");
+      setShowSuggestions(false);
     }
+  };
+
+  const handleSkillInput = (e) => {
+    setNewSkill(e.target.value);
+    setShowSuggestions(true);
   };
 
   const handleSkillRemove = (skillToRemove) => {
@@ -75,6 +306,11 @@ function JobPostingForm() {
       return;
     }
   
+    if (!formData.category) {
+      alert("Please select a category.");
+      return;
+    }
+
     const postData = {
       title: formData.jobTitle,
       description: formData.description,
@@ -91,6 +327,7 @@ function JobPostingForm() {
       responsibilities: formData.responsibilities,
       roleExperience: formData.roleExperience,
       skills: formData.skills,
+      category: formData.category, // Single category string
       type: formData.type,
       applicationDeadline: formData.applicationDeadline || undefined,
       remote: formData.remote,
@@ -123,6 +360,7 @@ function JobPostingForm() {
         responsibilities: "",
         roleExperience: "",
         skills: [],
+        category: "", // Reset to empty string
         type: "",
         applicationDeadline: "",
         remote: false,
@@ -352,6 +590,22 @@ function JobPostingForm() {
               </select>
             </div>
             <div className="form-group">
+              <label>Category</label>
+              <select
+                name="category"
+                value={formData.category}
+                onChange={handleChange}
+                required
+              >
+                <option value="">Select a category</option>
+                {categories.map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="form-group">
               <label>Remote</label>
               <input
                 type="checkbox"
@@ -434,15 +688,50 @@ function JobPostingForm() {
         return (
           <div className="form-section animate-in">
             <h3>Skills</h3>
-            <div className="form-group">
-              <label>Add Skills</label>
-              <input
-                type="text"
-                value={newSkill}
-                onChange={(e) => setNewSkill(e.target.value)}
-                onKeyPress={handleSkillAdd}
-                placeholder="Type a skill and press Enter"
-              />
+            <div className="skills-container">
+              <div className="skills-input-group">
+                <input
+                  type="text"
+                  value={newSkill}
+                  onChange={handleSkillInput}
+                  onKeyPress={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      handleSkillAdd(newSkill);
+                    }
+                  }}
+                  placeholder="Type a skill and press Enter or select below"
+                />
+                <button
+                  type="button"
+                  className="add-skill-btn"
+                  onClick={() => handleSkillAdd(newSkill)}
+                >
+                  Add
+                </button>
+              </div>
+              
+              {showSuggestions && newSkill && (
+                <div className="suggested-skills">
+                  <div className="suggested-skills-list">
+                    {suggestedSkills
+                      .filter(skill => 
+                        skill.toLowerCase().includes(newSkill.toLowerCase()) &&
+                        !formData.skills.includes(skill)
+                      )
+                      .map(skill => (
+                        <div
+                          key={skill}
+                          className="suggested-skill-item"
+                          onClick={() => handleSkillAdd(skill)}
+                        >
+                          {skill}
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              )}
+
               <div className="skills-list">
                 {formData.skills.map((skill) => (
                   <div key={skill} className="skill-tag">
@@ -455,6 +744,9 @@ function JobPostingForm() {
                     </span>
                   </div>
                 ))}
+                {formData.skills.length === 0 && (
+                  <p className="skills-placeholder">No skills added yet</p>
+                )}
               </div>
             </div>
           </div>
@@ -602,6 +894,7 @@ function JobPostingForm() {
                 <p><span>Location:</span> {formData.location || "Not provided"}</p>
                 <p><span>Email:</span> {formData.email || "Not provided"}</p>
                 <p><span>Type:</span> {formData.type || "Not provided"}</p>
+                <p><span>Category:</span> {formData.category || "Not provided"}</p>
                 <p><span>Remote:</span> {formData.remote ? "Yes" : "No"}</p>
               </div>
               <div className="review-block">

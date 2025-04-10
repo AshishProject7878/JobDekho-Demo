@@ -1,7 +1,8 @@
 .post-list-container {
-  max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 20px 40px;
+  width: 100%;
+  box-sizing: border-box; /* Ensure padding doesn't exceed container width */
 }
 
 .header {
@@ -9,11 +10,14 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
+  flex-wrap: wrap; /* Allow wrapping on small screens */
+  gap: 10px; /* Space between items when wrapped */
 }
 
 .header h2 {
   font-size: 24px;
   color: #333;
+  margin: 0; /* Remove default margin for consistency */
 }
 
 .post-btn {
@@ -24,95 +28,11 @@
   border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s;
+  font-size: 14px; /* Slightly smaller for mobile */
 }
 
 .post-btn:hover {
   background-color: #0056b3;
-}
-
-.card-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 20px;
-}
-
-.post-card {
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  padding: 15px;
-  transition: transform 0.2s;
-}
-
-.post-card:hover {
-  transform: translateY(-5px);
-}
-
-.post-title {
-  font-size: 18px;
-  color: #007bff;
-  margin: 0 0 10px;
-}
-
-.post-description {
-  font-size: 14px;
-  color: #666;
-  margin: 0 0 10px;
-}
-
-.post-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  font-size: 12px;
-  color: #888;
-  margin-bottom: 10px;
-}
-
-.post-details {
-  font-size: 13px;
-  color: #444;
-  margin-bottom: 15px;
-}
-
-.post-details p {
-  margin: 5px 0;
-}
-
-.post-details strong {
-  color: #333;
-}
-
-.card-actions {
-  display: flex;
-  gap: 10px;
-}
-
-.edit-btn,
-.delete-btn {
-  padding: 8px 15px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.edit-btn {
-  background-color: #28a745;
-  color: white;
-}
-
-.edit-btn:hover {
-  background-color: #218838;
-}
-
-.delete-btn {
-  background-color: #dc3545;
-  color: white;
-}
-
-.delete-btn:hover {
-  background-color: #c82333;
 }
 
 .info-message {
@@ -122,25 +42,364 @@
   margin-top: 20px;
 }
 
-/* Add this to your existing PostList.css */
-
-.view-btn {
-  padding: 8px 15px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  background-color: #007bff; /* Blue to match your theme */
-  color: white;
-  transition: background-color 0.3s;
+/* Card Styles */
+.card-holder {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* Exactly 4 cards per row on desktop */
+  gap: 15px;
+  justify-content: center;
 }
 
-.view-btn:hover {
-  background-color: #0056b3;
+.card {
+  width: 100%;
+  background: #fff;
+  border-radius: 20px;
+  overflow: hidden;
+  position: relative;
+  transition: transform 0.8s ease, box-shadow 0.3s ease-in-out;
 }
 
-/* Adjust card-actions to fit three buttons */
-.card-actions {
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 80px;
+  background: linear-gradient(135deg, #6a11cb, #2575fc);
+  clip-path: polygon(0 0, 100% 0, 100% 60%, 0 100%);
+  transition: all 0.8s ease;
+}
+
+.card:hover::before {
+  height: 100%;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+}
+
+.top-section,
+.mid-section,
+.bottom-section {
+  position: relative;
+  z-index: 2;
+}
+
+.top-section {
   display: flex;
-  gap: 10px;
-  justify-content: space-between; /* Optional: spreads buttons evenly */
+  justify-content: space-between;
+  padding: 16px;
+  color: #fff;
+  align-items: center; /* Vertically center items */
+}
+
+.top-section span {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.action-icons {
+  display: flex;
+  gap: 15px; /* Space between edit and delete icons */
+}
+
+.top-section i.fa-edit {
+  font-size: 20px;
+  opacity: 1;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.top-section i.fa-edit:hover {
+  color: #2575fc; /* Blue on hover */
+}
+
+.top-section i.fa-trash {
+  font-size: 20px;
+  opacity: 1;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.top-section i.fa-trash:hover {
+  color: #dc3545; /* Red on hover */
+}
+
+.mid-section {
+  padding: 10px 16px 16px;
+  color: #333;
+  transition: color 0.8s ease;
+  min-height: 180px; /* Reduced slightly for smaller screens */
+}
+
+.comp-img {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+  gap: 10px; /* Flexible gap */
+}
+
+.comp-img img {
+  width: 60px;
+  height: 60px;
+  border: 4px solid #fff;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 0 0 4px #6a11cb;
+}
+
+.comp-dets .job-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.comp-dets .comp-name {
+  margin: 4px 0;
+  font-size: 14px;
+  color: #6a11cb;
+  cursor: pointer;
+  transition: color 0.8s ease;
+}
+
+.comp-dets .comp-name:hover {
+  color: #2575fc;
+}
+
+.location1 {
+  font-size: 13px;
+  color: #888;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.desc {
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 16px;
+  color: #555;
+  transition: all 0.8s ease;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tag {
+  background: #f0f0f0;
+  padding: 4px 10px;
+  border-radius: 16px;
+  font-size: 12px;
+  color: #555;
+  transition: background 0.3s ease, color 0.3s ease;
+  cursor: pointer;
+}
+
+.tag:hover {
+  background: #ddd;
+}
+
+.extra-details {
+  margin-top: 10px;
+  font-size: 12px;
+  color: #666;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 5px;
+  transition: color 0.8s ease;
+}
+
+.extra-details span {
+  background: #f8f8f8;
+  padding: 3px 8px;
+  border-radius: 10px;
+}
+
+.bottom-section {
+  padding: 16px;
+  border-top: 1px solid #777777;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: color 0.8s ease;
+}
+
+.salary {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 30px;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.8s ease;
+}
+
+.btn.view-btn {
+  background: linear-gradient(135deg, #2575fc, #6a11cb);
+}
+
+.card:hover .btn.view-btn {
+  background: linear-gradient(135deg, #6a11cb, #6a11cb);
+}
+
+.card:hover .mid-section,
+.card:hover .bottom-section {
+  color: #fff;
+}
+
+.card:hover .comp-dets .comp-name {
+  color: #fff;
+}
+
+.card:hover .desc {
+  color: #fff;
+}
+
+.card:hover .extra-details {
+  color: #fff;
+}
+
+/* Responsive Design */
+@media only screen and (max-width: 1200px) {
+  .card-holder {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
+  .post-list-container {
+    padding: 20px 30px; /* Slightly reduced padding */
+  }
+}
+
+@media only screen and (max-width: 900px) {
+  .card-holder {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+  .header h2 {
+    font-size: 20px;
+  }
+  .post-btn {
+    padding: 8px 16px;
+    font-size: 12px;
+  }
+  .comp-img img {
+    width: 50px;
+    height: 50px;
+  }
+  .comp-dets .job-title {
+    font-size: 16px;
+  }
+}
+
+@media only screen and (max-width: 600px) {
+  .card-holder {
+    grid-template-columns: 1fr; /* Single column for small screens */
+  }
+  .post-list-container {
+    padding: 15px 20px; /* Further reduced padding */
+  }
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+  .header h2 {
+    font-size: 18px;
+  }
+  .post-btn {
+    width: 100%; /* Full width button */
+    padding: 10px;
+  }
+  .card {
+    margin: 0 auto;
+    max-width: 100%; /* Ensure card fits container */
+  }
+  .comp-img {
+    flex-direction: column; /* Stack image and details */
+    text-align: center;
+    gap: 10px;
+  }
+  .comp-img img {
+    width: 40px;
+    height: 40px;
+    margin: 0 auto;
+  }
+  .comp-dets .job-title {
+    font-size: 14px;
+  }
+  .comp-dets .comp-name {
+    font-size: 12px;
+  }
+  .location1 {
+    font-size: 11px;
+    justify-content: center;
+  }
+  .desc {
+    font-size: 12px;
+    margin-bottom: 10px;
+  }
+  .tags {
+    gap: 6px;
+  }
+  .tag {
+    font-size: 10px;
+    padding: 3px 8px;
+  }
+  .extra-details {
+    font-size: 10px;
+    flex-direction: column; /* Stack details */
+    gap: 8px;
+  }
+  .bottom-section {
+    padding: 12px;
+    flex-direction: column; /* Stack salary and button */
+    gap: 10px;
+  }
+  .salary {
+    font-size: 12px;
+  }
+  .btn.view-btn {
+    padding: 8px 16px;
+    font-size: 11px;
+  }
+  .card::before {
+    height: 60px; /* Reduced header height */
+  }
+}
+
+@media only screen and (max-width: 400px) {
+  .post-list-container {
+    padding: 10px 15px; /* Minimal padding for very small screens */
+  }
+  .card {
+    border-radius: 15px; /* Slightly smaller radius */
+  }
+  .top-section {
+    padding: 12px;
+  }
+  .top-section span {
+    font-size: 10px;
+    padding: 4px 8px;
+  }
+  .action-icons {
+    gap: 10px;
+  }
+  .top-section i.fa-edit,
+  .top-section i.fa-trash {
+    font-size: 16px;
+  }
 }

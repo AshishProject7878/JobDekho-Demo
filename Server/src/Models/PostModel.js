@@ -89,7 +89,174 @@ const postSchema = new mongoose.Schema({
         type: Number,
         default: 0, // To track how many times the job post has been viewed
     },
+    category: {
+  type: String,
+  required: true,
+  enum: [
+    // --- Tech & IT ---
+    "Software Development",
+    "Web Development",
+    "Mobile App Development",
+    "Frontend Development",
+    "Backend Development",
+    "Full Stack Development",
+    "Data Science",
+    "Machine Learning",
+    "Artificial Intelligence",
+    "Cybersecurity",
+    "Cloud Computing",
+    "DevOps",
+    "Blockchain",
+    "IT Support",
+    "Database Administration",
+    "Network Engineering",
+    "Game Development",
+    "Quality Assurance",
+    "UI/UX Design",
+    "Product Management",
+    "Project Management",
     
+    // --- Business, Sales & Marketing ---
+    "Digital Marketing",
+    "Social Media Management",
+    "Content Marketing",
+    "SEO/SEM",
+    "Marketing Strategy",
+    "Business Development",
+    "Sales",
+    "Retail",
+    "Customer Support",
+    "Technical Sales",
+    "Telemarketing",
+    "E-commerce",
+    "Brand Management",
+    "Market Research",
+    
+    // --- Creative & Media ---
+    "Graphic Design",
+    "Visual Design",
+    "Animation",
+    "Illustration",
+    "Video Editing",
+    "Photography",
+    "Content Writing",
+    "Copywriting",
+    "Blogging",
+    "Scriptwriting",
+    "Journalism",
+    "Media & Broadcasting",
+    "Public Relations",
+    "Film Production",
+    
+    // --- Education & Research ---
+    "Teaching",
+    "Online Tutoring",
+    "Curriculum Design",
+    "Research",
+    "Academic Writing",
+    "Educational Counseling",
+    "Library Science",
+    
+    // --- Finance & Legal ---
+    "Accounting",
+    "Auditing",
+    "Bookkeeping",
+    "Taxation",
+    "Finance",
+    "Banking",
+    "Insurance",
+    "Investment Management",
+    "Legal Advisory",
+    "Law Practice",
+    "Paralegal",
+    "Compliance",
+    
+    // --- HR & Admin ---
+    "Human Resources",
+    "Recruitment",
+    "Training & Development",
+    "Payroll Management",
+    "Office Administration",
+    "Executive Assistant",
+    "Data Entry",
+    
+    // --- Healthcare & Wellness ---
+    "Healthcare",
+    "Medical",
+    "Nursing",
+    "Physiotherapy",
+    "Pharmacy",
+    "Dentistry",
+    "Mental Health",
+    "Nutritionist",
+    "Lab Technician",
+    "Veterinary",
+    
+    // --- Engineering ---
+    "Mechanical Engineering",
+    "Electrical Engineering",
+    "Civil Engineering",
+    "Chemical Engineering",
+    "Environmental Engineering",
+    "Industrial Engineering",
+    "Biomedical Engineering",
+    "Structural Engineering",
+    
+    // --- Architecture & Construction ---
+    "Architecture",
+    "Urban Planning",
+    "Interior Design",
+    "Construction Management",
+    "Site Engineering",
+    "Surveying",
+    
+    // --- Manufacturing, Logistics & Operations ---
+    "Manufacturing",
+    "Production Management",
+    "Warehouse Operations",
+    "Supply Chain Management",
+    "Procurement",
+    "Inventory Management",
+    "Logistics",
+    "Transportation",
+    "Quality Control",
+    
+    // --- Government & Nonprofit ---
+    "Government",
+    "Public Policy",
+    "Civil Services",
+    "Defense & Military",
+    "Nonprofit",
+    "NGO",
+    "Social Work",
+    
+    // --- Hospitality, Tourism & Events ---
+    "Hospitality",
+    "Hotel Management",
+    "Travel & Tourism",
+    "Event Management",
+    "Food & Beverage",
+    
+    // --- Skilled Trades & Technical Jobs ---
+    "Electrician",
+    "Plumber",
+    "Carpenter",
+    "Mechanic",
+    "Welding",
+    "HVAC Technician",
+    "Machinist",
+    "CNC Operator",
+    
+    // --- Other / Emerging ---
+    "Remote Jobs",
+    "Freelance",
+    "Internships",
+    "Entry-Level",
+    "Others"
+  ],
+  default: "Others"
+}
+
 }, {
     timestamps: true,
 });

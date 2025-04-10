@@ -135,13 +135,13 @@ function JobDetail() {
   return (
     <div className="job-detail-container">
       <div className="jobDetail-holder">
-        <div className="img-container1">
+        {/* <div className="img-container1">
           <img src={CompImg} alt={`${job.company} Logo`} />
-        </div>
+        </div> */}
         <div className="jobDetail-dets">
           <h3 className="JobTitle">{job.title}</h3>
           <p className="CompName">{job.company}</p>
-          <p>⭐⭐⭐⭐⭐</p>
+          {/* <p>⭐⭐⭐⭐⭐</p> */}
           <div className="jobLocation">
             <span><i className="fa-solid fa-location-dot"></i></span>
             <p>{job.location}</p>

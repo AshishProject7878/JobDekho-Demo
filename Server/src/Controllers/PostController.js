@@ -17,6 +17,7 @@ export const createdPost = async (req, res) => {
           responsibilities,
           roleExperience,
           skills,
+          category,
           type,
           applicationDeadline,
           remote,
@@ -39,6 +40,7 @@ export const createdPost = async (req, res) => {
               currency: currency || "LPA"
           },
           experience,
+          category,
           educationLevel,
           languages: languages ? languages.split(',').map(lang => lang.trim()) : [],
           responsibilities,
@@ -66,8 +68,8 @@ export const createdPost = async (req, res) => {
 // Get all posts or filter by userId or search query
 export const getPosts = async (req, res) => {
   try {
-    const { userId, search } = req.query;
-
+    const { userId, search, category } = req.query;
+    const categoryFilter = category ? { category } : {};
     const searchFilter = search
       ? {
           $or: [
@@ -81,7 +83,7 @@ export const getPosts = async (req, res) => {
 
     const userFilter = userId ? { userId } : {};
 
-    const finalFilter = { ...searchFilter, ...userFilter };
+    const finalFilter = { ...searchFilter, ...userFilter, ...categoryFilter};
 
     const posts = await Post.find(finalFilter).sort({ createdAt: -1 });
 

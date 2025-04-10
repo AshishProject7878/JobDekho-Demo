@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
-import "../styles/PostList.css"; // Assuming the same CSS file
+import "../styles/PostList.css";
+import CompLogo from "../Assests/CompLogo.png";
 
 function PostList() {
   const [posts, setPosts] = useState([]);
@@ -30,18 +31,23 @@ function PostList() {
 
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this post?")) return;
-
+  
     try {
-      await axios.delete(`http://localhost:5000/api/user/${id}/post`, {
+      await axios.delete(`http://localhost:5000/api/posts/${id}`, {
         withCredentials: true,
       });
       setPosts(posts.filter((p) => p._id !== id));
     } catch (err) {
-      alert("Failed to delete post");
+      console.error("Failed to delete post:", err.response?.status, err.response?.data);
+      alert("Failed to delete post: " + (err.response?.data?.message || err.message));
     }
   };
 
-  const truncate = (str, max = 35) =>
+  const handleEdit = (id) => {
+    navigate(`/edit-post/${id}`);
+  };
+
+  const truncate = (str, max = 100) =>
     str?.length > max ? str.substring(0, max) + "..." : str;
 
   const formatSalary = (salary) => {
@@ -52,6 +58,9 @@ function PostList() {
     if (max) return `${max} ${currency} (max)`;
     return "Not Disclosed";
   };
+
+  const formatDate = (date) => 
+    date ? new Date(date).toLocaleDateString() : "Open";
 
   if (!user) {
     return <p className="info-message">Please log in to view your job posts.</p>;
@@ -71,44 +80,50 @@ function PostList() {
       </div>
 
       {posts.length > 0 ? (
-        <div className="card-grid">
+        <div className="card-holder">
           {posts.map((post) => (
-            <div className="post-card" key={post._id}>
-              <h3 className="post-title">{post.title}</h3>
-              <p className="post-description">{truncate(post.description)}</p>
-              <div className="post-meta">
-                <span>🏢 {post.company}</span>
-                <span>📍 {post.location}</span>
-                <span>💰 {formatSalary(post.salary)}</span>
-                <span>🕒 {post.type}</span>
-                <span>🏠 {post.remote ? "Remote" : "On-site"}</span>
+            <div className="card" key={post._id}>
+              <div className="top-section">
+                <span>{post.type}</span>
+                <div className="action-icons">
+                  <i 
+                    className="fa-solid fa-edit" 
+                    onClick={() => handleEdit(post._id)}
+                    title="Edit Post"
+                  ></i>
+                  <i 
+                    className="fa-solid fa-trash" 
+                    onClick={() => handleDelete(post._id)}
+                    title="Delete Post"
+                  ></i>
+                </div>
               </div>
-              <div className="post-details">
-                <p><strong>Skills:</strong> {post.skills?.length > 0 ? post.skills.join(", ") : "None listed"}</p>
-                <p><strong>Experience:</strong> {post.experience || "Not specified"}</p>
-                <p><strong>Education:</strong> {post.educationLevel || "Not specified"}</p>
-                <p><strong>Languages:</strong> {post.languages || "Not specified"}</p>
-                <p><strong>Deadline:</strong> {post.applicationDeadline ? new Date(post.applicationDeadline).toLocaleDateString() : "Open"}</p>
+              <div className="mid-section">
+                <div className="comp-img">
+                  <img src={CompLogo} alt={`${post.company} Logo`} />
+                  <div className="comp-dets">
+                    <h3 className="job-title">{post.title}</h3>
+                    <p className="comp-name">{post.company}</p>
+                    <div className="location1">
+                      <i className="fa-solid fa-location-dot"></i>
+                      {post.location} {post.remote ? "(Remote)" : "(On-site)"}
+                    </div>
+                  </div>
+                </div>
+                <p className="desc">{truncate(post.description)}</p>
+                
+                
               </div>
-              <div className="card-actions">
-                <button
-                  className="view-btn"
-                  onClick={() => navigate(`/job/${post._id}`)}
-                >
-                  View Job
-                </button>
-                <button
-                  className="edit-btn"
-                  onClick={() => navigate(`/edit-post/${post._id}`)}
-                >
-                  Edit
-                </button>
-                <button
-                  className="delete-btn"
-                  onClick={() => handleDelete(post._id)}
-                >
-                  Delete
-                </button>
+              <div className="bottom-section">
+                <span className="salary">{formatSalary(post.salary)}</span>
+                <div>
+                  <button
+                    className="btn view-btn"
+                    onClick={() => navigate(`/job/${post._id}`)}
+                  >
+                    View Job
+                  </button>
+                </div>
               </div>
             </div>
           ))}

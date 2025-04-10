@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Emblema+One&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Emblema+One&family=Poppins:wght@400;500&display=swap');
 
 * {
     margin: 0;
@@ -58,19 +58,24 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 15px;
+    gap: 20px; /* Increased gap for better spacing */
     list-style: none;
 }
 
-.Nv-links li a {
+.Nv-links li a,
+.Nv-links li a:link,
+.Nv-links li a:visited {
     text-decoration: none;
+    color: black;
 }
 
 .NVL-tags a {
     color: black;
-    text-decoration: none;
     position: relative;
     transition: all 0.5s ease-in-out;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    font-size: 16px; /* Slightly larger for readability */
 }
 
 .NVL-tags a::after {
@@ -88,6 +93,10 @@
     width: 70%;
 }
 
+.Nv-links a {
+    text-decoration: none !important;
+}
+
 .Lg-profile {
     background-color: #6a11cb;
     padding: 5px 13px;
@@ -97,39 +106,134 @@
 .Lg-profile a {
     color: #fff;
     font-size: 15px;
+    text-decoration: none;
 }
 
-/* Menu Icon */
 .menu-icon {
     display: none;
     font-size: 24px;
     cursor: pointer;
     color: #6a11cb;
+    transition: color 0.3s ease;
 }
 
 /* Responsive Design */
 @media only screen and (max-width: 768px) {
+    .Nv-container {
+        padding: 10px 15px; /* Reduced padding for smaller screens */
+    }
+
+    .Nv-logo {
+        gap: 10px; /* Slightly reduced gap */
+    }
+
+    .Lg-left {
+        padding: 8px 16px; /* Slightly smaller logo box */
+        font-size: 20px;
+    }
+
+    .Lg-right {
+        font-size: 18px;
+    }
+
+    .slogan {
+        font-size: 6px; /* Adjusted for smaller screens */
+    }
+
+    .menu-icon {
+        display: block;
+    }
+
     .Nv-links {
-        display: none;
+        display: none; /* Hidden by default */
         flex-direction: column;
         position: absolute;
-        top: 80px;
+        top: 100%; /* Position below navbar */
         right: 0;
-        border-radius: 12px;
+        width: 250px; /* Fixed width for consistency */
         background: #fff;
-        width: 50%;
-        text-align: center;
-        padding: 20px 0;
-        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        border-radius: 0 0 12px 12px; /* Rounded bottom corners */
+        box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2); /* Enhanced shadow */
+        transform: translateY(-10px); /* Start slightly above for animation */
+        opacity: 0; /* Start invisible */
+        transition: transform 0.3s ease, opacity 0.3s ease; /* Smooth animation */
     }
 
     .Nv-links.active {
         display: flex;
+        transform: translateY(0); /* Slide into place */
+        opacity: 1; /* Fade in */
     }
 
-   
+    .NVL-tags {
+        width: 100%; /* Full width for better touch targets */
+        padding: 10px 0; /* Increased padding for spacing */
+    }
+
+    .NVL-tags a {
+        font-size: 14px; /* Adjusted for mobile */
+        display: block; /* Full width clickable area */
+    }
+
+    .NVL-tags a::after {
+        bottom: -4px; /* Adjusted for mobile spacing */
+    }
+
+    .Lg-profile {
+        padding: 5px 12px; /* Slightly smaller circle */
+        margin-top: 10px; /* Space from other links */
+    }
+
+    .Lg-profile a {
+        font-size: 14px;
+    }
+
+    .menu-icon:hover {
+        color: #2575fc; /* Hover effect for touch feedback */
+    }
+}
+
+@media only screen and (max-width: 480px) {
+    .Nv-container {
+        padding: 8px 10px; /* Further reduced padding */
+    }
+
+    .Lg-left {
+        padding: 6px 12px;
+        font-size: 18px;
+    }
+
+    .Lg-right {
+        font-size: 16px;
+    }
+
+    .slogan {
+        font-size: 5px;
+    }
 
     .menu-icon {
-        display: block;
+        font-size: 20px; /* Smaller icon */
+    }
+
+    .Nv-links {
+        width: 200px; /* Smaller width for very small screens */
+        padding: 15px;
+    }
+
+    .NVL-tags {
+        padding: 8px 0;
+    }
+
+    .NVL-tags a {
+        font-size: 13px;
+    }
+
+    .Lg-profile {
+        padding: 4px 10px;
+    }
+
+    .Lg-profile a {
+        font-size: 12px;
     }
 }

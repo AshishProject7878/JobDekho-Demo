@@ -130,34 +130,170 @@
   .salary-inputs input {
     width: 45%;
   }
+
+  .skills-placeholder {
+    color: #7f8c8d;
+    font-style: italic;
+    padding: 10px;
+  }
+  
+  .skills-container {
+    padding: 20px;
+    background: #f9fbfc;
+    border-radius: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .skills-input-group {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    align-items: flex-end;
+  }
+  
+  .skills-input-group input {
+    flex: 1;
+    padding: 12px;
+    border: 2px solid #ecf0f1;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+  }
+  
+  .skills-input-group input:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+  }
+  
+  .add-skill-btn {
+    padding: 12px 20px;
+    background: #3498db;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+  
+  .add-skill-btn:hover {
+    background: #2980b9;
+    transform: translateY(-2px);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+  }
   
   .skills-list {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 10px;
+    gap: 12px;
+    margin-top: 15px;
+    padding: 10px;
+    background: white;
+    border-radius: 8px;
+    min-height: 60px;
+    border: 1px dashed #ecf0f1;
   }
   
   .skill-tag {
     background: #3498db;
     color: white;
-    padding: 6px 12px;
+    padding: 8px 15px;
     border-radius: 20px;
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     font-size: 14px;
-    transition: all 0.3s ease;
-  }
+    animation: slideIn 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    /* New properties */
+    width: auto;           /* Let content determine width */
+    max-width: 200px;      /* Set a reasonable maximum */
+    min-width: 80px;       /* Ensure minimum readability */
+    overflow: hidden;      /* Handle overflow */
+    text-overflow: ellipsis; /* Add ellipsis for long text */
+    white-space: nowrap;   /* Keep text on one line */
+}
   
   .skill-tag:hover {
     background: #2980b9;
+    transform: scale(1.02);
   }
   
   .remove-skill {
     cursor: pointer;
-    font-weight: bold;
-    font-size: 16px;
+    width: 18px;
+    height: 18px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    transition: all 0.3s ease;
+  }
+
+  .remove-skill:hover {
+    background: rgba(255, 255, 255, 0.5);
+    transform: scale(1.1);
+  }
+
+  .suggested-skills {
+    position: relative;
+    margin-top: 10px;
+  }
+  
+  .suggested-skills-list {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 10;
+    padding: 10px 0;
+  }
+  
+  .suggested-skill-item {
+    padding: 8px 15px;
+    cursor: pointer;
+    color: #34495e;
+    transition: all 0.2s ease;
+  }
+  
+  .suggested-skill-item:hover {
+    background: #f0f3f4;
+    color: #3498db;
+  }
+  
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateX(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  
+  @media (max-width: 600px) {
+    .skills-input-group {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    
+    .add-skill-btn {
+      width: 100%;
+    }
+    
+    .skill-tag {
+      width: 100%;
+      justify-content: space-between;
+    }
   }
   
   .form-navigation {
@@ -292,57 +428,181 @@
   }
 
   /* Existing styles remain unchanged */
+/* Add these to your existing JobPostingForm.css */
 
-.category-group {
+/* Category Container */
+.category-container {
+  padding: 20px;
+  background: #f9fbfc; /* Same as skills for consistency */
+  border-radius: 10px;
+  margin-bottom: 20px;
+  border: 2px dashed #6a11cb; /* Purple dashed border to distinguish */
+}
+
+/* Reusing skills-input-group for consistency */
+.category-container .skills-input-group {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  gap: 15px;
+  margin-bottom: 20px;
+  align-items: flex-end;
+}
+
+.category-container .skills-input-group input {
+  flex: 1;
+  padding: 12px;
+  border: 2px solid #ecf0f1;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+.category-container .skills-input-group input:focus {
+  border-color: #6a11cb; /* Purple focus border */
+  box-shadow: 0 0 5px rgba(106, 17, 203, 0.3);
+}
+
+/* Category-specific Add button */
+.category-container .add-category-btn {
+  padding: 12px 20px;
+  background: #6a11cb; /* Purple instead of blue */
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.category-container .add-category-btn:hover {
+  background: #8345c4;
+  transform: translateY(-2px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Category List */
+.category-container .category-list {
+  display: flex;
   flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 15px;
+  padding: 10px;
+  background: white;
+  border-radius: 8px;
+  min-height: 60px;
+  border: 1px dashed #d3c4f0; /* Light purple dashed border */
 }
 
-.category-group select {
-  flex-grow: 1;
-  min-width: 150px;
-}
-
-.add-category-btn {
-  background-color: #6a11cb;
+/* Category Tags */
+.category-container .category-tag {
+  background: #6a11cb;
   color: white;
-  border: none;
-  padding: 5px 10px;
-  cursor: pointer;
-  border-radius: 3px;
+  padding: 8px 15px;
+  border-radius: 20px;
   display: flex;
   align-items: center;
-  gap: 5px;
-}
-
-.add-category-btn:hover {
-  background-color: #8345c4;
-}
-
-.add-category-input {
-  margin-top: 10px;
-  display: flex;
   gap: 10px;
-  width: 100%;
+  font-size: 14px;
+  animation: slideIn 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  flex: 0 1 auto;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.add-category-input input {
-  flex-grow: 1;
-  padding: 5px;
+.category-container .category-tag:hover {
+  background: #8345c4;
+  transform: scale(1.02);
 }
 
-.add-category-input button {
-  padding: 5px 10px;
-  background-color: #6a11cb;
-  color: white;
-  border: none;
-  border-radius: 3px;
+/* Reusing remove button styling */
+.category-container .remove-category {
   cursor: pointer;
+  width: 18px;
+  height: 18px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  transition: all 0.3s ease;
 }
 
-.add-category-input button:hover {
-  background-color: #8345c4;
+.category-container .remove-category:hover {
+  background: rgba(255, 255, 255, 0.5);
+  transform: scale(1.1);
 }
 
+/* Category Suggestions */
+.category-container .suggested-categories {
+  position: relative;
+  margin-top: 10px;
+}
+
+.category-container .suggested-categories-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 10;
+  padding: 10px 0;
+  border: 1px solid #d3c4f0; /* Light purple border */
+}
+
+.category-container .suggested-category-item {
+  padding: 8px 15px;
+  cursor: pointer;
+  color: #34495e;
+  transition: all 0.2s ease;
+}
+
+.category-container .suggested-category-item:hover {
+  background: #f0f3f4;
+  color: #6a11cb; /* Purple hover color */
+}
+
+/* Category Placeholder */
+.category-container .categories-placeholder {
+  color: #7f8c8d;
+  font-style: italic;
+  padding: 10px;
+}
+
+/* Responsive Adjustments for Categories */
+@media (max-width: 600px) {
+  .category-container .skills-input-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .category-container .add-category-btn {
+    width: 100%;
+  }
+  
+  .category-container .category-tag {
+    flex-basis: calc(50% - 6px); /* Two columns on mobile */
+  }
+}
+
+@media (min-width: 601px) {
+  .category-container .category-tag {
+    max-width: 250px;
+  }
+}
+
+/* In JobPostingForm.css */
+.form-group select[name="category"] {
+  border-color: #6a11cb; /* Purple border */
+}
+
+.form-group select[name="category"]:focus {
+  border-color: #6a11cb;
+  box-shadow: 0 0 5px rgba(106, 17, 203, 0.3);
+}
