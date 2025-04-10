@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom'; // Added for navigation
 import "../styles/ProfileForm.css";
 
 function ProfileForm() {
@@ -10,7 +11,7 @@ function ProfileForm() {
     jobHistory: [{ company: '', position: '', startDate: '', endDate: '', description: '' }],
     educationHistory: [{ degree: '', institution: '', field: '', graduationYear: '' }],
     professional: { jobTitle: '', company: '', experience: '', skills: [] },
-    jobPrefs: { roles: [], locations: [], salary: '', employmentType: '' }
+    jobPrefs: { roles: [], locations: [], salary: '', employmentType: [] } // Fixed to array
   });
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
@@ -21,19 +22,43 @@ function ProfileForm() {
   const [roleInput, setRoleInput] = useState('');
   const [locationInput, setLocationInput] = useState('');
 
-  const API_URL = 'http://localhost:5000/api/profile/';
+  const API_URL = 'http://localhost:5000/api/profile'; // Removed trailing slash
+  const navigate = useNavigate(); // Added for navigation
 
   useEffect(() => {
     const fetchProfile = async () => {
       setIsLoading(true);
       try {
         const response = await axios.get(API_URL, {
-          withCredentials: true // Using cookie-based auth like JobPostingForm.js
+          withCredentials: true
         });
-        setFormData(response.data);
+        setFormData(prev => ({
+          ...prev,
+          ...response.data,
+          personal: { ...prev.personal, ...response.data.personal },
+          jobHistory: response.data.jobHistory || prev.jobHistory,
+          educationHistory: response.data.educationHistory || prev.educationHistory,
+          professional: { ...prev.professional, ...response.data.professional },
+          jobPrefs: { ...prev.jobPrefs, ...response.data.jobPrefs }
+        }));
       } catch (error) {
-        console.error('Failed to fetch profile:', error);
-        setErrorMessage(error.response?.data?.message || 'Failed to load profile');
+        if (error.response?.status === 404) {
+          // Profile doesn’t exist yet — expected for new users, no need to log as error
+          setFormData({
+            personal: { fullName: '', email: '', dob: '', gender: '' },
+            isFresher: false,
+            jobHistory: [{ company: '', position: '', startDate: '', endDate: '', description: '' }],
+            educationHistory: [{ degree: '', institution: '', field: '', graduationYear: '' }],
+            professional: { jobTitle: '', company: '', experience: '', skills: [] },
+            jobPrefs: { roles: [], locations: [], salary: '', employmentType: [] }
+          });
+          // Optionally log for debugging, but not as an error
+          console.log('No profile found, starting with empty form.');
+        } else {
+          // Unexpected errors (e.g., 500, network issues)
+          console.error('Failed to fetch profile:', error);
+          setErrorMessage(error.response?.data?.message || 'Failed to load profile');
+        }
       } finally {
         setIsLoading(false);
       }
@@ -280,7 +305,6 @@ function ProfileForm() {
     if (step === 5 && validateStep(4)) {
       setIsSubmitting(true);
       try {
-        // Using JobPostingForm.js backend logic: single PUT request with withCredentials
         const response = await axios.put(API_URL, formData, {
           withCredentials: true,
           headers: { 'Content-Type': 'application/json' }
@@ -288,20 +312,7 @@ function ProfileForm() {
 
         console.log('Profile updated:', response.data);
         alert(response.data.message || 'Profile successfully updated!');
-
-        // Reset form like JobPostingForm.js (optional: adjust based on your needs)
-        setFormData({
-          personal: { fullName: '', email: '', dob: '', gender: '' },
-          isFresher: false,
-          jobHistory: [{ company: '', position: '', startDate: '', endDate: '', description: '' }],
-          educationHistory: [{ degree: '', institution: '', field: '', graduationYear: '' }],
-          professional: { jobTitle: '', company: '', experience: '', skills: [] },
-          jobPrefs: { roles: [], locations: [], salary: '', employmentType: '' }
-        });
-        setStep(0); // Reset to first step
-        setErrors({});
-        setTouched({});
-        setErrorMessage(null);
+        navigate('/profile'); // Added navigation
       } catch (error) {
         console.error('Profile update failed:', error);
         setErrorMessage(error.response?.data?.message || 'Profile update failed');

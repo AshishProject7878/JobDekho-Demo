@@ -9,7 +9,7 @@ const PersonalSchema = new mongoose.Schema({
     email: {
         type: String,
         required: true,
-        unique: true,
+        unique: true, // Note: This may cause issues across profiles; consider removing if not intended
         trim: true
     },
     dob: {
@@ -27,23 +27,17 @@ const PersonalSchema = new mongoose.Schema({
 const JobHistorySchema = new mongoose.Schema({
     company: {
         type: String,
-        required: function() {
-            return !this.parent().isFresher;
-        },
         trim: true
+        // Removed: required: function() { return !this.parent().isFresher; }
     },
     position: {
         type: String,
-        required: function() {
-            return !this.parent().isFresher;
-        },
         trim: true
+        // Removed: required: function() { return !this.parent().isFresher; }
     },
     startDate: {
-        type: Date,
-        required: function() {
-            return !this.parent().isFresher;
-        }
+        type: Date
+        // Removed: required: function() { return !this.parent().isFresher; }
     },
     endDate: {
         type: Date,
@@ -56,10 +50,8 @@ const JobHistorySchema = new mongoose.Schema({
     },
     description: {
         type: String,
-        required: function() {
-            return !this.parent().isFresher;
-        },
         trim: true
+        // Removed: required: function() { return !this.parent().isFresher; }
     }
 });
 
@@ -154,21 +146,14 @@ const ProfileSchema = new mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
-        required: true
+        required: true,
+        unique: true // Ensure one profile per user
     },
-    createdAt: {
-        type: Date,
-        default: Date.now
-    },
-    updatedAt: {
-        type: Date,
-        default: Date.now
-    }
 }, {
     timestamps: true
 });
 
-// Add the pre-save middleware
+// Pre-save middleware to clear jobHistory for freshers
 ProfileSchema.pre('save', function(next) {
     if (this.isFresher && this.jobHistory.length > 0) {
         this.jobHistory = [];
