@@ -13,4 +13,4 @@ router.delete('/', protectRoute, deleteProfile);   // DELETE /api/profile
 // Optional route for getting profile by ID (e.g., for admin use)
 router.get('/:id', protectRoute, getProfileById);  // GET /api/profile/:id
 
-export default router;
+export default router; 

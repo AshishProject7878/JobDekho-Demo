@@ -481,3 +481,85 @@ h3 {
         display: none;
     }
 }
+
+/* Modal Overlay */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  /* Modal Content */
+  .modal-content {
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  .modal-content h2 {
+    margin-top: 0;
+    color: #2d3748;
+    font-size: 22px;
+  }
+  
+  .resume-option {
+    margin: 15px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .resume-option label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .resume-option a,
+  .resume-option span {
+    margin-left: 10px;
+    font-size: 14px;
+    color: #3182ce;
+  }
+  
+  .resume-upload {
+    margin-top: 10px;
+    display: block;
+  }
+  
+  .modal-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    justify-content: flex-end;
+  }
+  
+  .btn-cancel {
+    background-color: #e53e3e;
+  }
+  
+  .btn-cancel:hover {
+    background-color: #c53030;
+  }
+  
+  .error-text {
+    color: #e53e3e;
+    font-size: 14px;
+    margin: 10px 0;
+  }
+  
+  .success-text {
+    color: #38a169;
+    font-size: 14px;
+    margin: 10px 0;
+  }

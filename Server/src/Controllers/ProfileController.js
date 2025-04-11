@@ -1,7 +1,7 @@
-import Profile from '../models/ProfileModel.js'; // Adjust path as needed
-import { v2 as cloudinary } from "cloudinary"; // Import Cloudinary for file deletion
+import Profile from '../models/ProfileModel.js';
+import { v2 as cloudinary } from "cloudinary";
 
-// Configure Cloudinary (ensure this matches ResumeRoute.js)
+// Configure Cloudinary
 try {
   if (!process.env.CLOUD_NAME || !process.env.CLOUD_KEY || !process.env.CLOUD_SECRET) {
     throw new Error("Missing Cloudinary environment variables");
@@ -45,13 +45,16 @@ const validateCloudinaryUrl = async (url) => {
   }
 };
 
-// @desc    Create a new user profile
+// @desc    Create a new user profile (kept for reference or optional use)
 // @route   POST /api/profile
 // @access  Private
 export const createProfile = async (req, res) => {
   try {
     const userId = req.user._id;
     const { personal, isFresher, jobHistory, educationHistory, professional, jobPrefs } = req.body;
+
+    console.log("Creating profile for user:", userId);
+    console.log("Request body:", req.body);
 
     const existingProfile = await Profile.findOne({ user: userId });
     if (existingProfile) {
@@ -70,18 +73,18 @@ export const createProfile = async (req, res) => {
 
     const newProfile = new Profile({
       personal: {
-        fullName: personal.fullName,
-        email: personal.email,
-        dob: personal.dob,
-        gender: personal.gender,
-        profilePicture: personal.profilePicture || undefined,
-        resume: personal.resume || "", // Include validated resume or empty string
+        fullName: personal?.fullName || '',
+        email: personal?.email || '',
+        dob: personal?.dob || null,
+        gender: personal?.gender || '',
+        profilePicture: personal?.profilePicture || undefined,
+        resume: personal?.resume || ""
       },
-      isFresher,
-      jobHistory: isFresher ? [] : jobHistory,
-      educationHistory,
-      professional,
-      jobPrefs,
+      isFresher: isFresher || false,
+      jobHistory: isFresher ? [] : jobHistory || [],
+      educationHistory: educationHistory || [],
+      professional: professional || {},
+      jobPrefs: jobPrefs || {},
       user: userId,
     });
 
@@ -100,7 +103,7 @@ export const createProfile = async (req, res) => {
   }
 };
 
-// @desc    Update user profile
+// @desc    Create or update user profile
 // @route   PUT /api/profile
 // @access  Private
 export const updateProfile = async (req, res) => {
@@ -111,18 +114,24 @@ export const updateProfile = async (req, res) => {
     const userId = req.user._id;
     const { personal, isFresher, jobHistory, educationHistory, professional, jobPrefs } = req.body;
 
-    console.log("Updating profile for user:", userId);
-    console.log("Request body:", { personal, isFresher, jobHistory: jobHistory?.length, educationHistory: educationHistory?.length });
+    console.log("Processing profile for user:", userId);
+    console.log("Request body:", req.body);
 
-    // Fetch existing profile
-    const existingProfile = await Profile.findOne({ user: userId });
-    if (!existingProfile) {
-      return res.status(404).json({ message: "Profile not found" });
+    // Validate jobHistory and educationHistory
+    if (jobHistory && !Array.isArray(jobHistory)) {
+      return res.status(400).json({ message: "jobHistory must be an array" });
+    }
+    if (educationHistory && !Array.isArray(educationHistory)) {
+      return res.status(400).json({ message: "educationHistory must be an array" });
     }
 
+    // Check if profile exists to determine if this is a create or update
+    const existingProfile = await Profile.findOne({ user: userId });
+    const isCreating = !existingProfile;
+
     // Validate resume URL if provided
-    let newResumeUrl = personal?.resume || existingProfile.personal.resume || "";
-    if (personal?.resume && personal.resume !== existingProfile.personal.resume) {
+    let newResumeUrl = personal?.resume || (existingProfile?.personal.resume) || "";
+    if (personal?.resume && personal.resume !== existingProfile?.personal.resume) {
       const isValidUrl = await validateCloudinaryUrl(personal.resume);
       if (!isValidUrl) {
         console.warn("Invalid or inaccessible resume URL provided:", personal.resume);
@@ -131,7 +140,7 @@ export const updateProfile = async (req, res) => {
       console.log("Validated resume URL for update:", personal.resume);
 
       // Delete old resume file from Cloudinary if it exists and is different
-      if (existingProfile.personal.resume) {
+      if (existingProfile?.personal.resume) {
         try {
           const oldPublicId = existingProfile.personal.resume.match(/resumes\/(.+)\.pdf$/)?.[1];
           if (oldPublicId) {
@@ -149,60 +158,65 @@ export const updateProfile = async (req, res) => {
     }
 
     // Validate and format jobHistory for non-freshers
-    let updatedJobHistory = jobHistory || existingProfile.jobHistory;
-    if (isFresher !== undefined && !isFresher) {
-      if (!Array.isArray(jobHistory) || jobHistory.length === 0 || 
-          jobHistory.every(job => !job.company || !job.position || !job.startDate)) {
-        return res.status(400).json({ 
-          message: "Job history must include at least one entry with company, position, and start date for non-freshers",
-        });
+    let updatedJobHistory = jobHistory || (existingProfile?.jobHistory) || [];
+    if (isFresher !== undefined) {
+      if (!isFresher) {
+        if (!jobHistory || jobHistory.length === 0 || 
+            jobHistory.every(job => !job.company || !job.position || !job.startDate)) {
+          return res.status(400).json({ 
+            message: "Job history must include at least one entry with company, position, and start date for non-freshers",
+          });
+        }
+        updatedJobHistory = jobHistory.map(job => ({
+          company: job.company || "",
+          position: job.position || "",
+          startDate: job.startDate ? new Date(job.startDate) : null,
+          endDate: job.endDate ? new Date(job.endDate) : null,
+          description: job.description || "",
+        }));
+      } else {
+        updatedJobHistory = []; // Clear jobHistory for freshers
       }
-      updatedJobHistory = jobHistory.map(job => ({
-        company: job.company || "",
-        position: job.position || "",
-        startDate: job.startDate ? new Date(job.startDate) : null,
-        endDate: job.endDate ? new Date(job.endDate) : null,
-        description: job.description || "",
-      }));
-    } else if (isFresher) {
-      updatedJobHistory = []; // Clear jobHistory for freshers
     }
 
-    const updatedProfile = await Profile.findOneAndUpdate(
+    const profile = await Profile.findOneAndUpdate(
       { user: userId },
       {
         $set: {
           personal: {
-            fullName: personal?.fullName || existingProfile.personal.fullName,
-            email: personal?.email || existingProfile.personal.email,
-            dob: personal?.dob || existingProfile.personal.dob,
-            gender: personal?.gender || existingProfile.personal.gender,
-            profilePicture: personal?.profilePicture || existingProfile.personal.profilePicture,
+            fullName: personal?.fullName || existingProfile?.personal.fullName || '',
+            email: personal?.email || existingProfile?.personal.email || '',
+            dob: personal?.dob || existingProfile?.personal.dob || null,
+            gender: personal?.gender || existingProfile?.personal.gender || '',
+            profilePicture: personal?.profilePicture || existingProfile?.personal.profilePicture || undefined,
             resume: newResumeUrl,
           },
-          isFresher: isFresher !== undefined ? isFresher : existingProfile.isFresher,
+          isFresher: isFresher !== undefined ? isFresher : existingProfile?.isFresher || false,
           jobHistory: updatedJobHistory,
-          educationHistory: educationHistory || existingProfile.educationHistory,
-          professional: professional || existingProfile.professional,
-          jobPrefs: jobPrefs || existingProfile.jobPrefs,
+          educationHistory: educationHistory || existingProfile?.educationHistory || [],
+          professional: professional || existingProfile?.professional || {},
+          jobPrefs: jobPrefs || existingProfile?.jobPrefs || {},
           updatedAt: new Date(),
         },
       },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true, upsert: true } // Upsert: create if not exists
     );
 
-    console.log("Profile after update:", {
+    console.log(`${isCreating ? 'Created' : 'Updated'} Profile:`, {
       userId,
-      resume: updatedProfile.personal.resume,
+      resume: profile.personal.resume,
     });
 
-    res.status(200).json({ message: "Profile saved successfully", data: updatedProfile });
+    res.status(isCreating ? 201 : 200).json({
+      message: `Profile ${isCreating ? 'created' : 'saved'} successfully`,
+      data: profile,
+    });
   } catch (error) {
     console.error("🔥 Error in updateProfile:", {
       message: error.message,
       stack: error.stack,
     });
-    res.status(500).json({ message: "Error saving profile", error: error.message });
+    res.status(500).json({ message: "Error processing profile", error: error.message });
   }
 };
 
