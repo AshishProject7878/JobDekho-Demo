@@ -24,12 +24,12 @@ const validateCloudinaryUrl = async (url) => {
   try {
     const response = await fetch(url, { method: "HEAD" });
     const isValid = response.ok && response.headers.get("content-type") === "application/pdf";
-    console.log("URL validation result:", {
-      url,
-      status: response.status,
-      contentType: response.headers.get("content-type"),
-      isValid,
-    });
+    // console.log("URL validation result:", {
+    //   url,
+    //   status: response.status,
+    //   contentType: response.headers.get("content-type"),
+    //   isValid,
+    // });
     return isValid;
   } catch (error) {
     console.error("Error validating Cloudinary URL:", {
@@ -53,8 +53,8 @@ export const createProfile = async (req, res) => {
     const userId = req.user._id;
     const { personal, isFresher, jobHistory, educationHistory, professional, jobPrefs } = req.body;
 
-    console.log("Creating profile for user:", userId);
-    console.log("Request body:", req.body);
+    // console.log("Creating profile for user:", userId);
+    // console.log("Request body:", req.body);
 
     const existingProfile = await Profile.findOne({ user: userId });
     if (existingProfile) {
@@ -68,7 +68,7 @@ export const createProfile = async (req, res) => {
         console.warn("Invalid or inaccessible resume URL provided:", personal.resume);
         return res.status(400).json({ message: "Provided resume URL is invalid or inaccessible" });
       }
-      console.log("Validated resume URL for creation:", personal.resume);
+      // console.log("Validated resume URL for creation:", personal.resume);
     }
 
     const newProfile = new Profile({
@@ -89,10 +89,10 @@ export const createProfile = async (req, res) => {
     });
 
     await newProfile.save();
-    console.log("Created Profile:", {
-      userId,
-      resume: newProfile.personal.resume,
-    });
+    // console.log("Created Profile:", {
+    //   userId,
+    //   resume: newProfile.personal.resume,
+    // });
     res.status(201).json({ message: "Profile created successfully", data: newProfile });
   } catch (error) {
     console.error("🔥 Error in createProfile:", {
@@ -114,8 +114,8 @@ export const updateProfile = async (req, res) => {
     const userId = req.user._id;
     const { personal, isFresher, jobHistory, educationHistory, professional, jobPrefs } = req.body;
 
-    console.log("Processing profile for user:", userId);
-    console.log("Request body:", req.body);
+    // console.log("Processing profile for user:", userId);
+    // console.log("Request body:", req.body);
 
     // Validate jobHistory and educationHistory
     if (jobHistory && !Array.isArray(jobHistory)) {
