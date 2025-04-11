@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
-import emailjs from "@emailjs/browser";
+import emailjs from "@emailjs/browser"; // Correct import
 import "../styles/JobDetail.css";
 import CompImg from "../Assests/CompLogo.png";
 
@@ -15,33 +15,40 @@ function JobDetail() {
     "Key Responsibilities",
     "Role & Experience",
   ]);
-  const [showModal, setShowModal] = useState(false);
+  const [showApplyModal, setShowApplyModal] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
   const [profileResume, setProfileResume] = useState(null);
-  const [applicantEmail, setApplicantEmail] = useState(null); // Applicant's email
+  const [applicantEmail, setApplicantEmail] = useState(null);
   const [newResume, setNewResume] = useState(null);
   const [emailStatus, setEmailStatus] = useState(null);
+  const [shareEmail, setShareEmail] = useState("");
+  const [shareStatus, setShareStatus] = useState(null);
 
   const BASE_URL = "http://localhost:5000";
   const PROFILE_API_URL = `${BASE_URL}/api/profile`;
+  const JOB_URL = `${window.location.origin}/job/${id}`; // Dynamic job URL
 
-  // Fetch job details and profile data (resume + email)
+  // Initialize EmailJS once
+  useEffect(() => {
+    emailjs.init("7E85Be-mzfn5NmnlF"); // Your Public Key
+  }, []);
+
+  // Fetch job details and profile data
   useEffect(() => {
     const fetchJobAndProfile = async () => {
       try {
-        // Fetch job details
         const jobResponse = await axios.get(`${BASE_URL}/api/posts/${id}`, {
           withCredentials: true,
         });
         console.log("Job API Response:", jobResponse.data);
         setJob(jobResponse.data);
 
-        // Fetch profile resume and email
         const profileResponse = await axios.get(PROFILE_API_URL, {
           withCredentials: true,
         });
         console.log("Profile API Response:", profileResponse.data);
         setProfileResume(profileResponse.data.personal?.resume || null);
-        setApplicantEmail(profileResponse.data.personal?.email || null); // Fetch applicant's email
+        setApplicantEmail(profileResponse.data.personal?.email || null);
 
         setLoading(false);
       } catch (err) {
@@ -124,8 +131,15 @@ function JobDetail() {
 
   // Handle Apply button click
   const handleApplyClick = () => {
-    setShowModal(true);
+    setShowApplyModal(true);
     setEmailStatus(null);
+  };
+
+  // Handle Share button click
+  const handleShareClick = () => {
+    setShowShareModal(true);
+    setShareStatus(null);
+    setShareEmail("");
   };
 
   // Handle new resume upload
@@ -163,12 +177,10 @@ function JobDetail() {
       return;
     }
 
-    emailjs.init("7E85Be-mzfn5NmnlF"); // Your Public Key
-
     const templateParams = {
-      to_email: job.contactEmail, // Job poster's email
-      from_name: applicantEmail ? applicantEmail.split("@")[0] : "Job Applicant", // Display name
-      reply_to: applicantEmail, // Applicant's email for Reply-To
+      to_email: job.contactEmail,
+      from_name: applicantEmail ? applicantEmail.split("@")[0] : "Job Applicant",
+      reply_to: applicantEmail,
       job_title: job.title,
       company: job.company,
       resume_url: typeof resumeToSend === "string" ? resumeToSend : URL.createObjectURL(resumeToSend),
@@ -178,17 +190,70 @@ function JobDetail() {
 
     try {
       const response = await emailjs.send(
-        "service_bqzf4o6", // Your Service ID
-        "template_bbsvz9h", // Your Template ID
+        "service_bqzf4o6",
+        "template_bbsvz9h",
         templateParams
       );
       console.log("Email sent successfully:", response);
       setEmailStatus("Resume sent successfully!");
-      setShowModal(false);
+      setShowApplyModal(false);
     } catch (err) {
       console.error("Failed to send email:", err);
       setEmailStatus("Failed to send resume. Please try again.");
     }
+  };
+
+  // Send share email via EmailJS
+  const sendShareEmail = async () => {
+    if (!shareEmail) {
+      setShareStatus("Error: Please enter an email address.");
+      return;
+    }
+
+    if (!applicantEmail) {
+      setShareStatus("Error: Your email not found in profile.");
+      return;
+    }
+
+    const templateParams = {
+      to_email: shareEmail,
+      from_name: applicantEmail ? applicantEmail.split("@")[0] : "Job Sharer",
+      reply_to: applicantEmail,
+      job_title: job.title,
+      company: job.company,
+      job_url: JOB_URL,
+      message: `Check out this job posting: ${job.title} at ${job.company}. Apply here: ${JOB_URL}`,
+    };
+
+    console.log("Sending share email with params:", templateParams);
+
+    try {
+      const response = await emailjs.send(
+        "service_bqzf4o6", // Your Service ID
+        "template_bbsvz9h", // Reuse or create a new template in EmailJS
+        templateParams
+      );
+      console.log("Share email sent successfully:", response);
+      setShareStatus("Job shared successfully!");
+      setShowShareModal(false);
+    } catch (err) {
+      console.error("Failed to send share email:", err);
+      setShareStatus("Failed to share job. Please try again.");
+    }
+  };
+
+  // Copy job URL to clipboard
+  const copyJobLink = () => {
+    navigator.clipboard.writeText(JOB_URL).then(
+      () => {
+        setShareStatus("Link copied to clipboard!");
+        setTimeout(() => setShowShareModal(false), 1500); // Close modal after 1.5s
+      },
+      (err) => {
+        console.error("Failed to copy link:", err);
+        setShareStatus("Failed to copy link.");
+      }
+    );
   };
 
   if (loading) return <div className="job-detail-container"><p>Loading job details...</p></div>;
@@ -231,7 +296,9 @@ function JobDetail() {
           <button className="Jobbtn1" onClick={handleApplyClick}>
             Apply
           </button>
-          <button className="Jobbtn1 btn-cv">Share</button>
+          <button className="Jobbtn1 btn-cv" onClick={handleShareClick}>
+            Share
+          </button>
         </div>
       </div>
 
@@ -324,8 +391,8 @@ function JobDetail() {
         </div>
       </div>
 
-      {/* Resume Modal */}
-      {showModal && (
+      {/* Apply Modal */}
+      {showApplyModal && (
         <div className="modal-overlay">
           <div className="modal-content">
             <h2>Apply for {job.title}</h2>
@@ -379,8 +446,70 @@ function JobDetail() {
               <button className="Jobbtn1" onClick={sendResumeEmail}>
                 Send Resume
               </button>
-              <button className="Jobbtn1 btn-cancel" onClick={() => setShowModal(false)}>
+              <button className="Jobbtn1 btn-cancel" onClick={() => setShowApplyModal(false)}>
                 Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Share Modal */}
+      {showShareModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h2>Share {job.title}</h2> {/* Fixed typo */}
+            <p>Share this job with others:</p>
+
+            <div className="share-option">
+              <h3>Via Email</h3>
+              <input
+                type="email"
+                value={shareEmail}
+                onChange={(e) => setShareEmail(e.target.value)}
+                placeholder="Enter recipient's email"
+                className="share-email-input"
+              />
+              <button className="Jobbtn1" onClick={sendShareEmail} style={{ marginTop: "10px" }}>
+                Send Email
+              </button>
+            </div>
+
+            <div className="share-option">
+              <h3>Copy Link</h3>
+              <p>{JOB_URL}</p>
+              <button className="Jobbtn1" onClick={copyJobLink}>
+                Copy to Clipboard
+              </button>
+            </div>
+
+            <div className="share-option">
+              <h3>Social Media</h3>
+              <div className="social-buttons">
+                <button
+                  className="Jobbtn1 social-btn"
+                  onClick={() => window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(JOB_URL)}&text=${encodeURIComponent(`Check out this job: ${job.title} at ${job.company}`)}`, "_blank")}
+                >
+                  Twitter
+                </button>
+                <button
+                  className="Jobbtn1 social-btn"
+                  onClick={() => window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(JOB_URL)}`, "_blank")}
+                >
+                  LinkedIn
+                </button>
+              </div>
+            </div>
+
+            {shareStatus && (
+              <p className={shareStatus.includes("Error") ? "error-text" : "success-text"}>
+                {shareStatus}
+              </p>
+            )}
+
+            <div className="modal-buttons">
+              <button className="Jobbtn1 btn-cancel" onClick={() => setShowShareModal(false)}>
+                Close
               </button>
             </div>
           </div>

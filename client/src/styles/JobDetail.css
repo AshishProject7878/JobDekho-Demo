@@ -563,3 +563,41 @@ h3 {
     font-size: 14px;
     margin: 10px 0;
   }
+
+  .share-option {
+    margin-bottom: 20px;
+  }
+  
+  .share-option h3 {
+    margin-bottom: 10px;
+    font-size: 1.2em;
+  }
+  
+  .share-email-input {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .social-buttons {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .social-btn {
+    background-color: #007bff;
+    color: white;
+    padding: 8px 16px;
+  }
+  
+  .social-btn:hover {
+    background-color: #0056b3;
+  }
+  
+  .success-text {
+    color: green;
+    margin-top: 10px;
+  }
+  
