@@ -24,7 +24,12 @@ const PersonalSchema = new mongoose.Schema({
     },
     profilePicture: {
         type: String,
-        default: "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y", // Default avatar
+        default: "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y",
+        trim: true
+    },
+    resume: { // Added resume field
+        type: String,
+        default: "", // Empty string as default, matches frontend expectation
         trim: true
     }
 });

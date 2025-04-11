@@ -8,6 +8,9 @@ function CompProfile() {
   const [profileData, setProfileData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [resumeError, setResumeError] = useState(null);
+  const [isUploadingResume, setIsUploadingResume] = useState(false);
+  const [resumeStatus, setResumeStatus] = useState({ accessible: false, checked: false });
   const [sectionOrder, setSectionOrder] = useState([
     'Personal Information',
     'Job History',
@@ -16,30 +19,114 @@ function CompProfile() {
     'Job Preferences',
   ]);
 
-  const BASE_URL = 'http://localhost:5000'; // Backend base URL, move to .env later
+  const BASE_URL = 'http://localhost:5000';
   const API_URL = `${BASE_URL}/api/profile`;
+  const RESUME_UPLOAD_URL = `${BASE_URL}/api/upload/resume`;
+
+  const fetchProfileData = async () => {
+    setIsLoading(true);
+    try {
+      const response = await axios.get(API_URL, {
+        withCredentials: true,
+        headers: { 'Content-Type': 'application/json' },
+      });
+      console.log('Fetched Profile Data:', response.data);
+      console.log('Profile Picture:', response.data.personal?.profilePicture);
+      console.log('Resume:', response.data.personal?.resume);
+      setProfileData(response.data);
+      setError(null);
+      checkResumeAccessibility(response.data.personal?.resume);
+    } catch (error) {
+      console.error('Failed to fetch profile data:', error);
+      setError(error.response?.data?.message || 'Failed to load profile data');
+      setProfileData(null);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const checkResumeAccessibility = async (url) => {
+    if (!url || !url.match(/\.pdf$/i)) {
+      setResumeStatus({ accessible: false, checked: true });
+      return;
+    }
+    try {
+      const response = await fetch(url, { method: 'HEAD' });
+      const isAccessible = response.ok && response.headers.get('content-type') === 'application/pdf';
+      setResumeStatus({ accessible: isAccessible, checked: true });
+      if (!isAccessible) {
+        console.warn('Resume URL is inaccessible:', { url, status: response.status });
+        setResumeError(`Resume is not accessible (Status: ${response.status}). Please re-upload.`);
+      } else {
+        setResumeError(null);
+      }
+    } catch (error) {
+      console.error('Error checking resume accessibility:', error.message);
+      setResumeStatus({ accessible: false, checked: true });
+      setResumeError('Unable to verify resume accessibility. Please try re-uploading.');
+    }
+  };
 
   useEffect(() => {
-    const fetchProfileData = async () => {
-      setIsLoading(true);
-      try {
-        const response = await axios.get(API_URL, {
-          withCredentials: true,
-          headers: { 'Content-Type': 'application/json' },
-        });
-        console.log('API Response:', response.data);
-        console.log('Profile Picture:', response.data.personal?.profilePicture);
-        setProfileData(response.data);
-      } catch (error) {
-        console.error('Failed to fetch profile data:', error);
-        setError(error.response?.data?.message || 'Failed to load profile data');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     fetchProfileData();
   }, [API_URL]);
+
+  const handleResumeUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (file.type !== 'application/pdf') {
+      setResumeError('Only PDF files are allowed');
+      return;
+    }
+
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+      setResumeError('File size must be less than 10MB');
+      return;
+    }
+
+    setResumeError(null);
+    setIsUploadingResume(true);
+
+    const formData = new FormData();
+    formData.append('resume', file);
+
+    try {
+      const uploadResponse = await axios.post(RESUME_UPLOAD_URL, formData, {
+        withCredentials: true,
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      const resumeUrl = uploadResponse.data.url;
+      console.log('Uploaded Resume URL:', resumeUrl);
+
+      const updateResponse = await axios.put(
+        API_URL,
+        { personal: { resume: resumeUrl } },
+        {
+          withCredentials: true,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+      console.log('Profile Update Response:', updateResponse.data);
+
+      setProfileData(updateResponse.data.data);
+      setResumeStatus({ accessible: false, checked: false });
+      await checkResumeAccessibility(resumeUrl);
+      alert('Resume uploaded successfully!');
+    } catch (error) {
+      console.error('Resume upload failed:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+      });
+      const errorMsg = error.response?.data?.message || 'Failed to upload resume';
+      setResumeError(`${errorMsg}. ${errorMsg.includes('inaccessible') ? 'Please try again or check Cloudinary settings.' : ''}`);
+      await fetchProfileData();
+    } finally {
+      setIsUploadingResume(false);
+    }
+  };
 
   const handleTabClick = (tab) => {
     setSectionOrder((prevOrder) => {
@@ -84,12 +171,8 @@ function CompProfile() {
                     {item.degree || 'Degree not specified'} -{' '}
                     {item.field || 'Field not specified'}
                   </h3>
-                  <p>
-                    <strong>Institution:</strong> {item.institution || 'Not provided'}
-                  </p>
-                  <p>
-                    <strong>Year:</strong> {item.graduationYear || 'Not provided'}
-                  </p>
+                  <p><strong>Institution:</strong> {item.institution || 'Not provided'}</p>
+                  <p><strong>Year:</strong> {item.graduationYear || 'Not provided'}</p>
                 </>
               )}
             </div>
@@ -115,6 +198,29 @@ function CompProfile() {
         </p>
         <p>
           <strong>Gender:</strong> {profileData.personal.gender || 'Not provided'}
+        </p>
+        <p>
+          <strong>Resume:</strong>{' '}
+          {profileData.personal.resume && resumeStatus.checked ? (
+            resumeStatus.accessible ? (
+              <a
+                href={profileData.personal.resume}
+                target="_blank"
+                rel="noopener noreferrer"
+                download={`${profileData.personal.fullName || 'resume'}.pdf`}
+                className="resume-download-btn"
+                onClick={() => console.log('Opening and downloading resume:', profileData.personal.resume)}
+              >
+                Download Resume
+              </a>
+            ) : (
+              <span className="error-text">Resume unavailable (please re-upload)</span>
+            )
+          ) : profileData.personal.resume ? (
+            <span>Checking resume accessibility...</span>
+          ) : (
+            'Not uploaded'
+          )}
         </p>
       </>
     ),
@@ -202,8 +308,23 @@ function CompProfile() {
           <Link to="/edit-profile" className="profile-btn">
             Edit Profile
           </Link>
+          <label className="profile-btn" style={{ position: 'relative' }}>
+            {isUploadingResume
+              ? 'Uploading...'
+              : profileData.personal.resume
+              ? 'Change Resume'
+              : 'Upload Resume'}
+            <input
+              type="file"
+              accept="application/pdf"
+              onChange={handleResumeUpload}
+              disabled={isUploadingResume}
+              style={{ display: 'none' }}
+            />
+          </label>
           <button className="profile-btn btn-share">Share</button>
         </div>
+        {resumeError && <p className="error-message" style={{ color: 'red' }}>{resumeError}</p>}
       </div>
 
       <div className="section2">
