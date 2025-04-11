@@ -1,17 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom'; // Added for navigation
+import { useNavigate, useLocation } from 'react-router-dom';
 import "../styles/ProfileForm.css";
 
 function ProfileForm() {
+  const location = useLocation();
+  const navigate = useNavigate();
+
   const [step, setStep] = useState(0);
   const [formData, setFormData] = useState({
-    personal: { fullName: '', email: '', dob: '', gender: '' },
+    personal: { 
+      fullName: location.state?.name || '', 
+      email: location.state?.email || '', 
+      dob: '', 
+      gender: '', 
+      profilePicture: '' // Will store Cloudinary URL
+    },
     isFresher: false,
     jobHistory: [{ company: '', position: '', startDate: '', endDate: '', description: '' }],
     educationHistory: [{ degree: '', institution: '', field: '', graduationYear: '' }],
     professional: { jobTitle: '', company: '', experience: '', skills: [] },
-    jobPrefs: { roles: [], locations: [], salary: '', employmentType: [] } // Fixed to array
+    jobPrefs: { roles: [], locations: [], salary: '', employmentType: [] }
   });
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
@@ -22,20 +31,22 @@ function ProfileForm() {
   const [roleInput, setRoleInput] = useState('');
   const [locationInput, setLocationInput] = useState('');
 
-  const API_URL = 'http://localhost:5000/api/profile'; // Removed trailing slash
-  const navigate = useNavigate(); // Added for navigation
+  const API_URL = 'http://localhost:5000/api/profile';
+  const UPLOAD_URL = "http://localhost:5000/api/upload";
 
   useEffect(() => {
     const fetchProfile = async () => {
       setIsLoading(true);
       try {
-        const response = await axios.get(API_URL, {
-          withCredentials: true
-        });
+        const response = await axios.get(API_URL, { withCredentials: true });
         setFormData(prev => ({
           ...prev,
           ...response.data,
-          personal: { ...prev.personal, ...response.data.personal },
+          personal: { 
+            ...prev.personal, 
+            ...response.data.personal,
+            profilePicture: response.data.personal.profilePicture || ''
+          },
           jobHistory: response.data.jobHistory || prev.jobHistory,
           educationHistory: response.data.educationHistory || prev.educationHistory,
           professional: { ...prev.professional, ...response.data.professional },
@@ -43,19 +54,22 @@ function ProfileForm() {
         }));
       } catch (error) {
         if (error.response?.status === 404) {
-          // Profile doesn’t exist yet — expected for new users, no need to log as error
           setFormData({
-            personal: { fullName: '', email: '', dob: '', gender: '' },
+            personal: { 
+              fullName: location.state?.name || '', 
+              email: location.state?.email || '', 
+              dob: '', 
+              gender: '', 
+              profilePicture: ''
+            },
             isFresher: false,
             jobHistory: [{ company: '', position: '', startDate: '', endDate: '', description: '' }],
             educationHistory: [{ degree: '', institution: '', field: '', graduationYear: '' }],
             professional: { jobTitle: '', company: '', experience: '', skills: [] },
             jobPrefs: { roles: [], locations: [], salary: '', employmentType: [] }
           });
-          // Optionally log for debugging, but not as an error
           console.log('No profile found, starting with empty form.');
         } else {
-          // Unexpected errors (e.g., 500, network issues)
           console.error('Failed to fetch profile:', error);
           setErrorMessage(error.response?.data?.message || 'Failed to load profile');
         }
@@ -64,14 +78,14 @@ function ProfileForm() {
       }
     };
     fetchProfile();
-  }, []);
+  }, [location.state, API_URL]); // Added API_URL to fix ESLint warning
 
   const validateField = (section, field, value, index = null) => {
     const newErrors = { ...errors };
     const fieldKey = index !== null ? `${field}${index}` : field;
 
     if (touched[fieldKey] || isSubmitting) {
-      if ((field !== 'experience' && section !== 'jobHistory' && !value) || 
+      if ((field !== 'experience' && field !== 'profilePicture' && section !== 'jobHistory' && !value) || 
           (field === 'skills' && value.length === 0) || 
           (field === 'roles' && value.length === 0) || 
           (field === 'locations' && value.length === 0)) {
@@ -124,7 +138,7 @@ function ProfileForm() {
       });
     } else if (!Array.isArray(currentData)) {
       Object.entries(currentData).forEach(([key, value]) => {
-        if (!validateField(section, key, value)) {
+        if (key !== 'profilePicture' && !validateField(section, key, value)) {
           newErrors[key] = 'This field is required';
           isValid = false;
         }
@@ -132,6 +146,53 @@ function ProfileForm() {
     }
     setErrors(prev => ({ ...prev, ...newErrors }));
     return isValid;
+  };
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const validTypes = ['image/jpeg', 'image/png'];
+    if (!validTypes.includes(file.type)) {
+      setErrors(prev => ({
+        ...prev,
+        profilePicture: 'Only JPG or PNG files are allowed'
+      }));
+      return;
+    }
+
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      setErrors(prev => ({
+        ...prev,
+        profilePicture: 'File size must be less than 5MB'
+      }));
+      return;
+    }
+
+    setErrors(prev => ({ ...prev, profilePicture: '' }));
+
+    const formDataUpload = new FormData();
+    formDataUpload.append('profilePicture', file);
+
+    try {
+      const response = await axios.post(UPLOAD_URL, formDataUpload, {
+        withCredentials: true,
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      const imageUrl = response.data.url; // Cloudinary full URL
+      console.log('Uploaded Image URL:', imageUrl); // Debug
+      setFormData(prev => ({
+        ...prev,
+        personal: { ...prev.personal, profilePicture: imageUrl }
+      }));
+    } catch (error) {
+      console.error('Image upload failed:', error);
+      setErrors(prev => ({
+        ...prev,
+        profilePicture: error.response?.data?.message || 'Failed to upload image'
+      }));
+    }
   };
 
   const handleChange = (section, field, value, index = null) => {
@@ -309,10 +370,9 @@ function ProfileForm() {
           withCredentials: true,
           headers: { 'Content-Type': 'application/json' }
         });
-
         console.log('Profile updated:', response.data);
         alert(response.data.message || 'Profile successfully updated!');
-        navigate('/profile'); // Added navigation
+        navigate('/profileComp');
       } catch (error) {
         console.error('Profile update failed:', error);
         setErrorMessage(error.response?.data?.message || 'Profile update failed');
@@ -321,7 +381,7 @@ function ProfileForm() {
       }
     } else {
       setStep(5);
-    }
+    } 
   };
 
   const renderStep = () => {
@@ -354,6 +414,33 @@ function ProfileForm() {
                   className={errors.email ? 'error' : ''}
                 />
                 {errors.email && <span className="error-message">{errors.email}</span>}
+              </div>
+              <div className="form-group">
+                <label>Profile Picture (optional, JPG/PNG, max 5MB):</label>
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png"
+                  onChange={handleFileChange}
+                  className={errors.profilePicture ? 'error' : ''}
+                />
+                {formData.personal.profilePicture ? (
+                  <img 
+                    src={formData.personal.profilePicture} 
+                    alt="Profile Preview" 
+                    className="profile-preview" 
+                    onError={(e) => {
+                      console.log('Preview failed to load:', e.target.src);
+                      e.target.src = 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';
+                    }}
+                  />
+                ) : (
+                  <img 
+                    src="https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y" 
+                    alt="Default Profile" 
+                    className="profile-preview" 
+                  />
+                )}
+                {errors.profilePicture && <span className="error-message">{errors.profilePicture}</span>}
               </div>
               <div className="form-group">
                 <label>Date of Birth:</label>
@@ -743,6 +830,17 @@ function ProfileForm() {
               <SummarySection title="Personal Information" stepToEdit={0} setStep={setStep}>
                 <p><strong>Name:</strong> {formData.personal.fullName || 'Not provided'}</p>
                 <p><strong>Email:</strong> {formData.personal.email || 'Not provided'}</p>
+                <p><strong>Profile Picture:</strong> 
+                  <img 
+                    src={formData.personal.profilePicture || 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y'} 
+                    alt="Profile" 
+                    className="summary-profile-pic" 
+                    onError={(e) => {
+                      console.log('Summary image failed to load:', e.target.src);
+                      e.target.src = 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';
+                    }}
+                  />
+                </p>
                 <p><strong>Date of Birth:</strong> {formData.personal.dob || 'Not provided'}</p>
                 <p><strong>Gender:</strong> {formData.personal.gender || 'Not provided'}</p>
               </SummarySection>

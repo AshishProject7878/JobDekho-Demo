@@ -14,13 +14,19 @@ export const createProfile = async (req, res) => {
     }
 
     const newProfile = new Profile({
-      personal,
+      personal: {
+        fullName: personal.fullName,
+        email: personal.email,
+        dob: personal.dob,
+        gender: personal.gender,
+        profilePicture: personal.profilePicture || undefined // Nested under personal, optional
+      },
       isFresher,
       jobHistory: isFresher ? [] : jobHistory,
       educationHistory,
       professional,
       jobPrefs,
-      user: userId,
+      user: userId
     });
     await newProfile.save();
     res.status(201).json({ message: 'Profile created successfully', profile: newProfile });
@@ -67,7 +73,13 @@ export const updateProfile = async (req, res) => {
     const profile = await Profile.findOneAndUpdate(
       { user: userId },
       { 
-        personal: personal || {},
+        personal: {
+          fullName: personal?.fullName || '',
+          email: personal?.email || '',
+          dob: personal?.dob || null,
+          gender: personal?.gender || '',
+          profilePicture: personal?.profilePicture || undefined // Nested under personal, optional
+        },
         isFresher: isFresher || false,
         jobHistory: updatedJobHistory,
         educationHistory: educationHistory || [],
@@ -128,6 +140,7 @@ export const deleteProfile = async (req, res) => {
     res.status(500).json({ message: "Error deleting profile", error: error.message });
   }
 };
+
 // @desc    Get profile by ID (optional, for admin or specific use cases)
 // @route   GET /api/profile/:id
 // @access  Private (or Public depending on your needs)
@@ -138,7 +151,7 @@ export const getProfileById = async (req, res) => {
     if (!profile) {
       return res.status(404).json({ message: "Profile not found" });
     }
-
+ 
     res.status(200).json(profile);
   } catch (error) {
     console.error("🔥 Error in getProfileById:", error);

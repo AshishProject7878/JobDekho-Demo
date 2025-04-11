@@ -3,13 +3,15 @@ import SignUpImg from "../Assests/SignUp.svg";
 import "../styles/Signup.css";
 import axios from "axios";
 import { FaAt, FaEye, FaEyeSlash } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom"; // Added useNavigate
 
 function Signup() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+
+  const navigate = useNavigate(); // Initialize navigate hook
 
   const handleSignUp = async (e) => {
     e.preventDefault();
@@ -24,12 +26,13 @@ function Signup() {
         { withCredentials: true }
       );
       localStorage.setItem("user", JSON.stringify(res.data));
-
-      alert("Signup successful!");
+      alert("Signup successful! Let’s complete your profile.");
+      navigate("/profileForm"); // Redirect to ProfileForm
     } catch (error) {
       alert(error.response?.data?.message || "Signup failed.");
     }
   };
+
   return (
     <div className="main-container">
       <div className="login-container">

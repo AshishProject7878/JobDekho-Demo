@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { format } from 'date-fns';
-import { Link } from 'react-router-dom'; // For Edit button
-import '../styles/CompProfile.css'; // We'll adapt JobDetail.css
+import { Link } from 'react-router-dom';
+import '../styles/CompProfile.css';
 
 function CompProfile() {
   const [profileData, setProfileData] = useState(null);
@@ -16,7 +16,8 @@ function CompProfile() {
     'Job Preferences',
   ]);
 
-  const API_URL = 'http://localhost:5000/api/profile';
+  const BASE_URL = 'http://localhost:5000'; // Backend base URL, move to .env later
+  const API_URL = `${BASE_URL}/api/profile`;
 
   useEffect(() => {
     const fetchProfileData = async () => {
@@ -24,9 +25,10 @@ function CompProfile() {
       try {
         const response = await axios.get(API_URL, {
           withCredentials: true,
-          headers: { 'Content-Type': 'application/json' }
+          headers: { 'Content-Type': 'application/json' },
         });
-        console.log('API Response:', response.data); // Debug
+        console.log('API Response:', response.data);
+        console.log('Profile Picture:', response.data.personal?.profilePicture);
         setProfileData(response.data);
       } catch (error) {
         console.error('Failed to fetch profile data:', error);
@@ -37,7 +39,7 @@ function CompProfile() {
     };
 
     fetchProfileData();
-  }, []);
+  }, [API_URL]);
 
   const handleTabClick = (tab) => {
     setSectionOrder((prevOrder) => {
@@ -61,18 +63,33 @@ function CompProfile() {
             <div className="content">
               {type === 'job' ? (
                 <>
-                  <h3>{item.position || 'Position not specified'} at {item.company || 'Company not specified'}</h3>
+                  <h3>
+                    {item.position || 'Position not specified'} at{' '}
+                    {item.company || 'Company not specified'}
+                  </h3>
                   <p>
-                    {item.startDate ? format(new Date(item.startDate), 'MMM yyyy') : 'Not provided'} -{' '}
-                    {item.endDate ? format(new Date(item.endDate), 'MMM yyyy') : 'Present'}
+                    {item.startDate
+                      ? format(new Date(item.startDate), 'MMM yyyy')
+                      : 'Not provided'}{' '}
+                    -{' '}
+                    {item.endDate
+                      ? format(new Date(item.endDate), 'MMM yyyy')
+                      : 'Present'}
                   </p>
                   <p>{item.description || 'No description'}</p>
                 </>
               ) : (
                 <>
-                  <h3>{item.degree || 'Degree not specified'} - {item.field || 'Field not specified'}</h3>
-                  <p><strong>Institution:</strong> {item.institution || 'Not provided'}</p>
-                  <p><strong>Year:</strong> {item.graduationYear || 'Not provided'}</p>
+                  <h3>
+                    {item.degree || 'Degree not specified'} -{' '}
+                    {item.field || 'Field not specified'}
+                  </h3>
+                  <p>
+                    <strong>Institution:</strong> {item.institution || 'Not provided'}
+                  </p>
+                  <p>
+                    <strong>Year:</strong> {item.graduationYear || 'Not provided'}
+                  </p>
                 </>
               )}
             </div>
@@ -90,8 +107,15 @@ function CompProfile() {
     'Personal Information': (
       <>
         <h2>Personal Information</h2>
-        <p><strong>Date of Birth:</strong> {profileData.personal.dob ? format(new Date(profileData.personal.dob), 'MMMM dd, yyyy') : 'Not provided'}</p>
-        <p><strong>Gender:</strong> {profileData.personal.gender || 'Not provided'}</p>
+        <p>
+          <strong>Date of Birth:</strong>{' '}
+          {profileData.personal.dob
+            ? format(new Date(profileData.personal.dob), 'MMMM dd, yyyy')
+            : 'Not provided'}
+        </p>
+        <p>
+          <strong>Gender:</strong> {profileData.personal.gender || 'Not provided'}
+        </p>
       </>
     ),
     'Job History': (
@@ -113,18 +137,35 @@ function CompProfile() {
     'Professional Details': (
       <>
         <h2>Professional Details</h2>
-        <p><strong>Job Title:</strong> {profileData.professional.jobTitle || 'Not provided'}</p>
-        <p><strong>Company:</strong> {profileData.professional.company || 'Not provided'}</p>
-        <p><strong>Experience:</strong> {profileData.professional.experience || '0'} years</p>
+        <p>
+          <strong>Job Title:</strong> {profileData.professional.jobTitle || 'Not provided'}
+        </p>
+        <p>
+          <strong>Company:</strong> {profileData.professional.company || 'Not provided'}
+        </p>
+        <p>
+          <strong>Experience:</strong> {profileData.professional.experience || '0'} years
+        </p>
       </>
     ),
     'Job Preferences': (
       <>
         <h2>Job Preferences</h2>
-        <p><strong>Preferred Roles:</strong> {profileData.jobPrefs.roles?.join(', ') || 'Not specified'}</p>
-        <p><strong>Preferred Locations:</strong> {profileData.jobPrefs.locations?.join(', ') || 'Not specified'}</p>
-        <p><strong>Expected Salary:</strong> {profileData.jobPrefs.salary || 'Not specified'}</p>
-        <p><strong>Employment Type:</strong> {profileData.jobPrefs.employmentType?.join(', ') || 'Not specified'}</p>
+        <p>
+          <strong>Preferred Roles:</strong>{' '}
+          {profileData.jobPrefs.roles?.join(', ') || 'Not specified'}
+        </p>
+        <p>
+          <strong>Preferred Locations:</strong>{' '}
+          {profileData.jobPrefs.locations?.join(', ') || 'Not specified'}
+        </p>
+        <p>
+          <strong>Expected Salary:</strong> {profileData.jobPrefs.salary || 'Not specified'}
+        </p>
+        <p>
+          <strong>Employment Type:</strong>{' '}
+          {profileData.jobPrefs.employmentType?.join(', ') || 'Not specified'}
+        </p>
       </>
     ),
   };
@@ -133,18 +174,47 @@ function CompProfile() {
     <div className="Compprofile-container">
       <div className="profile-holder">
         <div className="profile-dets">
-          <h3 className="profile-title">{profileData.personal.fullName || 'Your Profile'}</h3>
-          <p className="profile-email">{profileData.personal.email || 'Email not provided'}</p>
+          <img
+            src={
+              profileData.personal.profilePicture
+                ? profileData.personal.profilePicture.startsWith('http')
+                  ? profileData.personal.profilePicture
+                  : `${BASE_URL}${profileData.personal.profilePicture}`
+                : 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y'
+            }
+            alt="Profile"
+            className="profile-pic"
+            onError={(e) =>
+              (e.target.src =
+                'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y')
+            }
+          />
+          <div className="profile-text">
+            <h3 className="profile-title">
+              {profileData.personal.fullName || 'Your Profile'}
+            </h3>
+            <p className="profile-email">
+              {profileData.personal.email || 'Email not provided'}
+            </p>
+          </div>
         </div>
         <div className="edit-profile">
-          <Link to="/edit-profile" className="profile-btn">Edit Profile</Link>
+          <Link to="/edit-profile" className="profile-btn">
+            Edit Profile
+          </Link>
           <button className="profile-btn btn-share">Share</button>
         </div>
       </div>
 
       <div className="section2">
         <div className="section-buttons" style={{ marginBottom: '20px' }}>
-          {['Personal Information', 'Job History', 'Education History', 'Professional Details', 'Job Preferences'].map((tab) => {
+          {[
+            'Personal Information',
+            'Job History',
+            'Education History',
+            'Professional Details',
+            'Job Preferences',
+          ].map((tab) => {
             const isActive = tab === sectionOrder[0];
             return (
               <button
@@ -204,7 +274,8 @@ function CompProfile() {
               <h3 className="title">Skills</h3>
               <hr />
               <div className="skills-list">
-                {profileData.professional.skills && profileData.professional.skills.length > 0 ? (
+                {profileData.professional.skills &&
+                profileData.professional.skills.length > 0 ? (
                   profileData.professional.skills.map((skill, index) => (
                     <div key={index} className="skillColor">
                       {skill}

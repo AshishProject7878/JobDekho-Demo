@@ -9,7 +9,7 @@ const PersonalSchema = new mongoose.Schema({
     email: {
         type: String,
         required: true,
-        unique: true, // Note: This may cause issues across profiles; consider removing if not intended
+        unique: true, // Note: Consider removing if not intended across all profiles
         trim: true
     },
     dob: {
@@ -21,6 +21,11 @@ const PersonalSchema = new mongoose.Schema({
         required: true,
         enum: ['male', 'female', 'other'],
         trim: true
+    },
+    profilePicture: {
+        type: String,
+        default: "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y", // Default avatar
+        trim: true
     }
 });
 
@@ -28,16 +33,13 @@ const JobHistorySchema = new mongoose.Schema({
     company: {
         type: String,
         trim: true
-        // Removed: required: function() { return !this.parent().isFresher; }
     },
     position: {
         type: String,
         trim: true
-        // Removed: required: function() { return !this.parent().isFresher; }
     },
     startDate: {
         type: Date
-        // Removed: required: function() { return !this.parent().isFresher; }
     },
     endDate: {
         type: Date,
@@ -51,7 +53,6 @@ const JobHistorySchema = new mongoose.Schema({
     description: {
         type: String,
         trim: true
-        // Removed: required: function() { return !this.parent().isFresher; }
     }
 });
 
@@ -148,7 +149,7 @@ const ProfileSchema = new mongoose.Schema({
         ref: 'User',
         required: true,
         unique: true // Ensure one profile per user
-    },
+    }
 }, {
     timestamps: true
 });
