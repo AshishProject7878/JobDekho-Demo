@@ -7,8 +7,9 @@ import { connectDB } from "./Libs/Db.js";
 import postRoutes from "./Routes/PostRoute.js";
 import profileRoutes from "./Routes/ProfileRoute.js";
 import uploadRoutes from "./Routes/UploadRoute.js";
-import resumeRoutes from "./Routes/ResumeRoute.js"; // Add this
+import resumeRoutes from "./Routes/ResumeRoute.js"; 
 import fileUpload from "express-fileupload";
+import companyRoutes from "./Routes/CompanyRoute.js"; 
 
 // Load environment variables
 dotenv.config();
@@ -39,7 +40,8 @@ app.use("/api/auth", authRoute);
 app.use("/api/posts", postRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/upload", uploadRoutes);
-app.use("/api/upload/resume", resumeRoutes); // Add this
+app.use("/api/upload/resume", resumeRoutes);
+app.use("/api/companies", companyRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

@@ -305,12 +305,12 @@ function CompProfile() {
           </div>
         </div>
         <div className="edit-profile">
-          <Link to="/edit-profile" className="profile-btn">
+          <Link to="/profileForm" className="profile-btn">
             Edit Profile
           </Link>
           <label className="profile-btn" style={{ position: 'relative' }}>
             {isUploadingResume
-              ? 'Uploading...'
+              ? 'Uploading...' 
               : profileData.personal.resume
               ? 'Change Resume'
               : 'Upload Resume'}

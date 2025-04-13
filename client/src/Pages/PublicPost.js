@@ -1,20 +1,22 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import "../styles/PublicPost.css";
 import { useNavigate } from "react-router-dom";
-import CompLogo from "../Assests/CompLogo.png"; 
+import "../styles/PublicPost.css";
+import CompLogo from "../Assests/CompLogo.png";
 
 function PublicPost() {
   const navigate = useNavigate();
   const [filteredPosts, setFilteredPosts] = useState([]);
+  const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
+  const [viewMode, setViewMode] = useState("Jobs");
   const [currentPage, setCurrentPage] = useState(1);
 
   const postsPerPage = 8;
   const categories = [
-    // --- Tech & IT ---
     "All",
     "Software Development",
     "Web Development",
@@ -37,8 +39,6 @@ function PublicPost() {
     "UI/UX Design",
     "Product Management",
     "Project Management",
-    
-    // --- Business, Sales & Marketing ---
     "Digital Marketing",
     "Social Media Management",
     "Content Marketing",
@@ -53,8 +53,6 @@ function PublicPost() {
     "E-commerce",
     "Brand Management",
     "Market Research",
-    
-    // --- Creative & Media ---
     "Graphic Design",
     "Visual Design",
     "Animation",
@@ -69,8 +67,6 @@ function PublicPost() {
     "Media & Broadcasting",
     "Public Relations",
     "Film Production",
-    
-    // --- Education & Research ---
     "Teaching",
     "Online Tutoring",
     "Curriculum Design",
@@ -78,8 +74,6 @@ function PublicPost() {
     "Academic Writing",
     "Educational Counseling",
     "Library Science",
-    
-    // --- Finance & Legal ---
     "Accounting",
     "Auditing",
     "Bookkeeping",
@@ -92,8 +86,6 @@ function PublicPost() {
     "Law Practice",
     "Paralegal",
     "Compliance",
-    
-    // --- HR & Admin ---
     "Human Resources",
     "Recruitment",
     "Training & Development",
@@ -101,8 +93,6 @@ function PublicPost() {
     "Office Administration",
     "Executive Assistant",
     "Data Entry",
-    
-    // --- Healthcare & Wellness ---
     "Healthcare",
     "Medical",
     "Nursing",
@@ -113,8 +103,6 @@ function PublicPost() {
     "Nutritionist",
     "Lab Technician",
     "Veterinary",
-    
-    // --- Engineering ---
     "Mechanical Engineering",
     "Electrical Engineering",
     "Civil Engineering",
@@ -123,16 +111,12 @@ function PublicPost() {
     "Industrial Engineering",
     "Biomedical Engineering",
     "Structural Engineering",
-    
-    // --- Architecture & Construction ---
     "Architecture",
     "Urban Planning",
     "Interior Design",
     "Construction Management",
     "Site Engineering",
     "Surveying",
-    
-    // --- Manufacturing, Logistics & Operations ---
     "Manufacturing",
     "Production Management",
     "Warehouse Operations",
@@ -142,8 +126,6 @@ function PublicPost() {
     "Logistics",
     "Transportation",
     "Quality Control",
-    
-    // --- Government & Nonprofit ---
     "Government",
     "Public Policy",
     "Civil Services",
@@ -151,15 +133,11 @@ function PublicPost() {
     "Nonprofit",
     "NGO",
     "Social Work",
-    
-    // --- Hospitality, Tourism & Events ---
     "Hospitality",
     "Hotel Management",
     "Travel & Tourism",
     "Event Management",
     "Food & Beverage",
-    
-    // --- Skilled Trades & Technical Jobs ---
     "Electrician",
     "Plumber",
     "Carpenter",
@@ -168,43 +146,75 @@ function PublicPost() {
     "HVAC Technician",
     "Machinist",
     "CNC Operator",
-    
-    // --- Other / Emerging ---
     "Remote Jobs",
     "Freelance",
     "Internships",
     "Entry-Level",
-    "Others"
+    "Others",
   ];
 
   useEffect(() => {
-    fetchPosts();
+    fetchData();
   }, []);
 
-  const fetchPosts = async (query = "", category = "") => {
+  const fetchData = async () => {
+    setLoading(true);
+    setError(null);
     try {
-      const url = `http://localhost:5000/api/posts${query || category ? "?" : ""}${
-        query ? `search=${query}` : ""
-      }${query && category ? "&" : ""}${category && category !== "All" ? `category=${category}` : ""}`;
-      const res = await axios.get(url, { withCredentials: true });
-      setFilteredPosts(res.data);
+      const postsUrl = `http://localhost:5000/api/posts${
+        searchQuery || categoryFilter ? "?" : ""
+      }${searchQuery ? `search=${searchQuery}` : ""}${
+        searchQuery && categoryFilter ? "&" : ""
+      }${categoryFilter && categoryFilter !== "All" ? `category=${categoryFilter}` : ""}`;
+      const postsRes = await axios.get(postsUrl, { withCredentials: true });
+      setFilteredPosts(postsRes.data || []);
+  
+      const companiesUrl = `http://localhost:5000/api/companies${
+        searchQuery ? `?search=${searchQuery}` : ""
+      }`;
+      const companiesRes = await axios.get(companiesUrl, { withCredentials: true });
+      setCompanies(companiesRes.data.companies || []);
+  
       setLoading(false);
     } catch (err) {
-      console.error("Error fetching public posts:", err);
+      console.error("Error fetching data:", err);
+      setError(err.response?.data?.message || "Failed to fetch data");
       setLoading(false);
     }
   };
 
   const handleSearch = () => {
-    fetchPosts(searchQuery, categoryFilter);
-    setCurrentPage(1);
+    if (viewMode === "Jobs") {
+      fetchData();
+    } else {
+      // Filter companies client-side
+      const filtered = companies.filter(
+        (company) =>
+          company.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          company.gstId.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setCompanies(filtered);
+      setCurrentPage(1);
+    }
   };
 
   const handleCategoryChange = (e) => {
     const selectedCategory = e.target.value;
     setCategoryFilter(selectedCategory);
-    fetchPosts(searchQuery, selectedCategory);
+    if (viewMode === "Jobs") {
+      fetchData();
+    }
     setCurrentPage(1);
+  };
+
+  const handleViewModeChange = (e) => {
+    setViewMode(e.target.value);
+    setSearchQuery("");
+    setCategoryFilter("");
+    setCurrentPage(1);
+    if (e.target.value === "Companies") {
+      fetchData();
+    }
   };
 
   const handleKeyPress = (e) => {
@@ -216,10 +226,14 @@ function PublicPost() {
   const truncate = (str, max = 45) =>
     str?.length > max ? str.substring(0, max) + "..." : str;
 
-  const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
-  const indexOfLastPost = currentPage * postsPerPage;
-  const indexOfFirstPost = indexOfLastPost - postsPerPage;
-  const currentPosts = filteredPosts.slice(indexOfFirstPost, indexOfLastPost);
+  const totalItems = viewMode === "Jobs" ? filteredPosts.length : companies.length;
+  const totalPages = Math.ceil(totalItems / postsPerPage);
+  const indexOfLastItem = currentPage * postsPerPage;
+  const indexOfFirstItem = indexOfLastItem - postsPerPage;
+  const currentItems =
+    viewMode === "Jobs"
+      ? filteredPosts.slice(indexOfFirstItem, indexOfLastItem)
+      : companies.slice(indexOfFirstItem, indexOfLastItem);
 
   const changePage = (pageNumber) => {
     setCurrentPage(pageNumber);
@@ -227,87 +241,162 @@ function PublicPost() {
   };
 
   if (loading) {
-    return <p className="public-info">Loading public job posts...</p>;
+    return <p className="public-info">Loading {viewMode.toLowerCase()}...</p>;
+  }
+
+  if (error) {
+    return <p className="public-info">{error}</p>;
   }
 
   return (
     <div className="public-container">
-      <h2 className="public-header">All Job Posts</h2>
+      <h2 className="public-header">
+        {viewMode === "Jobs" ? "All Job Posts" : "All Companies"}
+      </h2>
 
       <div className="search-filter-bar">
+        <div className="view-mode-dropdown">
+          <label htmlFor="view-mode">View:</label>
+          <select
+            id="view-mode"
+            value={viewMode}
+            onChange={handleViewModeChange}
+          >
+            <option value="Jobs">Jobs</option>
+            <option value="Companies">Companies</option>
+          </select>
+        </div>
         <div className="search-input">
           <input
             type="text"
-            placeholder="Search jobs by title, company, or location..."
+            placeholder={
+              viewMode === "Jobs"
+                ? "Search jobs by title, company, or location..."
+                : "Search companies by name or GST ID..."
+            }
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyPress={handleKeyPress}
           />
           <button onClick={handleSearch}>Search</button>
         </div>
-        <div className="filter-dropdown">
-          <label htmlFor="category-filter">Filter by Category:</label>
-          <select
-            id="category-filter"
-            value={categoryFilter}
-            onChange={handleCategoryChange}
-          >
-            {categories.map((cat) => (
-              <option key={cat} value={cat}>
-                {cat}
-              </option>
-            ))}
-          </select>
-        </div>
+        {viewMode === "Jobs" && (
+          <div className="filter-dropdown">
+            <label htmlFor="category-filter">Filter by Category:</label>
+            <select
+              id="category-filter"
+              value={categoryFilter}
+              onChange={handleCategoryChange}
+            >
+              {categories.map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
 
-      {currentPosts.length > 0 ? (
+      {currentItems.length > 0 ? (
         <>
           <div className="public-grid">
-            {currentPosts.map((post) => (
-              <div className="public-card" key={post._id}>
-                <div className="top-section">
-                  <span>{post.type || "Job"}</span>
-                </div>
-                <div className="mid-section">
-                  <div className="comp-img">
-                    <img src={CompLogo} alt={`${post.company} Logo`} />
-                    <div className="comp-dets">
-                      <h3 className="public-title">{post.title}</h3>
-                      <p className="comp-name">{post.company}</p>
-                      <div className="location1">
-                        <span>📍 {post.location}</span>
+            {viewMode === "Jobs" ? (
+              currentItems.map((post) => (
+                <div className="public-card" key={post._id}>
+                  <div className="top-section">
+                    <span>{post.type || "Job"}</span>
+                  </div>
+                  <div className="mid-section">
+                    <div className="comp-img">
+                      <img
+                        src={CompLogo}
+                        alt={`${post.company?.name || post.company} Logo`}
+                      />
+                      <div className="comp-dets">
+                        <h3 className="public-title">{post.title}</h3>
+                        <p className="comp-name">
+                          {post.company?.name || post.company}
+                        </p>
+                        <p className="comp-gst">
+                          GST ID: {post.company?.gstId || "N/A"}
+                        </p>
+                        <div className="location1">
+                          <span>📍 {post.location}</span>
+                        </div>
                       </div>
                     </div>
+                    <p className="public-description">
+                      {truncate(post.description)}
+                    </p>
+                    <div className="skills">
+                      {post.skills && post.skills.length > 0 ? (
+                        post.skills.slice(0, 3).map((skill, index) => (
+                          <span key={index} className="skill-tag">
+                            {skill}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="skill-tag">No skills listed</span>
+                      )}
+                    </div>
                   </div>
-                  <p className="public-description">{truncate(post.description)}</p>
-                  <div className="skills">
-                    {post.skills && post.skills.length > 0 ? (
-                      post.skills.slice(0, 3).map((skill, index) => (
-                        <span key={index} className="skill-tag">
-                          {skill}
-                        </span>
-                      ))
-                    ) : (
-                      <span className="skill-tag">No skills listed</span>
-                    )}
+                  <div className="bottom-section">
+                    <span className="salary">
+                      {post.salary && post.salary.min && post.salary.max
+                        ? `${post.salary.currency} ${post.salary.min} - ${post.salary.max}`
+                        : "Not Disclosed"}
+                    </span>
+                    <button
+                      className="view-btn"
+                      onClick={() => navigate(`/job/${post._id}`)}
+                    >
+                      View Job
+                    </button>
                   </div>
                 </div>
-                <div className="bottom-section">
-                  <span className="salary">
-                    {post.salary && post.salary.min && post.salary.max
-                      ? `${post.salary.currency} ${post.salary.min} - ${post.salary.max}`
-                      : "Not Disclosed"}
-                  </span>
-                  <button
-                    className="view-btn"
-                    onClick={() => navigate(`/job/${post._id}`)}
-                  >
-                    View Job
-                  </button>
+              ))
+            ) : (
+              currentItems.map((company) => (
+                <div className="public-card company-card" key={company._id}>
+                  <div className="top-section">
+                    <span>Company</span>
+                  </div>
+                  <div className="mid-section">
+                    <div className="comp-img">
+                      <img src={CompLogo} alt={`${company.name} Logo`} />
+                      <div className="comp-dets">
+                        <h3 className="public-title">{company.name}</h3>
+                        <p className="comp-gst">GST ID: {company.gstId}</p>
+                        <p className="comp-address">
+                          {company.address || "No address provided"}
+                        </p>
+                      </div>
+                    </div>
+                    <p className="public-description">
+                      {company.contactEmail || company.phoneNumber || company.website
+                        ? [
+                            company.contactEmail && `Email: ${company.contactEmail}`,
+                            company.phoneNumber && `Phone: ${company.phoneNumber}`,
+                            company.website && `Website: ${company.website}`,
+                          ]
+                            .filter(Boolean)
+                            .join(" | ")
+                        : "No contact details provided"}
+                    </p>
+                  </div>
+                  <div className="bottom-section">
+                    <span className="company-info">Registered Company</span>
+                    <button
+                      className="view-btn"
+                      onClick={() => navigate(`/companies/${company._id}`)}
+                    >
+                      View Details
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
 
           <div className="pagination">
@@ -323,7 +412,9 @@ function PublicPost() {
           </div>
         </>
       ) : (
-        <p className="public-info">No matching job posts found.</p>
+        <p className="public-info">
+          No {viewMode.toLowerCase()} found.
+        </p>
       )}
     </div>
   );

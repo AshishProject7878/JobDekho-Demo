@@ -180,7 +180,7 @@ export const updateProfile = async (req, res) => {
     }
 
     const profile = await Profile.findOneAndUpdate(
-      { user: userId },
+      { user: userId }, 
       {
         $set: {
           personal: {
