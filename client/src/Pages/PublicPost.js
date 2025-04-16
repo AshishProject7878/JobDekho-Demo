@@ -318,9 +318,9 @@ function PublicPost() {
                         <p className="comp-name">
                           {post.company?.name || post.company}
                         </p>
-                        <p className="comp-gst">
+                        {/* <p className="comp-gst">
                           GST ID: {post.company?.gstId || "N/A"}
-                        </p>
+                        </p> */}
                         <div className="location1">
                           <span>📍 {post.location}</span>
                         </div>

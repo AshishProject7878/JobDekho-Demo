@@ -1,9 +1,29 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
-import emailjs from "@emailjs/browser"; // Correct import
+import emailjs from "@emailjs/browser";
 import "../styles/JobDetail.css";
 import CompImg from "../Assests/CompLogo.png";
+
+class ErrorBoundary extends React.Component {
+  state = { hasError: false, error: null };
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="job-detail-container">
+          <h1>Something went wrong.</h1>
+          <p>{this.state.error?.message}</p>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 function JobDetail() {
   const { id } = useParams();
@@ -26,11 +46,11 @@ function JobDetail() {
 
   const BASE_URL = "http://localhost:5000";
   const PROFILE_API_URL = `${BASE_URL}/api/profile`;
-  const JOB_URL = `${window.location.origin}/job/${id}`; // Dynamic job URL
+  const JOB_URL = `${window.location.origin}/job/${id}`;
 
-  // Initialize EmailJS once
+  // Initialize EmailJS
   useEffect(() => {
-    emailjs.init("7E85Be-mzfn5NmnlF"); // Your Public Key
+    emailjs.init("7E85Be-mzfn5NmnlF");
   }, []);
 
   // Fetch job details and profile data
@@ -47,6 +67,7 @@ function JobDetail() {
           withCredentials: true,
         });
         console.log("Profile API Response:", profileResponse.data);
+        console.log("Personal Data:", profileResponse.data.personal);
         setProfileResume(profileResponse.data.personal?.resume || null);
         setApplicantEmail(profileResponse.data.personal?.email || null);
 
@@ -74,7 +95,7 @@ function JobDetail() {
   };
 
   const renderTimeline = (text) => {
-    if (!text) return <p>Not provided</p>;
+    if (!text || typeof text !== "string") return <p>Not provided</p>;
     const lines = text.split("\n").filter((line) => line.trim());
     return (
       <div className="timeline">
@@ -100,7 +121,7 @@ function JobDetail() {
   };
 
   const renderDescription = (text) => {
-    if (!text) return <p>Not provided</p>;
+    if (!text || typeof text !== "string") return <p>Not provided</p>;
     return (
       <p
         dangerouslySetInnerHTML={{
@@ -124,25 +145,23 @@ function JobDetail() {
         .map((lang) => lang.trim())
         .filter((lang) => lang)
         .join(", ");
-    } else {
-      return "Not specified";
+    } else if (typeof languages === "object" && languages !== null) {
+      return languages.name || "Not specified";
     }
+    return "Not specified";
   };
 
-  // Handle Apply button click
   const handleApplyClick = () => {
     setShowApplyModal(true);
     setEmailStatus(null);
   };
 
-  // Handle Share button click
   const handleShareClick = () => {
     setShowShareModal(true);
     setShareStatus(null);
     setShareEmail("");
   };
 
-  // Handle new resume upload
   const handleResumeChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -159,7 +178,6 @@ function JobDetail() {
     }
   };
 
-  // Send resume via EmailJS
   const sendResumeEmail = async () => {
     if (!job.contactEmail) {
       setEmailStatus("Error: No contact email available for this job.");
@@ -182,7 +200,7 @@ function JobDetail() {
       from_name: applicantEmail ? applicantEmail.split("@")[0] : "Job Applicant",
       reply_to: applicantEmail,
       job_title: job.title,
-      company: job.company,
+      company: typeof job.company === "string" ? job.company : job.company?.name || "Unknown Company",
       resume_url: typeof resumeToSend === "string" ? resumeToSend : URL.createObjectURL(resumeToSend),
     };
 
@@ -203,7 +221,6 @@ function JobDetail() {
     }
   };
 
-  // Send share email via EmailJS
   const sendShareEmail = async () => {
     if (!shareEmail) {
       setShareStatus("Error: Please enter an email address.");
@@ -220,17 +237,19 @@ function JobDetail() {
       from_name: applicantEmail ? applicantEmail.split("@")[0] : "Job Sharer",
       reply_to: applicantEmail,
       job_title: job.title,
-      company: job.company,
+      company: typeof job.company === "string" ? job.company : job.company?.name || "Unknown Company",
       job_url: JOB_URL,
-      message: `Check out this job posting: ${job.title} at ${job.company}. Apply here: ${JOB_URL}`,
+      message: `Check out this job posting: ${job.title} at ${
+        typeof job.company === "string" ? job.company : job.company?.name || "Unknown Company"
+      }. Apply here: ${JOB_URL}`,
     };
 
     console.log("Sending share email with params:", templateParams);
 
     try {
       const response = await emailjs.send(
-        "service_bqzf4o6", // Your Service ID
-        "template_bbsvz9h", // Reuse or create a new template in EmailJS
+        "service_bqzf4o6",
+        "template_bbsvz9h",
         templateParams
       );
       console.log("Share email sent successfully:", response);
@@ -242,12 +261,11 @@ function JobDetail() {
     }
   };
 
-  // Copy job URL to clipboard
   const copyJobLink = () => {
     navigator.clipboard.writeText(JOB_URL).then(
       () => {
         setShareStatus("Link copied to clipboard!");
-        setTimeout(() => setShowShareModal(false), 1500); // Close modal after 1.5s
+        setTimeout(() => setShowShareModal(false), 1500);
       },
       (err) => {
         console.error("Failed to copy link:", err);
@@ -282,240 +300,277 @@ function JobDetail() {
   };
 
   return (
-    <div className="job-detail-container">
-      <div className="jobDetail-holder">
-        <div className="jobDetail-dets">
-          <h3 className="JobTitle">{job.title}</h3>
-          <p className="CompName">{job.company}</p>
-          <div className="jobLocation">
-            <span><i className="fa-solid fa-location-dot"></i></span>
-            <p>{job.location}</p>
-          </div>
-        </div>
-        <div className="editJobDetail">
-          <button className="Jobbtn1" onClick={handleApplyClick}>
-            Apply
-          </button>
-          <button className="Jobbtn1 btn-cv" onClick={handleShareClick}>
-            Share
-          </button>
-        </div>
-      </div>
-
-      <div className="section2">
-        <div className="section-buttons" style={{ marginBottom: "20px" }}>
-          {["Description", "Key Responsibilities", "Role & Experience"].map((tab) => {
-            const isActive = tab === sectionOrder[0];
-            return (
-              <button
-                key={tab}
-                onClick={() => handleTabClick(tab)}
-                className={isActive ? "Jobbtn active-tab" : "Jobbtn inactive-tab"}
-              >
-                {tab}
-              </button>
-            );
-          })}
-        </div>
-
-        <hr style={{ marginBottom: "25px" }} />
-
-        <div className="about-me">
-          <div className="about-holder">
-            {sectionOrder.map((tab) => (
-              <div key={tab} className="section-block" style={{ marginBottom: "30px" }}>
-                {sections[tab]}
-              </div>
-            ))}
-          </div>
-
-          <div className="adv">
-            <div className="overview">
-              <h3 className="title">Overview</h3>
-              <hr />
-              <p className="short-dets">
-                <i className="fa-solid fa-briefcase"></i>
-                <span style={{ marginLeft: "20px" }}>Experience</span>
-              </p>
-              <p className="dets">{job.experience || "Not specified"}</p>
-
-              <p className="short-dets">
-                <i className="fa-solid fa-sack-dollar"></i>
-                <span style={{ marginLeft: "20px" }}>Salary</span>
-              </p>
-              <p className="dets">
-                {job.salary && (job.salary.min || job.salary.max)
-                  ? `${job.salary.min || "N/A"} - ${job.salary.max || "N/A"} ${job.salary.currency || "LPA"}`
-                  : "Not disclosed"}
-              </p>
-
-              <p className="short-dets">
-                <i className="fa-solid fa-graduation-cap"></i>
-                <span style={{ marginLeft: "20px" }}>Education Level</span>
-              </p>
-              <p className="dets grad">{job.educationLevel || "Not specified"}</p>
-
-              <p className="short-dets">
-                <i className="fa-solid fa-microphone"></i>
-                <span style={{ marginLeft: "20px" }}>Language</span>
-              </p>
-              <p className="dets lang">{formatLanguages(job.languages)}</p>
-
-              <p className="short-dets">
-                <i className="fa-solid fa-envelope"></i>
-                <span style={{ marginLeft: "20px" }}>Email</span>
-              </p>
-              <p className="dets lang">{job.contactEmail || "Not specified"}</p>
-
-              <button className="Jobbtn1 SM" style={{ marginTop: "20px" }}>
-                Send Message
-              </button>
-            </div>
-
-            <div className="overview">
-              <h3 className="title">Skills</h3>
-              <hr />
-              <div className="skills-list">
-                {job.skills && job.skills.length > 0 ? (
-                  job.skills.map((skill, index) => (
-                    <div key={index} className="skillColor">
-                      {skill}
-                    </div>
-                  ))
-                ) : (
-                  <p>No skills listed</p>
-                )}
-              </div>
+    <ErrorBoundary>
+      <div className="job-detail-container">
+        <div className="jobDetail-holder">
+          <div className="jobDetail-dets">
+            <h3 className="JobTitle">{job.title}</h3>
+            <p className="CompName">
+              {typeof job.company === "string" ? job.company : job.company?.name || "Unknown Company"}
+            </p>
+            <div className="jobLocation">
+              <span>
+                <i className="fa-solid fa-location-dot"></i>
+              </span>
+              <p>{typeof job.location === "string" ? job.location : "Not specified"}</p>
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* Apply Modal */}
-      {showApplyModal && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <h2>Apply for {job.title}</h2>
-            <p>Please select a resume to send to {job.contactEmail || "the job poster"}:</p>
-
-            <div className="resume-option">
-              <label>
-                <input
-                  type="radio"
-                  name="resume"
-                  checked={!newResume && profileResume}
-                  onChange={() => setNewResume(null)}
-                  disabled={!profileResume}
-                />
-                Use Profile Resume
-                {profileResume ? (
-                  <a href={profileResume} target="_blank" rel="noopener noreferrer">
-                    (View)
-                  </a>
-                ) : (
-                  <span> (Not available)</span>
-                )}
-              </label>
-            </div>
-
-            <div className="resume-option">
-              <label>
-                <input
-                  type="radio"
-                  name="resume"
-                  checked={!!newResume}
-                  onChange={() => setNewResume(null)}
-                />
-                Upload New Resume
-              </label>
-              <input
-                type="file"
-                accept="application/pdf"
-                onChange={handleResumeChange}
-                className="resume-upload"
-              />
-            </div>
-
-            {emailStatus && (
-              <p className={emailStatus.includes("Error") ? "error-text" : "success-text"}>
-                {emailStatus}
-              </p>
-            )}
-
-            <div className="modal-buttons">
-              <button className="Jobbtn1" onClick={sendResumeEmail}>
-                Send Resume
-              </button>
-              <button className="Jobbtn1 btn-cancel" onClick={() => setShowApplyModal(false)}>
-                Cancel
-              </button>
-            </div>
+          <div className="editJobDetail">
+            <button className="Jobbtn1" onClick={handleApplyClick}>
+              Apply
+            </button>
+            <button className="Jobbtn1 btn-cv" onClick={handleShareClick}>
+              Share
+            </button>
           </div>
         </div>
-      )}
 
-      {/* Share Modal */}
-      {showShareModal && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <h2>Share {job.title}</h2> {/* Fixed typo */}
-            <p>Share this job with others:</p>
-
-            <div className="share-option">
-              <h3>Via Email</h3>
-              <input
-                type="email"
-                value={shareEmail}
-                onChange={(e) => setShareEmail(e.target.value)}
-                placeholder="Enter recipient's email"
-                className="share-email-input"
-              />
-              <button className="Jobbtn1" onClick={sendShareEmail} style={{ marginTop: "10px" }}>
-                Send Email
-              </button>
-            </div>
-
-            <div className="share-option">
-              <h3>Copy Link</h3>
-              <p>{JOB_URL}</p>
-              <button className="Jobbtn1" onClick={copyJobLink}>
-                Copy to Clipboard
-              </button>
-            </div>
-
-            <div className="share-option">
-              <h3>Social Media</h3>
-              <div className="social-buttons">
+        <div className="section2">
+          <div className="section-buttons" style={{ marginBottom: "20px" }}>
+            {["Description", "Key Responsibilities", "Role & Experience"].map((tab) => {
+              const isActive = tab === sectionOrder[0];
+              return (
                 <button
-                  className="Jobbtn1 social-btn"
-                  onClick={() => window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(JOB_URL)}&text=${encodeURIComponent(`Check out this job: ${job.title} at ${job.company}`)}`, "_blank")}
+                  key={tab}
+                  onClick={() => handleTabClick(tab)}
+                  className={isActive ? "Jobbtn active-tab" : "Jobbtn inactive-tab"}
                 >
-                  Twitter
+                  {tab}
                 </button>
-                <button
-                  className="Jobbtn1 social-btn"
-                  onClick={() => window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(JOB_URL)}`, "_blank")}
-                >
-                  LinkedIn
+              );
+            })}
+          </div>
+
+          <hr style={{ marginBottom: "25px" }} />
+
+          <div className="about-me">
+            <div className="about-holder">
+              {sectionOrder.map((tab) => (
+                <div key={tab} className="section-block" style={{ marginBottom: "30px" }}>
+                  {sections[tab]}
+                </div>
+              ))}
+            </div>
+
+            <div className="adv">
+              <div className="overview">
+                <h3 className="title">Overview</h3>
+                <hr />
+                <p className="short-dets">
+                  <i className="fa-solid fa-briefcase"></i>
+                  <span style={{ marginLeft: "20px" }}>Experience</span>
+                </p>
+                <p className="dets">
+                  {typeof job.experience === "string" ? job.experience : "Not specified"}
+                </p>
+
+                <p className="short-dets">
+                  <i className="fa-solid fa-sack-dollar"></i>
+                  <span style={{ marginLeft: "20px" }}>Salary</span>
+                </p>
+                <p className="dets">
+                  {job.salary && (job.salary.min || job.salary.max)
+                    ? `${job.salary.min || "N/A"} - ${job.salary.max || "N/A"} ${
+                        job.salary.currency || "LPA"
+                      }`
+                    : "Not disclosed"}
+                </p>
+
+                <p className="short-dets">
+                  <i className="fa-solid fa-graduation-cap"></i>
+                  <span style={{ marginLeft: "20px" }}>Education Level</span>
+                </p>
+                <p className="dets grad">
+                  {typeof job.educationLevel === "string" ? job.educationLevel : "Not specified"}
+                </p>
+
+                <p className="short-dets">
+                  <i className="fa-solid fa-microphone"></i>
+                  <span style={{ marginLeft: "20px" }}>Language</span>
+                </p>
+                <p className="dets lang">{formatLanguages(job.languages)}</p>
+
+                <p className="short-dets">
+                  <i className="fa-solid fa-envelope"></i>
+                  <span style={{ marginLeft: "20px" }}>Email</span>
+                </p>
+                <p className="dets lang">
+                  {typeof job.contactEmail === "string" ? job.contactEmail : "Not specified"}
+                </p>
+
+                <button className="Jobbtn1 SM" style={{ marginTop: "20px" }}>
+                  Send Message
+                </button>
+              </div>
+
+              <div className="overview">
+                <h3 className="title">Skills</h3>
+                <hr />
+                <div className="skills-list">
+                  {job.skills && Array.isArray(job.skills) ? (
+                    job.skills.map((skill, index) => (
+                      <div key={index} className="skillColor">
+                        {skill}
+                      </div>
+                    ))
+                  ) : (
+                    <p>No skills listed</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Apply Modal */}
+        {showApplyModal && (
+          <div className="modal-overlay">
+            <div className="modal-content">
+              <h2>Apply for {job.title}</h2>
+              <p>
+                Please select a resume to send to{" "}
+                {typeof job.contactEmail === "string" ? job.contactEmail : "the job poster"}:
+              </p>
+
+              <div className="resume-option">
+                <label>
+                  <input
+                    type="radio"
+                    name="resume"
+                    checked={!newResume && profileResume}
+                    onChange={() => setNewResume(null)}
+                    disabled={!profileResume}
+                  />
+                  Use Profile Resume
+                  {profileResume ? (
+                    <a href={profileResume} target="_blank" rel="noopener noreferrer">
+                      (View)
+                    </a>
+                  ) : (
+                    <span> (Not available)</span>
+                  )}
+                </label>
+              </div>
+
+              <div className="resume-option">
+                <label>
+                  <input
+                    type="radio"
+                    name="resume"
+                    checked={!!newResume}
+                    onChange={() => setNewResume(null)}
+                  />
+                  Upload New Resume
+                </label>
+                <input
+                  type="file"
+                  accept="application/pdf"
+                  onChange={handleResumeChange}
+                  className="resume-upload"
+                />
+              </div>
+
+              {emailStatus && (
+                <p className={emailStatus.includes("Error") ? "error-text" : "success-text"}>
+                  {emailStatus}
+                </p>
+              )}
+
+              <div className="modal-buttons">
+                <button className="Jobbtn1" onClick={sendResumeEmail}>
+                  Send Resume
+                </button>
+                <button className="Jobbtn1 btn-cancel" onClick={() => setShowApplyModal(false)}>
+                  Cancel
                 </button>
               </div>
             </div>
+          </div>
+        )}
 
-            {shareStatus && (
-              <p className={shareStatus.includes("Error") ? "error-text" : "success-text"}>
-                {shareStatus}
-              </p>
-            )}
+        {/* Share Modal */}
+        {showShareModal && (
+          <div className="modal-overlay">
+            <div className="modal-content">
+              <h2>Share {job.title}</h2>
+              <p>Share this job with others:</p>
 
-            <div className="modal-buttons">
-              <button className="Jobbtn1 btn-cancel" onClick={() => setShowShareModal(false)}>
-                Close
-              </button>
+              <div className="share-option">
+                <h3>Via Email</h3>
+                <input
+                  type="email"
+                  value={shareEmail}
+                  onChange={(e) => setShareEmail(e.target.value)}
+                  placeholder="Enter recipient's email"
+                  className="share-email-input"
+                />
+                <button className="Jobbtn1" onClick={sendShareEmail} style={{ marginTop: "10px" }}>
+                  Send Email
+                </button>
+              </div>
+
+              <div className="share-option">
+                <h3>Copy Link</h3>
+                <p>{JOB_URL}</p>
+                <button className="Jobbtn1" onClick={copyJobLink}>
+                  Copy to Clipboard
+                </button>
+              </div>
+
+              <div className="share-option">
+                <h3>Social Media</h3>
+                <div className="social-buttons">
+                  <button
+                    className="Jobbtn1 social-btn"
+                    onClick={() =>
+                      window.open(
+                        `https://twitter.com/intent/tweet?url=${encodeURIComponent(
+                          JOB_URL
+                        )}&text=${encodeURIComponent(
+                          `Check out this job: ${job.title} at ${
+                            typeof job.company === "string"
+                              ? job.company
+                              : job.company?.name || "Unknown Company"
+                          }`
+                        )}`,
+                        "_blank"
+                      )
+                    }
+                  >
+                    Twitter
+                  </button>
+                  <button
+                    className="Jobbtn1 social-btn"
+                    onClick={() =>
+                      window.open(
+                        `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
+                          JOB_URL
+                        )}`,
+                        "_blank"
+                      )
+                    }
+                  >
+                    LinkedIn
+                  </button>
+                </div>
+              </div>
+
+              {shareStatus && (
+                <p className={shareStatus.includes("Error") ? "error-text" : "success-text"}>
+                  {shareStatus}
+                </p>
+              )}
+
+              <div className="modal-buttons">
+                <button className="Jobbtn1 btn-cancel" onClick={() => setShowShareModal(false)}>
+                  Close
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </ErrorBoundary>
   );
 }
 

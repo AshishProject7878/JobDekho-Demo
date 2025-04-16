@@ -1,4 +1,4 @@
-import Profile from '../models/ProfileModel.js';
+import Profile from '../Models/ProfileModel.js';
 import { v2 as cloudinary } from "cloudinary";
 
 // Configure Cloudinary

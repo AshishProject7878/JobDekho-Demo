@@ -18,6 +18,8 @@
     "dotenv": "^16.4.7",
     "express": "^5.1.0",
     "express-fileupload": "^1.5.1",
+    "ffprobe": "^1.1.2",
+    "get-video-duration": "^4.1.0",
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.15.0",
     "mongoose": "^8.13.2",
