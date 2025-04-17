@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { useNavigate, useLocation } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { useNavigate, useLocation } from "react-router-dom";
 import "../styles/ProfileForm.css";
 
 function ProfileForm() {
@@ -9,108 +9,134 @@ function ProfileForm() {
 
   const [step, setStep] = useState(0);
   const [formData, setFormData] = useState({
-    personal: { 
-      fullName: location.state?.name || '', 
-      email: location.state?.email || '', 
-      dob: '', 
-      gender: '', 
-      profilePicture: '' // Will store Cloudinary URL
+    personal: {
+      fullName: "", // Initialize empty, will be set from localStorage
+      email: "", // Initialize empty, will be set from localStorage
+      dob: "",
+      gender: "",
+      profilePicture: "", // Will store Cloudinary URL
     },
     isFresher: false,
-    jobHistory: [{ company: '', position: '', startDate: '', endDate: '', description: '' }],
-    educationHistory: [{ degree: '', institution: '', field: '', graduationYear: '' }],
-    professional: { jobTitle: '', company: '', experience: '', skills: [] },
-    jobPrefs: { roles: [], locations: [], salary: '', employmentType: [] }
+    jobHistory: [{ company: "", position: "", startDate: "", endDate: "", description: "" }],
+    educationHistory: [{ degree: "", institution: "", field: "", graduationYear: "" }],
+    professional: { jobTitle: "", company: "", experience: "", skills: [] },
+    jobPrefs: { roles: [], locations: [], salary: "", employmentType: [] },
   });
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
-  const [skillInput, setSkillInput] = useState('');
-  const [roleInput, setRoleInput] = useState('');
-  const [locationInput, setLocationInput] = useState('');
+  const [skillInput, setSkillInput] = useState("");
+  const [roleInput, setRoleInput] = useState("");
+  const [locationInput, setLocationInput] = useState("");
 
-  const API_URL = 'http://localhost:5000/api/profile';
+  const API_URL = "http://localhost:5000/api/profile";
   const UPLOAD_URL = "http://localhost:5000/api/upload";
 
+  // Fetch user data from localStorage and profile data from API
   useEffect(() => {
+    // Check for user data in localStorage
+    const userData = JSON.parse(localStorage.getItem("user"));
+    if (!userData) {
+      navigate("/login");
+      return;
+    }
+
+    // Set name and email from localStorage or location.state as fallback
+    setFormData((prev) => ({
+      ...prev,
+      personal: {
+        ...prev.personal,
+        fullName: userData.name || location.state?.name || "",
+        email: userData.email || location.state?.email || "",
+      },
+    }));
+
+    // Fetch profile data
     const fetchProfile = async () => {
       setIsLoading(true);
       try {
         const response = await axios.get(API_URL, { withCredentials: true });
-        setFormData(prev => ({
+        setFormData((prev) => ({
           ...prev,
           ...response.data,
-          personal: { 
-            ...prev.personal, 
-            ...response.data.personal,
-            profilePicture: response.data.personal.profilePicture || ''
+          personal: {
+            fullName: userData.name || location.state?.name || "", // Enforce from User
+            email: userData.email || location.state?.email || "", // Enforce from User
+            profilePicture: response.data.personal?.profilePicture || "",
+            dob: response.data.personal?.dob || "",
+            gender: response.data.personal?.gender || "",
           },
           jobHistory: response.data.jobHistory || prev.jobHistory,
           educationHistory: response.data.educationHistory || prev.educationHistory,
           professional: { ...prev.professional, ...response.data.professional },
-          jobPrefs: { ...prev.jobPrefs, ...response.data.jobPrefs }
+          jobPrefs: { ...prev.jobPrefs, ...response.data.jobPrefs },
         }));
       } catch (error) {
         if (error.response?.status === 404) {
-          setFormData({
-            personal: { 
-              fullName: location.state?.name || '', 
-              email: location.state?.email || '', 
-              dob: '', 
-              gender: '', 
-              profilePicture: ''
+          setFormData((prev) => ({
+            ...prev,
+            personal: {
+              fullName: userData.name || location.state?.name || "",
+              email: userData.email || location.state?.email || "",
+              dob: "",
+              gender: "",
+              profilePicture: "",
             },
             isFresher: false,
-            jobHistory: [{ company: '', position: '', startDate: '', endDate: '', description: '' }],
-            educationHistory: [{ degree: '', institution: '', field: '', graduationYear: '' }],
-            professional: { jobTitle: '', company: '', experience: '', skills: [] },
-            jobPrefs: { roles: [], locations: [], salary: '', employmentType: [] }
-          });
-          console.log('No profile found, starting with empty form.');
+            jobHistory: [{ company: "", position: "", startDate: "", endDate: "", description: "" }],
+            educationHistory: [{ degree: "", institution: "", field: "", graduationYear: "" }],
+            professional: { jobTitle: "", company: "", experience: "", skills: [] },
+            jobPrefs: { roles: [], locations: [], salary: "", employmentType: [] },
+          }));
+          console.log("No profile found, starting with empty form.");
         } else {
-          console.error('Failed to fetch profile:', error);
-          setErrorMessage(error.response?.data?.message || 'Failed to load profile');
+          console.error("Failed to fetch profile:", error);
+          setErrorMessage(error.response?.data?.message || "Failed to load profile");
         }
       } finally {
         setIsLoading(false);
       }
     };
     fetchProfile();
-  }, [location.state, API_URL]); // Added API_URL to fix ESLint warning
+  }, [navigate, location.state]);
 
   const validateField = (section, field, value, index = null) => {
     const newErrors = { ...errors };
     const fieldKey = index !== null ? `${field}${index}` : field;
 
     if (touched[fieldKey] || isSubmitting) {
-      if ((field !== 'experience' && field !== 'profilePicture' && section !== 'jobHistory' && !value) || 
-          (field === 'skills' && value.length === 0) || 
-          (field === 'roles' && value.length === 0) || 
-          (field === 'locations' && value.length === 0)) {
-        newErrors[fieldKey] = 'This field is required';
-      } else if (section === 'jobHistory' && !formData.isFresher && !value) {
-        newErrors[fieldKey] = 'This field is required';
+      if (
+        (field !== "experience" &&
+          field !== "profilePicture" &&
+          field !== "email" && // Skip email validation since it's read-only
+          field !== "fullName" && // Skip fullName validation since it's read-only
+          section !== "jobHistory" &&
+          !value) ||
+        (field === "skills" && value.length === 0) ||
+        (field === "roles" && value.length === 0) ||
+        (field === "locations" && value.length === 0)
+      ) {
+        newErrors[fieldKey] = "This field is required";
+      } else if (section === "jobHistory" && !formData.isFresher && !value) {
+        newErrors[fieldKey] = "This field is required";
       } else {
         delete newErrors[fieldKey];
-        
-        if (field === 'email' && value && !/\S+@\S+\.\S+/.test(value)) {
-          newErrors[fieldKey] = 'Invalid email format';
+
+        if (field === "experience" && value && (isNaN(value) || value < 0)) {
+          newErrors[fieldKey] = "Experience must be a positive number";
         }
-        if (field === 'experience' && value && (isNaN(value) || value < 0)) {
-          newErrors[fieldKey] = 'Experience must be a positive number';
-        }
-        if (field === 'graduationYear' && value) {
+        if (field === "graduationYear" && value) {
           const year = parseInt(value);
           if (year < 1900 || year > new Date().getFullYear()) {
             newErrors[fieldKey] = `Year must be between 1900 and ${new Date().getFullYear()}`;
           }
         }
-        if (section === 'jobHistory' && index !== null && !formData.isFresher) {
+        if (section === "jobHistory" && index !== null && !formData.isFresher) {
           const job = formData.jobHistory[index];
-          if (field === 'endDate' && job.startDate && value && new Date(job.startDate) > new Date(value)) {
-            newErrors[fieldKey] = 'End date must be after start date';
+          if (field === "endDate" && job.startDate && value && new Date(job.startDate) > new Date(value)) {
+            newErrors[fieldKey] = "End date must be after start date";
           }
         }
       }
@@ -125,26 +151,26 @@ function ProfileForm() {
     const newErrors = {};
     let isValid = true;
 
-    if (section === 'isFresher') return true;
+    if (section === "isFresher") return true;
 
-    if (Array.isArray(currentData) && section === 'jobHistory' && !formData.isFresher) {
+    if (Array.isArray(currentData) && section === "jobHistory" && !formData.isFresher) {
       currentData.forEach((item, index) => {
         Object.entries(item).forEach(([key, value]) => {
           if (!validateField(section, key, value, index)) {
-            newErrors[`${key}${index}`] = 'This field is required';
+            newErrors[`${key}${index}`] = "This field is required";
             isValid = false;
           }
         });
       });
     } else if (!Array.isArray(currentData)) {
       Object.entries(currentData).forEach(([key, value]) => {
-        if (key !== 'profilePicture' && !validateField(section, key, value)) {
-          newErrors[key] = 'This field is required';
+        if (key !== "profilePicture" && key !== "email" && key !== "fullName" && !validateField(section, key, value)) {
+          newErrors[key] = "This field is required";
           isValid = false;
         }
       });
     }
-    setErrors(prev => ({ ...prev, ...newErrors }));
+    setErrors((prev) => ({ ...prev, ...newErrors }));
     return isValid;
   };
 
@@ -152,52 +178,52 @@ function ProfileForm() {
     const file = e.target.files[0];
     if (!file) return;
 
-    const validTypes = ['image/jpeg', 'image/png'];
+    const validTypes = ["image/jpeg", "image/png"];
     if (!validTypes.includes(file.type)) {
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
-        profilePicture: 'Only JPG or PNG files are allowed'
+        profilePicture: "Only JPG or PNG files are allowed",
       }));
       return;
     }
 
     const maxSize = 5 * 1024 * 1024; // 5MB
     if (file.size > maxSize) {
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
-        profilePicture: 'File size must be less than 5MB'
+        profilePicture: "File size must be less than 5MB",
       }));
       return;
     }
 
-    setErrors(prev => ({ ...prev, profilePicture: '' }));
+    setErrors((prev) => ({ ...prev, profilePicture: "" }));
 
     const formDataUpload = new FormData();
-    formDataUpload.append('profilePicture', file);
+    formDataUpload.append("profilePicture", file);
 
     try {
       const response = await axios.post(UPLOAD_URL, formDataUpload, {
         withCredentials: true,
-        headers: { 'Content-Type': 'multipart/form-data' }
+        headers: { "Content-Type": "multipart/form-data" },
       });
       const imageUrl = response.data.url; // Cloudinary full URL
-      console.log('Uploaded Image URL:', imageUrl); // Debug
-      setFormData(prev => ({
+      console.log("Uploaded Image URL:", imageUrl); // Debug
+      setFormData((prev) => ({
         ...prev,
-        personal: { ...prev.personal, profilePicture: imageUrl }
+        personal: { ...prev.personal, profilePicture: imageUrl },
       }));
     } catch (error) {
-      console.error('Image upload failed:', error);
-      setErrors(prev => ({
+      console.error("Image upload failed:", error);
+      setErrors((prev) => ({
         ...prev,
-        profilePicture: error.response?.data?.message || 'Failed to upload image'
+        profilePicture: error.response?.data?.message || "Failed to upload image",
       }));
     }
   };
 
   const handleChange = (section, field, value, index = null) => {
-    setFormData(prev => {
-      if (section === 'isFresher') {
+    setFormData((prev) => {
+      if (section === "isFresher") {
         return { ...prev, isFresher: value };
       }
       if (index !== null) {
@@ -209,16 +235,16 @@ function ProfileForm() {
         ...prev,
         [section]: {
           ...prev[section],
-          [field]: value
-        }
+          [field]: value,
+        },
       };
     });
 
     const fieldKey = index !== null ? `${field}${index}` : field;
-    if (section !== 'isFresher') {
-      setTouched(prev => ({
+    if (section !== "isFresher" && field !== "email" && field !== "fullName") {
+      setTouched((prev) => ({
         ...prev,
-        [fieldKey]: true
+        [fieldKey]: true,
       }));
       validateField(section, field, value, index);
     }
@@ -226,101 +252,106 @@ function ProfileForm() {
 
   const handleBlur = (section, field, value, index = null) => {
     const fieldKey = index !== null ? `${field}${index}` : field;
-    setTouched(prev => ({
-      ...prev,
-      [fieldKey]: true
-    }));
-    validateField(section, field, value, index);
+    if (field !== "email" && field !== "fullName") {
+      setTouched((prev) => ({
+        ...prev,
+        [fieldKey]: true,
+      }));
+      validateField(section, field, value, index);
+    }
   };
 
   const addSkill = (e) => {
-    if (e.key === 'Enter' && skillInput.trim()) {
+    if (e.key === "Enter" && skillInput.trim()) {
       const newSkills = [...formData.professional.skills, skillInput.trim()];
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        professional: { ...prev.professional, skills: newSkills }
+        professional: { ...prev.professional, skills: newSkills },
       }));
-      setSkillInput('');
-      validateField('professional', 'skills', newSkills);
+      setSkillInput("");
+      validateField("professional", "skills", newSkills);
     }
   };
 
   const removeSkill = (skillToRemove) => {
-    const newSkills = formData.professional.skills.filter(skill => skill !== skillToRemove);
-    setFormData(prev => ({
+    const newSkills = formData.professional.skills.filter((skill) => skill !== skillToRemove);
+    setFormData((prev) => ({
       ...prev,
-      professional: { ...prev.professional, skills: newSkills }
+      professional: { ...prev.professional, skills: newSkills },
     }));
-    validateField('professional', 'skills', newSkills);
+    validateField("professional", "skills", newSkills);
   };
 
   const addRole = (e) => {
-    if (e.key === 'Enter' && roleInput.trim()) {
+    if (e.key === "Enter" && roleInput.trim()) {
       const newRoles = [...formData.jobPrefs.roles, roleInput.trim()];
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        jobPrefs: { ...prev.jobPrefs, roles: newRoles }
+        jobPrefs: { ...prev.jobPrefs, roles: newRoles },
       }));
-      setRoleInput('');
-      validateField('jobPrefs', 'roles', newRoles);
+      setRoleInput("");
+      validateField("jobPrefs", "roles", newRoles);
     }
   };
 
   const removeRole = (roleToRemove) => {
-    const newRoles = formData.jobPrefs.roles.filter(role => role !== roleToRemove);
-    setFormData(prev => ({
+    const newRoles = formData.jobPrefs.roles.filter((role) => role !== roleToRemove);
+    setFormData((prev) => ({
       ...prev,
-      jobPrefs: { ...prev.jobPrefs, roles: newRoles }
+      jobPrefs: { ...prev.jobPrefs, roles: newRoles },
     }));
-    validateField('jobPrefs', 'roles', newRoles);
+    validateField("jobPrefs", "roles", newRoles);
   };
 
   const addLocation = (e) => {
-    if (e.key === 'Enter' && locationInput.trim()) {
+    if (e.key === "Enter" && locationInput.trim()) {
       const newLocations = [...formData.jobPrefs.locations, locationInput.trim()];
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        jobPrefs: { ...prev.jobPrefs, locations: newLocations }
+        jobPrefs: { ...prev.jobPrefs, locations: newLocations },
       }));
-      setLocationInput('');
-      validateField('jobPrefs', 'locations', newLocations);
+      setLocationInput(""); // Reset input field
+      validateField("jobPrefs", "locations", newLocations);
     }
   };
 
   const removeLocation = (locationToRemove) => {
-    const newLocations = formData.jobPrefs.locations.filter(location => location !== locationToRemove);
-    setFormData(prev => ({
+    const newLocations = formData.jobPrefs.locations.filter((location) => location !== locationToRemove);
+    setFormData((prev) => ({
       ...prev,
-      jobPrefs: { ...prev.jobPrefs, locations: newLocations }
+      jobPrefs: { ...prev.jobPrefs, locations: newLocations },
     }));
-    validateField('jobPrefs', 'locations', newLocations);
+    validateField("jobPrefs", "locations", newLocations);
   };
 
   const addEntry = (section) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [section]: [...prev[section], section === 'jobHistory'
-        ? { company: '', position: '', startDate: '', endDate: '', description: '' }
-        : { degree: '', institution: '', field: '', graduationYear: '' }]
+      [section]: [
+        ...prev[section],
+        section === "jobHistory"
+          ? { company: "", position: "", startDate: "", endDate: "", description: "" }
+          : { degree: "", institution: "", field: "", graduationYear: "" },
+      ],
     }));
   };
 
   const removeEntry = (section, index) => {
-    if (window.confirm('Are you sure you want to remove this entry?')) {
-      setFormData(prev => ({
+    if (window.confirm("Are you sure you want to remove this entry?")) {
+      setFormData((prev) => ({
         ...prev,
-        [section]: prev[section].filter((_, i) => i !== index)
+        [section]: prev[section].filter((_, i) => i !== index),
       }));
-      setErrors(prev => {
+      setErrors((prev) => {
         const newErrors = { ...prev };
-        Object.keys(prev).forEach(key => {
+        Object.keys(prev).forEach((key) => {
           if (key.endsWith(index)) delete newErrors[key];
         });
         return newErrors;
       });
-      setTouched(prev => {
+      setTouched((prev) => {
         const newTouched = { ...prev };
-        Object.keys(prev).forEach(key => {
+        Object.keys(prev).forEach((key) => {
           if (key.endsWith(index)) delete newTouched[key];
         });
         return newTouched;
@@ -336,16 +367,18 @@ function ProfileForm() {
       const section = Object.keys(formData)[step];
       const currentData = formData[section];
       const newTouched = { ...touched };
-      
-      if (Array.isArray(currentData) && section !== 'isFresher') {
+
+      if (Array.isArray(currentData) && section !== "isFresher") {
         currentData.forEach((_, index) => {
-          Object.keys(currentData[0]).forEach(key => {
+          Object.keys(currentData[0]).forEach((key) => {
             newTouched[`${key}${index}`] = true;
           });
         });
-      } else if (section !== 'isFresher') {
-        Object.keys(currentData).forEach(key => {
-          newTouched[key] = true;
+      } else if (section !== "isFresher") {
+        Object.keys(currentData).forEach((key) => {
+          if (key !== "email" && key !== "fullName") {
+            newTouched[key] = true;
+          }
         });
       }
       setTouched(newTouched);
@@ -368,24 +401,24 @@ function ProfileForm() {
       try {
         const response = await axios.put(API_URL, formData, {
           withCredentials: true,
-          headers: { 'Content-Type': 'application/json' }
+          headers: { "Content-Type": "application/json" },
         });
-        console.log('Profile updated:', response.data);
-        alert(response.data.message || 'Profile successfully updated!');
-        navigate('/profileComp');
+        console.log("Profile updated:", response.data);
+        alert(response.data.message || "Profile successfully updated!");
+        navigate("/profileComp");
       } catch (error) {
-        console.error('Profile update failed:', error);
-        setErrorMessage(error.response?.data?.message || 'Profile update failed');
+        console.error("Profile update failed:", error);
+        setErrorMessage(error.response?.data?.message || "Profile update failed");
       } finally {
         setIsSubmitting(false);
       }
     } else {
       setStep(5);
-    } 
+    }
   };
 
   const renderStep = () => {
-    switch(step) {
+    switch (step) {
       case 0: // Personal Info
         return (
           <div className="form-section">
@@ -396,10 +429,8 @@ function ProfileForm() {
                 <input
                   type="text"
                   value={formData.personal.fullName}
-                  onChange={(e) => handleChange('personal', 'fullName', e.target.value)}
-                  onBlur={(e) => handleBlur('personal', 'fullName', e.target.value)}
-                  placeholder="Enter your full name"
-                  className={errors.fullName ? 'error' : ''}
+                  readOnly // Make fullName read-only
+                  className={errors.fullName ? "error" : ""}
                 />
                 {errors.fullName && <span className="error-message">{errors.fullName}</span>}
               </div>
@@ -408,10 +439,8 @@ function ProfileForm() {
                 <input
                   type="email"
                   value={formData.personal.email}
-                  onChange={(e) => handleChange('personal', 'email', e.target.value)}
-                  onBlur={(e) => handleBlur('personal', 'email', e.target.value)}
-                  placeholder="Enter your email"
-                  className={errors.email ? 'error' : ''}
+                  readOnly // Make email read-only
+                  className={errors.email ? "error" : ""}
                 />
                 {errors.email && <span className="error-message">{errors.email}</span>}
               </div>
@@ -421,23 +450,24 @@ function ProfileForm() {
                   type="file"
                   accept="image/jpeg,image/png"
                   onChange={handleFileChange}
-                  className={errors.profilePicture ? 'error' : ''}
+                  className={errors.profilePicture ? "error" : ""}
                 />
                 {formData.personal.profilePicture ? (
-                  <img 
-                    src={formData.personal.profilePicture} 
-                    alt="Profile Preview" 
-                    className="profile-preview" 
+                  <img
+                    src={formData.personal.profilePicture}
+                    alt="Profile Preview"
+                    className="profile-preview"
                     onError={(e) => {
-                      console.log('Preview failed to load:', e.target.src);
-                      e.target.src = 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';
+                      console.log("Preview failed to load:", e.target.src);
+                      e.target.src =
+                        "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y";
                     }}
                   />
                 ) : (
-                  <img 
-                    src="https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y" 
-                    alt="Default Profile" 
-                    className="profile-preview" 
+                  <img
+                    src="https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y"
+                    alt="Default Profile"
+                    className="profile-preview"
                   />
                 )}
                 {errors.profilePicture && <span className="error-message">{errors.profilePicture}</span>}
@@ -447,9 +477,9 @@ function ProfileForm() {
                 <input
                   type="date"
                   value={formData.personal.dob}
-                  onChange={(e) => handleChange('personal', 'dob', e.target.value)}
-                  onBlur={(e) => handleBlur('personal', 'dob', e.target.value)}
-                  className={errors.dob ? 'error' : ''}
+                  onChange={(e) => handleChange("personal", "dob", e.target.value)}
+                  onBlur={(e) => handleBlur("personal", "dob", e.target.value)}
+                  className={errors.dob ? "error" : ""}
                 />
                 {errors.dob && <span className="error-message">{errors.dob}</span>}
               </div>
@@ -485,16 +515,14 @@ function ProfileForm() {
                 <input
                   type="checkbox"
                   checked={formData.isFresher}
-                  onChange={(e) => handleChange('isFresher', '', e.target.checked)}
+                  onChange={(e) => handleChange("isFresher", "", e.target.checked)}
                 />
                 <span>I am a Fresher (No Job Experience)</span>
               </label>
             </div>
             {formData.isFresher ? (
               <div className="fresher-section">
-                <p className="fresher-message">
-                  As a fresher, you don't need to provide job history.
-                </p>
+                <p className="fresher-message">As a fresher, you don't need to provide job history.</p>
               </div>
             ) : (
               <div className="pre-form">
@@ -505,66 +533,80 @@ function ProfileForm() {
                       <input
                         type="text"
                         value={job.company}
-                        onChange={(e) => handleChange('jobHistory', 'company', e.target.value, index)}
-                        onBlur={(e) => handleBlur('jobHistory', 'company', e.target.value, index)}
+                        onChange={(e) => handleChange("jobHistory", "company", e.target.value, index)}
+                        onBlur={(e) => handleBlur("jobHistory", "company", e.target.value, index)}
                         placeholder="Enter company name"
-                        className={errors[`company${index}`] ? 'error' : ''}
+                        className={errors[`company${index}`] ? "error" : ""}
                       />
-                      {errors[`company${index}`] && <span className="error-message">{errors[`company${index}`]}</span>}
+                      {errors[`company${index}`] && (
+                        <span className="error-message">{errors[`company${index}`]}</span>
+                      )}
                     </div>
                     <div className="form-group">
                       <label>Position:</label>
                       <input
                         type="text"
                         value={job.position}
-                        onChange={(e) => handleChange('jobHistory', 'position', e.target.value, index)}
-                        onBlur={(e) => handleBlur('jobHistory', 'position', e.target.value, index)}
+                        onChange={(e) => handleChange("jobHistory", "position", e.target.value, index)}
+                        onBlur={(e) => handleBlur("jobHistory", "position", e.target.value, index)}
                         placeholder="Enter position"
-                        className={errors[`position${index}`] ? 'error' : ''}
+                        className={errors[`position${index}`] ? "error" : ""}
                       />
-                      {errors[`position${index}`] && <span className="error-message">{errors[`position${index}`]}</span>}
+                      {errors[`position${index}`] && (
+                        <span className="error-message">{errors[`position${index}`]}</span>
+                      )}
                     </div>
                     <div className="form-group">
                       <label>Start Date:</label>
                       <input
                         type="date"
                         value={job.startDate}
-                        onChange={(e) => handleChange('jobHistory', 'startDate', e.target.value, index)}
-                        onBlur={(e) => handleBlur('jobHistory', 'startDate', e.target.value, index)}
-                        className={errors[`startDate${index}`] ? 'error' : ''}
+                        onChange={(e) => handleChange("jobHistory", "startDate", e.target.value, index)}
+                        onBlur={(e) => handleBlur("jobHistory", "startDate", e.target.value, index)}
+                        className={errors[`startDate${index}`] ? "error" : ""}
                       />
-                      {errors[`startDate${index}`] && <span className="error-message">{errors[`startDate${index}`]}</span>}
+                      {errors[`startDate${index}`] && (
+                        <span className="error-message">{errors[`startDate${index}`]}</span>
+                      )}
                     </div>
                     <div className="form-group">
                       <label>End Date:</label>
                       <input
                         type="date"
                         value={job.endDate}
-                        onChange={(e) => handleChange('jobHistory', 'endDate', e.target.value, index)}
-                        onBlur={(e) => handleBlur('jobHistory', 'endDate', e.target.value, index)}
-                        className={errors[`endDate${index}`] ? 'error' : ''}
+                        onChange={(e) => handleChange("jobHistory", "endDate", e.target.value, index)}
+                        onBlur={(e) => handleBlur("jobHistory", "endDate", e.target.value, index)}
+                        className={errors[`endDate${index}`] ? "error" : ""}
                       />
-                      {errors[`endDate${index}`] && <span className="error-message">{errors[`endDate${index}`]}</span>}
+                      {errors[`endDate${index}`] && (
+                        <span className="error-message">{errors[`endDate${index}`]}</span>
+                      )}
                     </div>
                     <div className="form-group">
                       <label>Description:</label>
                       <textarea
                         value={job.description}
-                        onChange={(e) => handleChange('jobHistory', 'description', e.target.value, index)}
-                        onBlur={(e) => handleBlur('jobHistory', 'description', e.target.value, index)}
+                        onChange={(e) => handleChange("jobHistory", "description", e.target.value, index)}
+                        onBlur={(e) => handleBlur("jobHistory", "description", e.target.value, index)}
                         placeholder="Describe your responsibilities"
-                        className={errors[`description${index}`] ? 'error' : ''}
+                        className={errors[`description${index}`] ? "error" : ""}
                       />
-                      {errors[`description${index}`] && <span className="error-message">{errors[`description${index}`]}</span>}
+                      {errors[`description${index}`] && (
+                        <span className="error-message">{errors[`description${index}`]}</span>
+                      )}
                     </div>
                     {formData.jobHistory.length > 1 && (
-                      <button type="button" className="remove-btn" onClick={() => removeEntry('jobHistory', index)}>
+                      <button
+                        type="button"
+                        className="remove-btn"
+                        onClick={() => removeEntry("jobHistory", index)}
+                      >
                         Remove
                       </button>
                     )}
                   </div>
                 ))}
-                <button type="button" className="add-btn" onClick={() => addEntry('jobHistory')}>
+                <button type="button" className="add-btn" onClick={() => addEntry("jobHistory")}>
                   Add Another Job
                 </button>
               </div>
@@ -584,63 +626,81 @@ function ProfileForm() {
                     <input
                       type="text"
                       value={edu.degree}
-                      onChange={(e) => handleChange('educationHistory', 'degree', e.target.value, index)}
-                      onBlur={(e) => handleBlur('educationHistory', 'degree', e.target.value, index)}
+                      onChange={(e) => handleChange("educationHistory", "degree", e.target.value, index)}
+                      onBlur={(e) => handleBlur("educationHistory", "degree", e.target.value, index)}
                       placeholder="Enter degree"
-                      className={errors[`degree${index}`] ? 'error' : ''}
+                      className={errors[`degree${index}`] ? "error" : ""}
                     />
-                    {errors[`degree${index}`] && <span className="error-message">{errors[`degree${index}`]}</span>}
+                    {errors[`degree${index}`] && (
+                      <span className="error-message">{errors[`degree${index}`]}</span>
+                    )}
                   </div>
                   <div className="form-group">
                     <label>Institution:</label>
                     <input
                       type="text"
                       value={edu.institution}
-                      onChange={(e) => handleChange('educationHistory', 'institution', e.target.value, index)}
-                      onBlur={(e) => handleBlur('educationHistory', 'institution', e.target.value, index)}
+                      onChange={(e) =>
+                        handleChange("educationHistory", "institution", e.target.value, index)
+                      }
+                      onBlur={(e) => handleBlur("educationHistory", "institution", e.target.value, index)}
                       placeholder="Enter institution name"
-                      className={errors[`institution${index}`] ? 'error' : ''}
+                      className={errors[`institution${index}`] ? "error" : ""}
                     />
-                    {errors[`institution${index}`] && <span className="error-message">{errors[`institution${index}`]}</span>}
+                    {errors[`institution${index}`] && (
+                      <span className="error-message">{errors[`institution${index}`]}</span>
+                    )}
                   </div>
                   <div className="form-group">
                     <label>Field of Study:</label>
                     <input
                       type="text"
                       value={edu.field}
-                      onChange={(e) => handleChange('educationHistory', 'field', e.target.value, index)}
-                      onBlur={(e) => handleBlur('educationHistory', 'field', e.target.value, index)}
+                      onChange={(e) => handleChange("educationHistory", "field", e.target.value, index)}
+                      onBlur={(e) => handleBlur("educationHistory", "field", e.target.value, index)}
                       placeholder="Enter field of study"
-                      className={errors[`field${index}`] ? 'error' : ''}
+                      className={errors[`field${index}`] ? "error" : ""}
                     />
-                    {errors[`field${index}`] && <span className="error-message">{errors[`field${index}`]}</span>}
+                    {errors[`field${index}`] && (
+                      <span className="error-message">{errors[`field${index}`]}</span>
+                    )}
                   </div>
                   <div className="form-group">
                     <label>Graduation Year:</label>
                     <input
                       type="number"
                       value={edu.graduationYear}
-                      onChange={(e) => handleChange('educationHistory', 'graduationYear', e.target.value, index)}
-                      onBlur={(e) => handleBlur('educationHistory', 'graduationYear', e.target.value, index)}
+                      onChange={(e) =>
+                        handleChange("educationHistory", "graduationYear", e.target.value, index)
+                      }
+                      onBlur={(e) =>
+                        handleBlur("educationHistory", "graduationYear", e.target.value, index)
+                      }
                       placeholder="Enter year"
                       min="1900"
                       max={new Date().getFullYear()}
-                      className={errors[`graduationYear${index}`] ? 'error' : ''}
+                      className={errors[`graduationYear${index}`] ? "error" : ""}
                     />
-                    {errors[`graduationYear${index}`] && <span className="error-message">{errors[`graduationYear${index}`]}</span>}
+                    {errors[`graduationYear${index}`] && (
+                      <span className="error-message">{errors[`graduationYear${index}`]}</span>
+                    )}
                   </div>
                   {formData.educationHistory.length > 1 && (
                     <button
                       type="button"
                       className="remove-btn"
-                      onClick={() => removeEntry('educationHistory', index)}
+                      onClick={() => removeEntry("educationHistory", index)}
                     >
                       Remove
                     </button>
                   )}
                 </div>
               ))}
-              <button type="button" className="add-btn" onClick={() => addEntry('educationHistory')}>
+              <button
+                type="button"
+                className="add-btn"
+                onClick={() => addEntry("educationHistory")}
+              >
                 Add Another Education
               </button>
             </div>
@@ -657,10 +717,10 @@ function ProfileForm() {
                 <input
                   type="text"
                   value={formData.professional.jobTitle}
-                  onChange={(e) => handleChange('professional', 'jobTitle', e.target.value)}
-                  onBlur={(e) => handleBlur('professional', 'jobTitle', e.target.value)}
+                  onChange={(e) => handleChange("professional", "jobTitle", e.target.value)}
+                  onBlur={(e) => handleBlur("professional", "jobTitle", e.target.value)}
                   placeholder="Enter your current job title"
-                  className={errors.jobTitle ? 'error' : ''}
+                  className={errors.jobTitle ? "error" : ""}
                 />
                 {errors.jobTitle && <span className="error-message">{errors.jobTitle}</span>}
               </div>
@@ -669,10 +729,10 @@ function ProfileForm() {
                 <input
                   type="text"
                   value={formData.professional.company}
-                  onChange={(e) => handleChange('professional', 'company', e.target.value)}
-                  onBlur={(e) => handleBlur('professional', 'company', e.target.value)}
+                  onChange={(e) => handleChange("professional", "company", e.target.value)}
+                  onBlur={(e) => handleBlur("professional", "company", e.target.value)}
                   placeholder="Enter your current company"
-                  className={errors.company ? 'error' : ''}
+                  className={errors.company ? "error" : ""}
                 />
                 {errors.company && <span className="error-message">{errors.company}</span>}
               </div>
@@ -681,12 +741,12 @@ function ProfileForm() {
                 <input
                   type="number"
                   value={formData.professional.experience}
-                  onChange={(e) => handleChange('professional', 'experience', e.target.value)}
-                  onBlur={(e) => handleBlur('professional', 'experience', e.target.value)}
+                  onChange={(e) => handleChange("professional", "experience", e.target.value)}
+                  onBlur={(e) => handleBlur("professional", "experience", e.target.value)}
                   placeholder="Enter total years of experience"
                   min="0"
                   step="0.1"
-                  className={errors.experience ? 'error' : ''}
+                  className={errors.experience ? "error" : ""}
                 />
                 {errors.experience && <span className="error-message">{errors.experience}</span>}
               </div>
@@ -699,7 +759,7 @@ function ProfileForm() {
                     onChange={(e) => setSkillInput(e.target.value)}
                     onKeyDown={addSkill}
                     placeholder="Type a skill and press Enter"
-                    className={errors.skills ? 'error' : ''}
+                    className={errors.skills ? "error" : ""}
                   />
                   <div className="skills-tags">
                     {formData.professional.skills.map((skill, index) => (
@@ -736,7 +796,7 @@ function ProfileForm() {
                     onChange={(e) => setRoleInput(e.target.value)}
                     onKeyDown={addRole}
                     placeholder="Type a job role and press Enter"
-                    className={errors.roles ? 'error' : ''}
+                    className={errors.roles ? "error" : ""}
                   />
                   <div className="skills-tags">
                     {formData.jobPrefs.roles.map((role, index) => (
@@ -764,7 +824,7 @@ function ProfileForm() {
                     onChange={(e) => setLocationInput(e.target.value)}
                     onKeyDown={addLocation}
                     placeholder="Type a location and press Enter"
-                    className={errors.locations ? 'error' : ''}
+                    className={errors.locations ? "error" : ""}
                   />
                   <div className="skills-tags">
                     {formData.jobPrefs.locations.map((location, index) => (
@@ -788,17 +848,17 @@ function ProfileForm() {
                 <input
                   type="text"
                   value={formData.jobPrefs.salary}
-                  onChange={(e) => handleChange('jobPrefs', 'salary', e.target.value)}
-                  onBlur={(e) => handleBlur('jobPrefs', 'salary', e.target.value)}
+                  onChange={(e) => handleChange("jobPrefs", "salary", e.target.value)}
+                  onBlur={(e) => handleBlur("jobPrefs", "salary", e.target.value)}
                   placeholder="e.g., $50,000 - $70,000"
-                  className={errors.salary ? 'error' : ''}
+                  className={errors.salary ? "error" : ""}
                 />
                 {errors.salary && <span className="error-message">{errors.salary}</span>}
               </div>
               <div className="form-group">
                 <label>Employment Type:</label>
                 <div className="checkbox-group">
-                  {['Full-time', 'Part-time', 'Remote', 'Freelance'].map((type) => (
+                  {["Full-time", "Part-time", "Remote", "Freelance"].map((type) => (
                     <label key={type} className="checkbox-label">
                       <input
                         type="checkbox"
@@ -809,7 +869,7 @@ function ProfileForm() {
                           const newTypes = e.target.checked
                             ? [...selectedTypes, type.toLowerCase()]
                             : selectedTypes.filter((t) => t !== type.toLowerCase());
-                          handleChange('jobPrefs', 'employmentType', newTypes);
+                          handleChange("jobPrefs", "employmentType", newTypes);
                         }}
                       />
                       {type}
@@ -828,21 +888,34 @@ function ProfileForm() {
             <h3 className="pre-title">Profile Summary</h3>
             <div className="summary-content">
               <SummarySection title="Personal Information" stepToEdit={0} setStep={setStep}>
-                <p><strong>Name:</strong> {formData.personal.fullName || 'Not provided'}</p>
-                <p><strong>Email:</strong> {formData.personal.email || 'Not provided'}</p>
-                <p><strong>Profile Picture:</strong> 
-                  <img 
-                    src={formData.personal.profilePicture || 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y'} 
-                    alt="Profile" 
-                    className="summary-profile-pic" 
+                <p>
+                  <strong>Name:</strong> {formData.personal.fullName || "Not provided"}
+                </p>
+                <p>
+                  <strong>Email:</strong> {formData.personal.email || "Not provided"}
+                </p>
+                <p>
+                  <strong>Profile Picture:</strong>
+                  <img
+                    src={
+                      formData.personal.profilePicture ||
+                      "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y"
+                    }
+                    alt="Profile"
+                    className="summary-profile-pic"
                     onError={(e) => {
-                      console.log('Summary image failed to load:', e.target.src);
-                      e.target.src = 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';
+                      console.log("Summary image failed to load:", e.target.src);
+                      e.target.src =
+                        "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y";
                     }}
                   />
                 </p>
-                <p><strong>Date of Birth:</strong> {formData.personal.dob || 'Not provided'}</p>
-                <p><strong>Gender:</strong> {formData.personal.gender || 'Not provided'}</p>
+                <p>
+                  <strong>Date of Birth:</strong> {formData.personal.dob || "Not provided"}
+                </p>
+                <p>
+                  <strong>Gender:</strong> {formData.personal.gender || "Not provided"}
+                </p>
               </SummarySection>
 
               <SummarySection title="Job History" stepToEdit={1} setStep={setStep}>
@@ -851,10 +924,18 @@ function ProfileForm() {
                 ) : formData.jobHistory.length > 0 ? (
                   formData.jobHistory.map((job, index) => (
                     <div key={index} className="summary-entry">
-                      <p><strong>Company:</strong> {job.company}</p>
-                      <p><strong>Position:</strong> {job.position}</p>
-                      <p><strong>Period:</strong> {job.startDate} - {job.endDate || 'Present'}</p>
-                      <p><strong>Description:</strong> {job.description}</p>
+                      <p>
+                        <strong>Company:</strong> {job.company}
+                      </p>
+                      <p>
+                        <strong>Position:</strong> {job.position}
+                      </p>
+                      <p>
+                        <strong>Period:</strong> {job.startDate} - {job.endDate || "Present"}
+                      </p>
+                      <p>
+                        <strong>Description:</strong> {job.description}
+                      </p>
                     </div>
                   ))
                 ) : (
@@ -866,10 +947,18 @@ function ProfileForm() {
                 {formData.educationHistory.length > 0 ? (
                   formData.educationHistory.map((edu, index) => (
                     <div key={index} className="summary-entry">
-                      <p><strong>Degree:</strong> {edu.degree}</p>
-                      <p><strong>Institution:</strong> {edu.institution}</p>
-                      <p><strong>Field:</strong> {edu.field}</p>
-                      <p><strong>Year:</strong> {edu.graduationYear}</p>
+                      <p>
+                        <strong>Degree:</strong> {edu.degree}
+                      </p>
+                      <p>
+                        <strong>Institution:</strong> {edu.institution}
+                      </p>
+                      <p>
+                        <strong>Field:</strong> {edu.field}
+                      </p>
+                      <p>
+                        <strong>Year:</strong> {edu.graduationYear}
+                      </p>
                     </div>
                   ))
                 ) : (
@@ -878,32 +967,44 @@ function ProfileForm() {
               </SummarySection>
 
               <SummarySection title="Professional Details" stepToEdit={3} setStep={setStep}>
-                <p><strong>Job Title:</strong> {formData.professional.jobTitle || 'Not provided'}</p>
-                <p><strong>Company:</strong> {formData.professional.company || 'Not provided'}</p>
-                <p><strong>Experience:</strong> {formData.professional.experience || '0'} years</p>
-                <p><strong>Skills:</strong> 
-                  {formData.professional.skills.length > 0 
-                    ? formData.professional.skills.join(', ') 
-                    : 'Not provided'}
+                <p>
+                  <strong>Job Title:</strong> {formData.professional.jobTitle || "Not provided"}
+                </p>
+                <p>
+                  <strong>Company:</strong> {formData.professional.company || "Not provided"}
+                </p>
+                <p>
+                  <strong>Experience:</strong> {formData.professional.experience || "0"} years
+                </p>
+                <p>
+                  <strong>Skills:</strong>
+                  {formData.professional.skills.length > 0
+                    ? formData.professional.skills.join(", ")
+                    : "Not provided"}
                 </p>
               </SummarySection>
 
               <SummarySection title="Job Preferences" stepToEdit={4} setStep={setStep}>
-                <p><strong>Roles:</strong> 
-                  {formData.jobPrefs.roles.length > 0 
-                    ? formData.jobPrefs.roles.join(', ') 
-                    : 'Not provided'}
+                <p>
+                  <strong>Roles:</strong>
+                  {formData.jobPrefs.roles.length > 0
+                    ? formData.jobPrefs.roles.join(", ")
+                    : "Not provided"}
                 </p>
-                <p><strong>Locations:</strong> 
-                  {formData.jobPrefs.locations.length > 0 
-                    ? formData.jobPrefs.locations.join(', ') 
-                    : 'Not provided'}
+                <p>
+                  <strong>Locations:</strong>
+                  {formData.jobPrefs.locations.length > 0
+                    ? formData.jobPrefs.locations.join(", ")
+                    : "Not provided"}
                 </p>
-                <p><strong>Salary:</strong> {formData.jobPrefs.salary || 'Not provided'}</p>
-                <p><strong>Type:</strong> 
-                  {formData.jobPrefs.employmentType.length > 0 
-                    ? formData.jobPrefs.employmentType.join(', ') 
-                    : 'Not provided'}
+                <p>
+                  <strong>Salary:</strong> {formData.jobPrefs.salary || "Not provided"}
+                </p>
+                <p>
+                  <strong>Type:</strong>
+                  {formData.jobPrefs.employmentType.length > 0
+                    ? formData.jobPrefs.employmentType.join(", ")
+                    : "Not provided"}
                 </p>
               </SummarySection>
             </div>
@@ -923,8 +1024,8 @@ function ProfileForm() {
         <div className="summary-header" onClick={() => setIsOpen(!isOpen)}>
           <h4>{title}</h4>
           <div className="summary-actions">
-            <button 
-              className="edit-btn" 
+            <button
+              className="edit-btn"
               onClick={(e) => {
                 e.stopPropagation();
                 setStep(stepToEdit);
@@ -932,14 +1033,12 @@ function ProfileForm() {
             >
               Edit
             </button>
-            <span className={`toggle-icon ${isOpen ? 'open' : ''}`}>
-              {isOpen ? '▼' : '▶'}
+            <span className={`toggle-icon ${isOpen ? "open" : ""}`}>
+              {isOpen ? "▼" : "▶"}
             </span>
           </div>
         </div>
-        <div className={`summary-body ${isOpen ? 'open' : ''}`}>
-          {children}
-        </div>
+        <div className={`summary-body ${isOpen ? "open" : ""}`}>{children}</div>
       </div>
     );
   };
@@ -950,20 +1049,17 @@ function ProfileForm() {
         <div className="pre-card">
           {isLoading && <div className="loading-overlay">Loading profile...</div>}
           {errorMessage && <div className="error-message global-error">{errorMessage}</div>}
-          
+
           <div className="progress-bar">
-            <div 
-              className="progress" 
-              style={{ width: `${(step / 5) * 100}%` }}
-            ></div>
+            <div className="progress" style={{ width: `${(step / 5) * 100}%` }}></div>
           </div>
-          
+
           {renderStep()}
 
           <div className="pre-buttons">
             {step > 0 && (
-              <button 
-                onClick={prevStep} 
+              <button
+                onClick={prevStep}
                 className="back-btn"
                 disabled={isSubmitting || isLoading}
               >
@@ -971,8 +1067,8 @@ function ProfileForm() {
               </button>
             )}
             {step < 5 && (
-              <button 
-                onClick={skipStep} 
+              <button
+                onClick={skipStep}
                 className="skip-btn"
                 disabled={isSubmitting || isLoading}
               >
@@ -980,22 +1076,26 @@ function ProfileForm() {
               </button>
             )}
             {step < 4 ? (
-              <button 
-                onClick={nextStep} 
+              <button
+                onClick={nextStep}
                 className="next-btn"
                 disabled={isSubmitting || isLoading}
               >
                 Next
               </button>
             ) : (
-              <button 
-                onClick={handleSubmit} 
+              <button
+                onClick={handleSubmit}
                 className="form-submit-btn"
                 disabled={isSubmitting || isLoading}
               >
                 {isSubmitting ? (
                   <span className="spinner"></span>
-                ) : step === 5 ? 'Confirm & Submit' : 'Review'}
+                ) : step === 5 ? (
+                  "Confirm & Submit"
+                ) : (
+                  "Review"
+                )}
               </button>
             )}
           </div>
