@@ -8,7 +8,7 @@ function EditPost() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     jobTitle: "",
-    companyName: "",
+    company: "", // Changed from companyName to company
     location: "",
     experience: "",
     salaryMin: "",
@@ -27,26 +27,42 @@ function EditPost() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const [companies, setCompanies] = useState([]); // Store fetched companies
 
   const jobTypes = ["Full-time", "Part-time", "Internship", "Contract"];
 
+  // Fetch companies and post data on mount
   useEffect(() => {
-    axios
-      .get(`http://localhost:5000/api/posts/${id}`, {
-        withCredentials: true,
-      })
-      .then((res) => {
+    const fetchCompanies = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/companies", {
+          withCredentials: true,
+        });
+        // Handle response based on API structure
+        const companiesData = response.data.companies || response.data;
+        setCompanies(Array.isArray(companiesData) ? companiesData : []);
+      } catch (error) {
+        console.error("Error fetching companies:", error);
+        setError("Failed to load companies. Please try again.");
+      }
+    };
+
+    const fetchPost = async () => {
+      try {
+        const res = await axios.get(`http://localhost:5000/api/posts/${id}`, {
+          withCredentials: true,
+        });
         const post = res.data;
         setFormData({
           jobTitle: post.title || "",
-          companyName: post.company || "",
+          company: post.company || "", // Expecting company _id
           location: post.location || "",
           experience: post.experience || "",
           salaryMin: post.salary?.min || "",
           salaryMax: post.salary?.max || "",
           educationLevel: post.educationLevel || "",
           languages: post.languages || "",
-          email: post.contactEmail || "",
+          email: post+ post.contactEmail || "",
           description: post.description || "",
           responsibilities: post.responsibilities || "",
           roleExperience: post.roleExperience || "",
@@ -58,12 +74,17 @@ function EditPost() {
           remote: post.remote || false,
         });
         setLoading(false);
-      })
-      .catch((err) => {
+      } catch (err) {
         console.error("Failed to fetch post:", err);
         setError("Failed to load post data.");
         setLoading(false);
-      });
+      }
+    };
+
+    Promise.all([fetchCompanies(), fetchPost()]).catch((err) => {
+      setError("Failed to load data.");
+      setLoading(false);
+    });
   }, [id]);
 
   const handleChange = (e) => {
@@ -102,10 +123,15 @@ function EditPost() {
       return;
     }
 
+    if (!formData.company) {
+      setError("Please select a company.");
+      return;
+    }
+
     const postData = {
       title: formData.jobTitle,
       description: formData.description,
-      company: formData.companyName,
+      company: formData.company, // Send company _id
       location: formData.location,
       salary: {
         min: formData.salaryMin ? Number(formData.salaryMin) : undefined,
@@ -159,14 +185,23 @@ function EditPost() {
             />
           </div>
           <div className="form-group">
-            <label>Company Name</label>
-            <input
-              type="text"
-              name="companyName"
-              value={formData.companyName}
+            <label>Company</label>
+            <select
+              name="company"
+              value={formData.company}
               onChange={handleChange}
               required
-            />
+            >
+              <option value="">Select a Company</option>
+              {companies.map((company) => (
+                <option key={company._id} value={company._id}>
+                  {company.name}
+                </option>
+              ))}
+            </select>
+            {companies.length === 0 && (
+              <p className="form-error">No companies available. Please add a company first.</p>
+            )}
           </div>
           <div className="form-group">
             <label>Location</label>
