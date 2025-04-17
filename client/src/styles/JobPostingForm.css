@@ -1,453 +1,157 @@
 .job-posting-container {
-    max-width: 900px;
-    margin: 40px auto;
-    padding: 30px;
-    background: #ffffff;
-    border-radius: 15px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-  }
-  
-  .form-header {
-    margin-bottom: 30px;
-  }
-  
-  .form-header h2 {
-    color: #2c3e50;
-    font-size: 28px;
-    margin-bottom: 15px;
-  }
-  
-  .progress-bar {
-    height: 6px;
-    background: #ecf0f1;
-    border-radius: 3px;
-    overflow: hidden;
-  }
-  
-  .progress-fill {
-    height: 100%;
-    background: linear-gradient(45deg, #3498db, #2ecc71);
-    transition: width 0.3s ease;
-  }
-  
-  .section-tabs {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 30px;
-    overflow-x: auto;
-    padding-bottom: 10px;
-  }
-  
-  .tab-btn {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 25px;
-    background: #ecf0f1;
-    color: #7f8c8d;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  
-  .tab-btn .tab-number {
-    width: 20px;
-    height: 20px;
-    background: #bdc3c7;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    color: white;
-    transition: all 0.3s ease;
-  }
-  
-  .tab-btn.active {
-    background: #3498db;
-    color: white;
-  }
-  
-  .tab-btn.active .tab-number {
-    background: #2ecc71;
-  }
-  
-  .tab-btn:hover:not(.active) {
-    background: #dfe6e9;
-  }
-  
-  .form-section {
-    padding: 25px;
-    background: #f9fbfc;
-    border-radius: 10px;
-    margin-bottom: 20px;
-  }
-  
-  .form-section h3 {
-    color: #2c3e50;
-    margin-bottom: 20px;
-    font-size: 22px;
-  }
-  
-  .form-group {
-    margin-bottom: 20px;
-  }
-  
-  .form-group label {
-    display: block;
-    margin-bottom: 8px;
-    color: #34495e;
-    font-weight: 600;
-    font-size: 14px;
-  }
-  
-  .form-group input,
-  .form-group select,
-  .form-group textarea {
-    width: 100%;
-    padding: 12px;
-    border: 2px solid #ecf0f1;
-    border-radius: 8px;
-    font-size: 16px;
-    transition: border-color 0.3s ease;
-  }
-  
-  .form-group input:focus,
-  .form-group select:focus,
-  .form-group textarea:focus {
-    border-color: #3498db;
-    outline: none;
-  }
-  
-  .salary-inputs {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-  }
-  
-  .salary-inputs input {
-    width: 45%;
-  }
-
-  .skills-placeholder {
-    color: #7f8c8d;
-    font-style: italic;
-    padding: 10px;
-  }
-  
-  .skills-container {
-    padding: 20px;
-    background: #f9fbfc;
-    border-radius: 10px;
-    margin-bottom: 20px;
-  }
-  
-  .skills-input-group {
-    display: flex;
-    gap: 15px;
-    margin-bottom: 20px;
-    align-items: flex-end;
-  }
-  
-  .skills-input-group input {
-    flex: 1;
-    padding: 12px;
-    border: 2px solid #ecf0f1;
-    border-radius: 8px;
-    font-size: 16px;
-    transition: all 0.3s ease;
-  }
-  
-  .skills-input-group input:focus {
-    border-color: #3498db;
-    box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
-  }
-  
-  .add-skill-btn {
-    padding: 12px 20px;
-    background: #3498db;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: all 0.3s ease;
-  }
-  
-  .add-skill-btn:hover {
-    background: #2980b9;
-    transform: translateY(-2px);
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
-  }
-  
-  .skills-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-top: 15px;
-    padding: 10px;
-    background: white;
-    border-radius: 8px;
-    min-height: 60px;
-    border: 1px dashed #ecf0f1;
-  }
-  
-  .skill-tag {
-    background: #3498db;
-    color: white;
-    padding: 8px 15px;
-    border-radius: 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 10px;
-    font-size: 14px;
-    animation: slideIn 0.2s ease;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    /* New properties */
-    width: auto;           /* Let content determine width */
-    max-width: 200px;      /* Set a reasonable maximum */
-    min-width: 80px;       /* Ensure minimum readability */
-    overflow: hidden;      /* Handle overflow */
-    text-overflow: ellipsis; /* Add ellipsis for long text */
-    white-space: nowrap;   /* Keep text on one line */
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 30px;
+  background: #ffffff;
+  border-radius: 15px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
-  
-  .skill-tag:hover {
-    background: #2980b9;
-    transform: scale(1.02);
-  }
-  
-  .remove-skill {
-    cursor: pointer;
-    width: 18px;
-    height: 18px;
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    transition: all 0.3s ease;
-  }
 
-  .remove-skill:hover {
-    background: rgba(255, 255, 255, 0.5);
-    transform: scale(1.1);
-  }
+.form-header {
+  margin-bottom: 30px;
+}
 
-  .suggested-skills {
-    position: relative;
-    margin-top: 10px;
-  }
-  
-  .suggested-skills-list {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    max-height: 200px;
-    overflow-y: auto;
-    z-index: 10;
-    padding: 10px 0;
-  }
-  
-  .suggested-skill-item {
-    padding: 8px 15px;
-    cursor: pointer;
-    color: #34495e;
-    transition: all 0.2s ease;
-  }
-  
-  .suggested-skill-item:hover {
-    background: #f0f3f4;
-    color: #3498db;
-  }
-  
-  @keyframes slideIn {
-    from {
-      opacity: 0;
-      transform: translateX(-10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateX(0);
-    }
-  }
-  
-  @media (max-width: 600px) {
-    .skills-input-group {
-      flex-direction: column;
-      align-items: stretch;
-    }
-    
-    .add-skill-btn {
-      width: 100%;
-    }
-    
-    .skill-tag {
-      width: 100%;
-      justify-content: space-between;
-    }
-  }
-  
-  .form-navigation {
-    display: flex;
-    justify-content: space-between;
-    gap: 15px;
-  }
-  
-  .nav-btn {
-    padding: 12px 25px;
-    border: none;
-    border-radius: 25px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    font-size: 16px;
-  }
-  
-  .prev-btn {
-    background: #95a5a6;
-    color: white;
-  }
-  
-  .next-btn {
-    background: #3498db;
-    color: white;
-  }
-  
-  .submit-btn {
-    background: #2ecc71;
-    color: white;
-  }
-  
-  .nav-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
-  }
-  
-  .review-section .review-content {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 25px;
-  }
-  
-  .review-block {
-    padding: 15px;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-  }
-  
-  .review-block h4 {
-    color: #2c3e50;
-    margin-bottom: 15px;
-    font-size: 18px;
-  }
-  
-  .review-block p {
-    margin: 8px 0;
-    color: #7f8c8d;
-    font-size: 14px;
-  }
-  
-  .review-block p span {
-    color: #34495e;
-    font-weight: 600;
-    margin-right: 8px;
-  }
-  
-  .formatting-controls {
-    margin-bottom: 10px;
-    display: flex;
-    gap: 8px;
-  }
-  
-  .formatting-controls button {
-    width: 35px;
-    height: 35px;
-    border: 2px solid #ecf0f1;
-    border-radius: 5px;
-    background: #ffffff;
-    cursor: pointer;
-    font-size: 16px;
-    transition: all 0.3s ease;
-  }
-  
-  .formatting-controls button:hover {
-    background: #3498db;
-    color: white;
-    border-color: #3498db;
-  }
-  
-  .formatted-text {
-    display: inline;
-    color: #7f8c8d;
-  }
-  
-  .formatted-list {
-    margin: 8px 0 8px 20px;
-    padding: 0;
-    list-style-type: disc;
-  }
-  
-  .formatted-list li {
-    margin: 5px 0;
-    color: #7f8c8d;
-  }
-  
-  .animate-in {
-    animation: fadeIn 0.3s ease-in;
-  }
-  
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
+.form-header h2 {
+  color: #2c3e50;
+  font-size: 28px;
+  margin-bottom: 15px;
+}
 
-  .error-message {
-    color: red;
-    margin-bottom: 10px;
-  }
-  
-  .success-message {
-    color: green;
-    margin-bottom: 10px;
-  }
+.progress-bar {
+  height: 6px;
+  background: #ecf0f1;
+  border-radius: 3px;
+  overflow: hidden;
+}
 
-  /* Existing styles remain unchanged */
-/* Add these to your existing JobPostingForm.css */
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(45deg, #3498db, #2ecc71);
+  transition: width 0.3s ease;
+}
 
-/* Category Container */
-.category-container {
-  padding: 20px;
-  background: #f9fbfc; /* Same as skills for consistency */
+.section-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 30px;
+  overflow-x: auto;
+  padding-bottom: 10px;
+}
+
+.tab-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 25px;
+  background: #ecf0f1;
+  color: #7f8c8d;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tab-btn .tab-number {
+  width: 20px;
+  height: 20px;
+  background: #bdc3c7;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.tab-btn.active {
+  background: #3498db;
+  color: white;
+}
+
+.tab-btn.active .tab-number {
+  background: #2ecc71;
+}
+
+.tab-btn:hover:not(.active) {
+  background: #dfe6e9;
+}
+
+.form-section {
+  padding: 25px;
+  background: #f9fbfc;
   border-radius: 10px;
   margin-bottom: 20px;
-  border: 2px dashed #6a11cb; /* Purple dashed border to distinguish */
 }
 
-/* Reusing skills-input-group for consistency */
-.category-container .skills-input-group {
+.form-section h3 {
+  color: #2c3e50;
+  margin-bottom: 20px;
+  font-size: 22px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: #34495e;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #ecf0f1;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: border-color 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: #3498db;
+  outline: none;
+}
+
+.salary-inputs {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.salary-inputs input {
+  width: 45%;
+}
+
+.skills-placeholder {
+  color: #7f8c8d;
+  font-style: italic;
+  padding: 10px;
+}
+
+.skills-container {
+  padding: 20px;
+  background: #f9fbfc;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+.skills-input-group {
   display: flex;
   gap: 15px;
   margin-bottom: 20px;
   align-items: flex-end;
 }
 
-.category-container .skills-input-group input {
+.skills-input-group input {
   flex: 1;
   padding: 12px;
   border: 2px solid #ecf0f1;
@@ -456,15 +160,14 @@
   transition: all 0.3s ease;
 }
 
-.category-container .skills-input-group input:focus {
-  border-color: #6a11cb; /* Purple focus border */
-  box-shadow: 0 0 5px rgba(106, 17, 203, 0.3);
+.skills-input-group input:focus {
+  border-color: #3498db;
+  box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
 }
 
-/* Category-specific Add button */
-.category-container .add-category-btn {
+.add-skill-btn {
   padding: 12px 20px;
-  background: #6a11cb; /* Purple instead of blue */
+  background: #3498db;
   color: white;
   border: none;
   border-radius: 8px;
@@ -473,14 +176,13 @@
   transition: all 0.3s ease;
 }
 
-.category-container .add-category-btn:hover {
-  background: #8345c4;
+.add-skill-btn:hover {
+  background: #2980b9;
   transform: translateY(-2px);
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* Category List */
-.category-container .category-list {
+.skills-list {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
@@ -489,35 +191,36 @@
   background: white;
   border-radius: 8px;
   min-height: 60px;
-  border: 1px dashed #d3c4f0; /* Light purple dashed border */
+  border: 1px dashed #ecf0f1;
 }
 
-/* Category Tags */
-.category-container .category-tag {
-  background: #6a11cb;
+.skill-tag {
+  background: #3498db;
   color: white;
   padding: 8px 15px;
   border-radius: 20px;
   display: flex;
+  justify-content: space-between;
   align-items: center;
   gap: 10px;
   font-size: 14px;
   animation: slideIn 0.2s ease;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  flex: 0 1 auto;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  /* New properties */
+  width: auto;           /* Let content determine width */
+  max-width: 200px;      /* Set a reasonable maximum */
+  min-width: 80px;       /* Ensure minimum readability */
+  overflow: hidden;      /* Handle overflow */
+  text-overflow: ellipsis; /* Add ellipsis for long text */
+  white-space: nowrap;   /* Keep text on one line */
 }
 
-.category-container .category-tag:hover {
-  background: #8345c4;
+.skill-tag:hover {
+  background: #2980b9;
   transform: scale(1.02);
 }
 
-/* Reusing remove button styling */
-.category-container .remove-category {
+.remove-skill {
   cursor: pointer;
   width: 18px;
   height: 18px;
@@ -530,18 +233,17 @@
   transition: all 0.3s ease;
 }
 
-.category-container .remove-category:hover {
+.remove-skill:hover {
   background: rgba(255, 255, 255, 0.5);
   transform: scale(1.1);
 }
 
-/* Category Suggestions */
-.category-container .suggested-categories {
+.suggested-skills {
   position: relative;
   margin-top: 10px;
 }
 
-.category-container .suggested-categories-list {
+.suggested-skills-list {
   position: absolute;
   top: 100%;
   left: 0;
@@ -553,56 +255,354 @@
   overflow-y: auto;
   z-index: 10;
   padding: 10px 0;
-  border: 1px solid #d3c4f0; /* Light purple border */
 }
 
-.category-container .suggested-category-item {
+.suggested-skill-item {
   padding: 8px 15px;
   cursor: pointer;
   color: #34495e;
   transition: all 0.2s ease;
 }
 
-.category-container .suggested-category-item:hover {
+.suggested-skill-item:hover {
   background: #f0f3f4;
-  color: #6a11cb; /* Purple hover color */
+  color: #3498db;
 }
 
-/* Category Placeholder */
-.category-container .categories-placeholder {
-  color: #7f8c8d;
-  font-style: italic;
-  padding: 10px;
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
-/* Responsive Adjustments for Categories */
 @media (max-width: 600px) {
-  .category-container .skills-input-group {
+  .skills-input-group {
     flex-direction: column;
     align-items: stretch;
   }
   
-  .category-container .add-category-btn {
+  .add-skill-btn {
     width: 100%;
   }
   
-  .category-container .category-tag {
-    flex-basis: calc(50% - 6px); /* Two columns on mobile */
+  .skill-tag {
+    width: 100%;
+    justify-content: space-between;
   }
 }
 
-@media (min-width: 601px) {
-  .category-container .category-tag {
-    max-width: 250px;
+.form-navigation {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.nav-btn {
+  padding: 12px 25px;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  font-size: 16px;
+}
+
+.prev-btn {
+  background: #95a5a6;
+  color: white;
+}
+
+.next-btn {
+  background: #3498db;
+  color: white;
+}
+
+.submit-btn {
+  background: #2ecc71;
+  color: white;
+}
+
+.nav-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+}
+
+.review-section .review-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 25px;
+}
+
+.review-block {
+  padding: 15px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.review-block h4 {
+  color: #2c3e50;
+  margin-bottom: 15px;
+  font-size: 18px;
+}
+
+.review-block p {
+  margin: 8px 0;
+  color: #7f8c8d;
+  font-size: 14px;
+}
+
+.review-block p span {
+  color: #34495e;
+  font-weight: 600;
+  margin-right: 8px;
+}
+
+.formatting-controls {
+  margin-bottom: 10px;
+  display: flex;
+  gap: 8px;
+}
+
+.formatting-controls button {
+  width: 35px;
+  height: 35px;
+  border: 2px solid #ecf0f1;
+  border-radius: 5px;
+  background: #ffffff;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+.formatting-controls button:hover {
+  background: #3498db;
+  color: white;
+  border-color: #3498db;
+}
+
+.formatted-text {
+  display: inline;
+  color: #7f8c8d;
+}
+
+.formatted-list {
+  margin: 8px 0 8px 20px;
+  padding: 0;
+  list-style-type: disc;
+}
+
+.formatted-list li {
+  margin: 5px 0;
+  color: #7f8c8d;
+}
+
+.animate-in {
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
   }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.error-message {
+  color: red;
+  margin-bottom: 10px;
+}
+
+.success-message {
+  color: green;
+  margin-bottom: 10px;
+}
+
+/* Existing styles remain unchanged */
+/* Add these to your existing JobPostingForm.css */
+
+/* Category Container */
+.category-container {
+padding: 20px;
+background: #f9fbfc; /* Same as skills for consistency */
+border-radius: 10px;
+margin-bottom: 20px;
+border: 2px dashed #6a11cb; /* Purple dashed border to distinguish */
+}
+
+/* Reusing skills-input-group for consistency */
+.category-container .skills-input-group {
+display: flex;
+gap: 15px;
+margin-bottom: 20px;
+align-items: flex-end;
+}
+
+.category-container .skills-input-group input {
+flex: 1;
+padding: 12px;
+border: 2px solid #ecf0f1;
+border-radius: 8px;
+font-size: 16px;
+transition: all 0.3s ease;
+}
+
+.category-container .skills-input-group input:focus {
+border-color: #6a11cb; /* Purple focus border */
+box-shadow: 0 0 5px rgba(106, 17, 203, 0.3);
+}
+
+/* Category-specific Add button */
+.category-container .add-category-btn {
+padding: 12px 20px;
+background: #6a11cb; /* Purple instead of blue */
+color: white;
+border: none;
+border-radius: 8px;
+cursor: pointer;
+font-weight: 600;
+transition: all 0.3s ease;
+}
+
+.category-container .add-category-btn:hover {
+background: #8345c4;
+transform: translateY(-2px);
+box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Category List */
+.category-container .category-list {
+display: flex;
+flex-wrap: wrap;
+gap: 12px;
+margin-top: 15px;
+padding: 10px;
+background: white;
+border-radius: 8px;
+min-height: 60px;
+border: 1px dashed #d3c4f0; /* Light purple dashed border */
+}
+
+/* Category Tags */
+.category-container .category-tag {
+background: #6a11cb;
+color: white;
+padding: 8px 15px;
+border-radius: 20px;
+display: flex;
+align-items: center;
+gap: 10px;
+font-size: 14px;
+animation: slideIn 0.2s ease;
+box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+flex: 0 1 auto;
+max-width: 100%;
+overflow: hidden;
+text-overflow: ellipsis;
+white-space: nowrap;
+}
+
+.category-container .category-tag:hover {
+background: #8345c4;
+transform: scale(1.02);
+}
+
+/* Reusing remove button styling */
+.category-container .remove-category {
+cursor: pointer;
+width: 18px;
+height: 18px;
+background: rgba(255, 255, 255, 0.3);
+border-radius: 50%;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 12px;
+transition: all 0.3s ease;
+}
+
+.category-container .remove-category:hover {
+background: rgba(255, 255, 255, 0.5);
+transform: scale(1.1);
+}
+
+/* Category Suggestions */
+.category-container .suggested-categories {
+position: relative;
+margin-top: 10px;
+}
+
+.category-container .suggested-categories-list {
+position: absolute;
+top: 100%;
+left: 0;
+right: 0;
+background: white;
+border-radius: 8px;
+box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+max-height: 200px;
+overflow-y: auto;
+z-index: 10;
+padding: 10px 0;
+border: 1px solid #d3c4f0; /* Light purple border */
+}
+
+.category-container .suggested-category-item {
+padding: 8px 15px;
+cursor: pointer;
+color: #34495e;
+transition: all 0.2s ease;
+}
+
+.category-container .suggested-category-item:hover {
+background: #f0f3f4;
+color: #6a11cb; /* Purple hover color */
+}
+
+/* Category Placeholder */
+.category-container .categories-placeholder {
+color: #7f8c8d;
+font-style: italic;
+padding: 10px;
+}
+
+/* Responsive Adjustments for Categories */
+@media (max-width: 600px) {
+.category-container .skills-input-group {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.category-container .add-category-btn {
+  width: 100%;
+}
+
+.category-container .category-tag {
+  flex-basis: calc(50% - 6px); /* Two columns on mobile */
+}
+}
+
+@media (min-width: 601px) {
+.category-container .category-tag {
+  max-width: 250px;
+}
 }
 
 /* In JobPostingForm.css */
 .form-group select[name="category"] {
-  border-color: #6a11cb; /* Purple border */
+border-color: #6a11cb; /* Purple border */
 }
 
 .form-group select[name="category"]:focus {
-  border-color: #6a11cb;
-  box-shadow: 0 0 5px rgba(106, 17, 203, 0.3);
+border-color: #6a11cb;
+box-shadow: 0 0 5px rgba(106, 17, 203, 0.3);
 }

@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef } from "react";
 import axios from "axios";
 import "../styles/JobPostingForm.css";
 
 function JobPostingForm() {
   const [formData, setFormData] = useState({
     jobTitle: "",
-    company: "", // Changed from companyName to company
+    companyName: "",
     location: "",
     experience: "",
     salaryMin: "",
@@ -17,7 +17,7 @@ function JobPostingForm() {
     responsibilities: "",
     roleExperience: "",
     skills: [],
-    category: "",
+    category: "", // Added as a single string
     type: "",
     applicationDeadline: "",
     remote: false,
@@ -28,75 +28,229 @@ function JobPostingForm() {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [companies, setCompanies] = useState([]); // Store fetched companies
 
   const [suggestedSkills] = useState([
+    // Tech & IT
     "JavaScript", "Python", "React", "Node.js", "Java", "SQL", "NoSQL", "HTML", "CSS", "TypeScript",
-    "AWS", "Azure", "Docker", "Kubernetes", "Git", "Machine Learning", "TensorFlow", "Cybersecurity",
+    "AWS", "Azure", "Docker", "Kubernetes", "Git", "Machine Learning", "TensorFlow", "Cybersecurity", 
     "CI/CD", "Figma",
+  
+    // Business, Sales & Marketing
     "SEO", "Google Ads", "Meta Ads", "CRM", "Salesforce", "HubSpot", "A/B Testing", "Lead Generation",
     "Email Marketing", "Copywriting", "Market Research", "Cold Calling", "E-commerce Tools",
+  
+    // Creative & Media
     "Adobe Photoshop", "Illustrator", "Premiere Pro", "After Effects", "Video Editing", "Photography",
     "Storyboarding", "Figma", "Content Writing", "Scriptwriting", "Canva",
-    "Lesson Planning", "Google Classroom", "Zoom", "Moodle", "Academic Writing", "Curriculum Design",
+  
+    // Education & Research
+    "Lesson Planning", "Google Classroom", "Zoom", "Moodle", "Academic Writing", "Curriculum Design", 
     "Critical Thinking", "Research Methods",
-    "Excel", "QuickBooks", "Tally", "Taxation", "Auditing", "Legal Research", "Contract Drafting",
+  
+    // Finance & Legal
+    "Excel", "QuickBooks", "Tally", "Taxation", "Auditing", "Legal Research", "Contract Drafting", 
     "Financial Modelling", "Compliance", "Risk Analysis",
-    "Recruitment", "Payroll", "HRIS", "Conflict Resolution", "MS Excel", "Employee Engagement",
+  
+    // HR & Admin
+    "Recruitment", "Payroll", "HRIS", "Conflict Resolution", "MS Excel", "Employee Engagement", 
     "Office Management", "Data Entry",
-    "Patient Care", "Medical Records", "EMR", "Diagnosis Coding", "Mental Health Support",
+  
+    // Healthcare & Wellness
+    "Patient Care", "Medical Records", "EMR", "Diagnosis Coding", "Mental Health Support", 
     "Nutrition Planning", "Pharmacology", "CPR Certification",
-    "AutoCAD", "MATLAB", "SolidWorks", "PLC Programming", "Circuit Design", "Thermodynamics",
+  
+    // Engineering
+    "AutoCAD", "MATLAB", "SolidWorks", "PLC Programming", "Circuit Design", "Thermodynamics", 
     "Structural Analysis", "Project Management",
-    "Revit", "Urban Planning", "SketchUp", "Blueprint Reading", "3D Modeling", "Cost Estimation",
+  
+    // Architecture & Construction
+    "Revit", "Urban Planning", "SketchUp", "Blueprint Reading", "3D Modeling", "Cost Estimation", 
     "GIS", "Construction Scheduling",
-    "Lean Manufacturing", "Six Sigma", "Inventory Management", "Procurement", "Logistics",
+  
+    // Manufacturing, Logistics & Operations
+    "Lean Manufacturing", "Six Sigma", "Inventory Management", "Procurement", "Logistics", 
     "Supply Chain", "ERP", "Warehouse Operations", "Quality Control",
-    "Public Policy", "Stakeholder Management", "Grant Writing", "Community Outreach",
+  
+    // Government & Nonprofit
+    "Public Policy", "Stakeholder Management", "Grant Writing", "Community Outreach", 
     "Research Writing", "NGO Tools",
-    "Event Planning", "Guest Services", "Food Safety", "Hospitality Management",
+  
+    // Hospitality, Tourism & Events
+    "Event Planning", "Guest Services", "Food Safety", "Hospitality Management", 
     "Reservations Systems", "Multilingual Communication", "Vendor Management",
-    "Blueprint Reading", "Electrical Wiring", "Plumbing", "CNC Operation", "Machining",
+  
+    // Skilled Trades & Technical Jobs
+    "Blueprint Reading", "Electrical Wiring", "Plumbing", "CNC Operation", "Machining", 
     "Welding", "HVAC", "Preventive Maintenance",
-    "Remote Collaboration", "Time Management", "Notion", "Slack", "Freelancing", "Portfolio Design",
+  
+    // Other / Emerging
+    "Remote Collaboration", "Time Management", "Notion", "Slack", "Freelancing", "Portfolio Design", 
     "Client Communication", "Entry-Level Tools"
   ]);
+  
 
+  // Define categories matching your backend enum (simplified for brevity)
   const categories = [
-    "Software Development", "Web Development", "Mobile App Development", "Frontend Development",
-    "Backend Development", "Full Stack Development", "Data Science", "Machine Learning",
-    "Artificial Intelligence", "Cybersecurity", "Cloud Computing", "DevOps", "Blockchain",
-    "IT Support", "Database Administration", "Network Engineering", "Game Development",
-    "Quality Assurance", "UI/UX Design", "Product Management", "Project Management",
-    "Digital Marketing", "Social Media Management", "Content Marketing", "SEO/SEM",
-    "Marketing Strategy", "Business Development", "Sales", "Retail", "Customer Support",
-    "Technical Sales", "Telemarketing", "E-commerce", "Brand Management", "Market Research",
-    "Graphic Design", "Visual Design", "Animation", "Illustration", "Video Editing",
-    "Photography", "Content Writing", "Copywriting", "Blogging", "Scriptwriting",
-    "Journalism", "Media & Broadcasting", "Public Relations", "Film Production",
-    "Teaching", "Online Tutoring", "Curriculum Design", "Research", "Academic Writing",
-    "Educational Counseling", "Library Science",
-    "Accounting", "Auditing", "Bookkeeping", "Taxation", "Finance", "Banking",
-    "Insurance", "Investment Management", "Legal Advisory", "Law Practice", "Paralegal",
-    "Compliance",
-    "Human Resources", "Recruitment", "Training & Development", "Payroll Management",
-    "Office Administration", "Executive Assistant", "Data Entry",
-    "Healthcare", "Medical", "Nursing", "Physiotherapy", "Pharmacy", "Dentistry",
-    "Mental Health", "Nutritionist", "Lab Technician", "Veterinary",
-    "Mechanical Engineering", "Electrical Engineering", "Civil Engineering",
-    "Chemical Engineering", "Environmental Engineering", "Industrial Engineering",
-    "Biomedical Engineering", "Structural Engineering",
-    "Architecture", "Urban Planning", "Interior Design", "Construction Management",
-    "Site Engineering", "Surveying",
-    "Manufacturing", "Production Management", "Warehouse Operations", "Supply Chain Management",
-    "Procurement", "Inventory Management", "Logistics", "Transportation", "Quality Control",
-    "Government", "Public Policy", "Civil Services", "Defense & Military", "Nonprofit",
-    "NGO", "Social Work",
-    "Hospitality", "Hotel Management", "Travel & Tourism", "Event Management",
-    "Food & Beverage",
-    "Electrician", "Plumber", "Carpenter", "Mechanic", "Welding", "HVAC Technician",
-    "Machinist", "CNC Operator",
-    "Remote Jobs", "Freelance", "Internships", "Entry-Level", "Others"
+    // --- Tech & IT ---
+          "Software Development",
+          "Web Development",
+          "Mobile App Development",
+          "Frontend Development",
+          "Backend Development",
+          "Full Stack Development",
+          "Data Science",
+          "Machine Learning",
+          "Artificial Intelligence",
+          "Cybersecurity",
+          "Cloud Computing",
+          "DevOps",
+          "Blockchain",
+          "IT Support",
+          "Database Administration",
+          "Network Engineering",
+          "Game Development",
+          "Quality Assurance",
+          "UI/UX Design",
+          "Product Management",
+          "Project Management",
+          
+          // --- Business, Sales & Marketing ---
+          "Digital Marketing",
+          "Social Media Management",
+          "Content Marketing",
+          "SEO/SEM",
+          "Marketing Strategy",
+          "Business Development",
+          "Sales",
+          "Retail",
+          "Customer Support",
+          "Technical Sales",
+          "Telemarketing",
+          "E-commerce",
+          "Brand Management",
+          "Market Research",
+          
+          // --- Creative & Media ---
+          "Graphic Design",
+          "Visual Design",
+          "Animation",
+          "Illustration",
+          "Video Editing",
+          "Photography",
+          "Content Writing",
+          "Copywriting",
+          "Blogging",
+          "Scriptwriting",
+          "Journalism",
+          "Media & Broadcasting",
+          "Public Relations",
+          "Film Production",
+          
+          // --- Education & Research ---
+          "Teaching",
+          "Online Tutoring",
+          "Curriculum Design",
+          "Research",
+          "Academic Writing",
+          "Educational Counseling",
+          "Library Science",
+          
+          // --- Finance & Legal ---
+          "Accounting",
+          "Auditing",
+          "Bookkeeping",
+          "Taxation",
+          "Finance",
+          "Banking",
+          "Insurance",
+          "Investment Management",
+          "Legal Advisory",
+          "Law Practice",
+          "Paralegal",
+          "Compliance",
+          
+          // --- HR & Admin ---
+          "Human Resources",
+          "Recruitment",
+          "Training & Development",
+          "Payroll Management",
+          "Office Administration",
+          "Executive Assistant",
+          "Data Entry",
+          
+          // --- Healthcare & Wellness ---
+          "Healthcare",
+          "Medical",
+          "Nursing",
+          "Physiotherapy",
+          "Pharmacy",
+          "Dentistry",
+          "Mental Health",
+          "Nutritionist",
+          "Lab Technician",
+          "Veterinary",
+          
+          // --- Engineering ---
+          "Mechanical Engineering",
+          "Electrical Engineering",
+          "Civil Engineering",
+          "Chemical Engineering",
+          "Environmental Engineering",
+          "Industrial Engineering",
+          "Biomedical Engineering",
+          "Structural Engineering",
+          
+          // --- Architecture & Construction ---
+          "Architecture",
+          "Urban Planning",
+          "Interior Design",
+          "Construction Management",
+          "Site Engineering",
+          "Surveying",
+          
+          // --- Manufacturing, Logistics & Operations ---
+          "Manufacturing",
+          "Production Management",
+          "Warehouse Operations",
+          "Supply Chain Management",
+          "Procurement",
+          "Inventory Management",
+          "Logistics",
+          "Transportation",
+          "Quality Control",
+          
+          // --- Government & Nonprofit ---
+          "Government",
+          "Public Policy",
+          "Civil Services",
+          "Defense & Military",
+          "Nonprofit",
+          "NGO",
+          "Social Work",
+          
+          // --- Hospitality, Tourism & Events ---
+          "Hospitality",
+          "Hotel Management",
+          "Travel & Tourism",
+          "Event Management",
+          "Food & Beverage",
+          
+          // --- Skilled Trades & Technical Jobs ---
+          "Electrician",
+          "Plumber",
+          "Carpenter",
+          "Mechanic",
+          "Welding",
+          "HVAC Technician",
+          "Machinist",
+          "CNC Operator",
+          
+          // --- Other / Emerging ---
+          "Remote Jobs",
+          "Freelance",
+          "Internships",
+          "Entry-Level",
+          "Others"
   ];
 
   const descriptionRef = useRef(null);
@@ -112,24 +266,6 @@ function JobPostingForm() {
   ];
 
   const jobTypes = ["Full-time", "Part-time", "Internship", "Contract"];
-
-  // Fetch companies on mount
-  useEffect(() => {
-    const fetchCompanies = async () => {
-      try {
-        const response = await axios.get("http://localhost:5000/api/companies", {
-          withCredentials: true,
-        });
-        // Handle response based on your API structure
-        const companiesData = response.data.companies || response.data;
-        setCompanies(Array.isArray(companiesData) ? companiesData : []);
-      } catch (error) {
-        console.error("Error fetching companies:", error);
-        setError("Failed to load companies. Please try again.");
-      }
-    };
-    fetchCompanies();
-  }, []);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -164,26 +300,21 @@ function JobPostingForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     if (!formData.type) {
       alert("Please select a job type.");
       return;
     }
-
+  
     if (!formData.category) {
       alert("Please select a category.");
-      return;
-    }
-
-    if (!formData.company) {
-      alert("Please select a company.");
       return;
     }
 
     const postData = {
       title: formData.jobTitle,
       description: formData.description,
-      company: formData.company, // Send company _id
+      company: formData.companyName,
       location: formData.location,
       salary: {
         min: formData.salaryMin ? Number(formData.salaryMin) : undefined,
@@ -196,13 +327,13 @@ function JobPostingForm() {
       responsibilities: formData.responsibilities,
       roleExperience: formData.roleExperience,
       skills: formData.skills,
-      category: formData.category,
+      category: formData.category, // Single category string
       type: formData.type,
       applicationDeadline: formData.applicationDeadline || undefined,
       remote: formData.remote,
       contactEmail: formData.email,
     };
-
+  
     try {
       const response = await axios.post(
         "http://localhost:5000/api/posts/",
@@ -211,13 +342,13 @@ function JobPostingForm() {
           withCredentials: true,
         }
       );
-
+  
       alert("Job posted successfully!");
       console.log("Job Posting Response:", response.data);
-
+  
       setFormData({
         jobTitle: "",
-        company: "", // Reset to empty string
+        companyName: "",
         location: "",
         experience: "",
         salaryMin: "",
@@ -229,19 +360,16 @@ function JobPostingForm() {
         responsibilities: "",
         roleExperience: "",
         skills: [],
-        category: "",
+        category: "", // Reset to empty string
         type: "",
         applicationDeadline: "",
         remote: false,
       });
-
+  
       setActiveSection("Basic Information");
-      setError(null);
-      setSuccess("Job posted successfully!");
     } catch (error) {
       console.error("Post creation error:", error);
-      setError(error.response?.data?.message || "Post creation failed.");
-      setSuccess(null);
+      alert(error.response?.data?.message || "Post creation failed.");
     }
   };
 
@@ -418,23 +546,15 @@ function JobPostingForm() {
               />
             </div>
             <div className="form-group">
-              <label>Company</label>
-              <select
-                name="company"
-                value={formData.company}
+              <label>Company Name</label>
+              <input
+                type="text"
+                name="companyName"
+                value={formData.companyName}
                 onChange={handleChange}
+                placeholder="e.g. Wrogan Tech Support"
                 required
-              >
-                <option value="">Select a Company</option>
-                {companies.map((company) => (
-                  <option key={company._id} value={company._id}>
-                    {company.name}
-                  </option>
-                ))}
-              </select>
-              {companies.length === 0 && (
-                <p className="form-error">No companies available. Please add a company first.</p>
-              )}
+              />
             </div>
             <div className="form-group">
               <label>Location</label>
@@ -590,12 +710,12 @@ function JobPostingForm() {
                   Add
                 </button>
               </div>
-
+              
               {showSuggestions && newSkill && (
                 <div className="suggested-skills">
                   <div className="suggested-skills-list">
                     {suggestedSkills
-                      .filter(skill =>
+                      .filter(skill => 
                         skill.toLowerCase().includes(newSkill.toLowerCase()) &&
                         !formData.skills.includes(skill)
                       )
@@ -770,7 +890,7 @@ function JobPostingForm() {
               <div className="review-block">
                 <h4>Basic Information</h4>
                 <p><span>Job Title:</span> {formData.jobTitle || "Not provided"}</p>
-                <p><span>Company:</span> {companies.find(c => c._id === formData.company)?.name || "Not selected"}</p>
+                <p><span>Company:</span> {formData.companyName || "Not provided"}</p>
                 <p><span>Location:</span> {formData.location || "Not provided"}</p>
                 <p><span>Email:</span> {formData.email || "Not provided"}</p>
                 <p><span>Type:</span> {formData.type || "Not provided"}</p>

@@ -4,26 +4,6 @@ import { Link, useNavigate } from "react-router-dom";
 import "../styles/PostList.css";
 import CompLogo from "../Assests/CompLogo.png";
 
-class ErrorBoundary extends React.Component {
-  state = { hasError: false, error: null };
-
-  static getDerivedStateFromError(error) {
-    return { hasError: true, error };
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return (
-        <div className="post-list-container">
-          <h1>Something went wrong.</h1>
-          <p>{this.state.error?.message}</p>
-        </div>
-      );
-    }
-    return this.props.children;
-  }
-}
-
 function PostList() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -37,7 +17,6 @@ function PostList() {
           withCredentials: true,
         })
         .then((res) => {
-          console.log("Posts API Response:", res.data); // Debug log
           setPosts(res.data);
           setLoading(false);
         })
@@ -52,7 +31,7 @@ function PostList() {
 
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this post?")) return;
-
+  
     try {
       await axios.delete(`http://localhost:5000/api/posts/${id}`, {
         withCredentials: true,
@@ -80,7 +59,7 @@ function PostList() {
     return "Not Disclosed";
   };
 
-  const formatDate = (date) =>
+  const formatDate = (date) => 
     date ? new Date(date).toLocaleDateString() : "Open";
 
   if (!user) {
@@ -92,72 +71,67 @@ function PostList() {
   }
 
   return (
-    <ErrorBoundary>
-      <div className="post-list-container">
-        <div className="header">
-          <h2>My Job Posts</h2>
-          <Link to="/jobPostingForm">
-            <button className="post-btn">Post New Job</button>
-          </Link>
-        </div>
+    <div className="post-list-container">
+      <div className="header">
+        <h2>My Job Posts</h2>
+        <Link to="/jobPostingForm">
+          <button className="post-btn">Post New Job</button>
+        </Link>
+      </div>
 
-        {posts.length > 0 ? (
-          <div className="card-holder">
-            {posts.map((post) => (
-              <div className="card" key={post._id}>
-                <div className="top-section">
-                  <span>{post.type}</span>
-                  <div className="action-icons">
-                    <i
-                      className="fa-solid fa-edit"
-                      onClick={() => handleEdit(post._id)}
-                      title="Edit Post"
-                    ></i>
-                    <i
-                      className="fa-solid fa-trash"
-                      onClick={() => handleDelete(post._id)}
-                      title="Delete Post"
-                    ></i>
-                  </div>
-                </div>
-                <div className="mid-section">
-                  <div className="comp-img">
-                    <img src={CompLogo} alt="Company Logo" />
-                    <div className="comp-dets">
-                      <h3 className="job-title">{post.title}</h3>
-                      <p className="comp-name">
-                        {typeof post.company === "string"
-                          ? post.company
-                          : post.company?.name || "Unknown Company"}
-                      </p>
-                      <div className="location1">
-                        <i className="fa-solid fa-location-dot"></i>
-                        {typeof post.location === "string" ? post.location : "Not specified"}{" "}
-                        {post.remote ? "(Remote)" : "(On-site)"}
-                      </div>
-                    </div>
-                  </div>
-                  <p className="desc">{truncate(post.description)}</p>
-                </div>
-                <div className="bottom-section">
-                  <span className="salary">{formatSalary(post.salary)}</span>
-                  <div>
-                    <button
-                      className="btn view-btn"
-                      onClick={() => navigate(`/job/${post._id}`)}
-                    >
-                      View Job
-                    </button>
-                  </div>
+      {posts.length > 0 ? (
+        <div className="card-holder">
+          {posts.map((post) => (
+            <div className="card" key={post._id}>
+              <div className="top-section">
+                <span>{post.type}</span>
+                <div className="action-icons">
+                  <i 
+                    className="fa-solid fa-edit" 
+                    onClick={() => handleEdit(post._id)}
+                    title="Edit Post"
+                  ></i>
+                  <i 
+                    className="fa-solid fa-trash" 
+                    onClick={() => handleDelete(post._id)}
+                    title="Delete Post"
+                  ></i>
                 </div>
               </div>
-            ))}
-          </div>
-        ) : (
-          <p className="info-message">You haven’t posted any jobs yet.</p>
-        )}
-      </div>
-    </ErrorBoundary>
+              <div className="mid-section">
+                <div className="comp-img">
+                  <img src={CompLogo} alt={`${post.company} Logo`} />
+                  <div className="comp-dets">
+                    <h3 className="job-title">{post.title}</h3>
+                    <p className="comp-name">{post.company}</p>
+                    <div className="location1">
+                      <i className="fa-solid fa-location-dot"></i>
+                      {post.location} {post.remote ? "(Remote)" : "(On-site)"}
+                    </div>
+                  </div>
+                </div>
+                <p className="desc">{truncate(post.description)}</p>
+                
+                
+              </div>
+              <div className="bottom-section">
+                <span className="salary">{formatSalary(post.salary)}</span>
+                <div>
+                  <button
+                    className="btn view-btn"
+                    onClick={() => navigate(`/job/${post._id}`)}
+                  >
+                    View Job
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="info-message">You haven’t posted any jobs yet.</p>
+      )}
+    </div>
   );
 }
 

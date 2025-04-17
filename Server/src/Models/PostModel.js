@@ -10,8 +10,7 @@ const postSchema = new mongoose.Schema({
         required: true,
     },
     company: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Company",
+        type: String,
         required: true,
     },
     location: {

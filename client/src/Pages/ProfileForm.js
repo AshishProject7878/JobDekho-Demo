@@ -366,23 +366,22 @@ function ProfileForm() {
     if (step === 5 && validateStep(4)) {
       setIsSubmitting(true);
       try {
-        console.log('Submitting form data:', JSON.stringify(formData, null, 2));
         const response = await axios.put(API_URL, formData, {
           withCredentials: true,
           headers: { 'Content-Type': 'application/json' }
         });
-        console.log('Profile processed:', response.data);
-        alert(response.data.message || 'Profile processed successfully!');
+        console.log('Profile updated:', response.data);
+        alert(response.data.message || 'Profile successfully updated!');
         navigate('/profileComp');
       } catch (error) {
-        console.error('Profile processing failed:', error);
-        setErrorMessage(error.response?.data?.message || 'Profile processing failed');
+        console.error('Profile update failed:', error);
+        setErrorMessage(error.response?.data?.message || 'Profile update failed');
       } finally {
         setIsSubmitting(false);
       }
     } else {
       setStep(5);
-    }
+    } 
   };
 
   const renderStep = () => {
