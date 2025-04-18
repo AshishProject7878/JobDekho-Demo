@@ -18,13 +18,23 @@ const PersonalSchema = new mongoose.Schema({
         type: String,
         trim: true,
         default: "",
-      },
+    },
       resumePublicId: {
         // New field to store Cloudinary public_id
         type: String,
         trim: true,
         default: "",
       },
+      videoResumeUrl: {
+        type: String,
+        trim: true,
+        default: "",
+    },
+    videoResumePublicId: {
+        type: String,
+        trim: true,
+        default: "",
+    },
 });
 
 const JobHistorySchema = new mongoose.Schema({

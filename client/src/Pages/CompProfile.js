@@ -5,7 +5,6 @@ import { format } from 'date-fns';
 import { Link } from 'react-router-dom';
 import '../styles/CompProfile.css';
 
-// Use environment variable for API URL (create .env with REACT_APP_API_URL)
 const BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 function CompProfile() {
@@ -13,7 +12,13 @@ function CompProfile() {
   const [user, setUser] = useState({ name: '', email: '' });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [resumeFile, setResumeFile] = useState(null); // To store selected resume file
+  const [resumeFile, setResumeFile] = useState(null);
+  const [videoFile, setVideoFile] = useState(null);
+  const [isUploadingResume, setIsUploadingResume] = useState(false);
+  const [isUploadingVideo, setIsUploadingVideo] = useState(false);
+  const [showSuccessPopup, setShowSuccessPopup] = useState(null); // 'resume' or 'video'
+  const [showErrorPopup, setShowErrorPopup] = useState(null); // 'resume' or 'video'
+  const [errorMessage, setErrorMessage] = useState('');
   const [sectionOrder, setSectionOrder] = useState([
     'Personal Information',
     'Job History',
@@ -59,6 +64,25 @@ function CompProfile() {
     }
   }, [API_URL, navigate]);
 
+  useEffect(() => {
+    if (showSuccessPopup) {
+      const timer = setTimeout(() => {
+        setShowSuccessPopup(null);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [showSuccessPopup]);
+
+  useEffect(() => {
+    if (showErrorPopup) {
+      const timer = setTimeout(() => {
+        setShowErrorPopup(null);
+        setErrorMessage('');
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [showErrorPopup]);
+
   const handleTabClick = (tab) => {
     setSectionOrder((prevOrder) => {
       const newOrder = [...prevOrder];
@@ -76,16 +100,29 @@ function CompProfile() {
     if (file && file.type === 'application/pdf') {
       setResumeFile(file);
     } else {
-      alert('Please upload a valid PDF file');
+      setErrorMessage('Please upload a valid PDF file');
+      setShowErrorPopup('resume');
+    }
+  };
+
+  const handleVideoChange = (e) => {
+    const file = e.target.files[0];
+    if (file && ['video/mp4', 'video/webm'].includes(file.type)) {
+      setVideoFile(file);
+    } else {
+      setErrorMessage('Please upload a valid MP4 or WebM video');
+      setShowErrorPopup('video');
     }
   };
 
   const handleResumeUpload = async () => {
     if (!resumeFile) {
-      alert('Please select a file to upload');
+      setErrorMessage('Please select a file to upload');
+      setShowErrorPopup('resume');
       return;
     }
 
+    setIsUploadingResume(true);
     const formData = new FormData();
     formData.append('resume', resumeFile);
 
@@ -96,12 +133,45 @@ function CompProfile() {
         },
         withCredentials: true,
       });
-      alert('Resume uploaded successfully!');
-      setResumeFile(null); // Clear file input
-      await fetchProfileData(); // Refetch profile data to get updated resumeUrl
+      setShowSuccessPopup('resume');
+      setResumeFile(null);
+      await fetchProfileData();
     } catch (error) {
       console.error('Error uploading resume:', error);
-      alert('Failed to upload resume');
+      setErrorMessage(error.response?.data?.message || 'Failed to upload resume');
+      setShowErrorPopup('resume');
+    } finally {
+      setIsUploadingResume(false);
+    }
+  };
+
+  const handleVideoUpload = async () => {
+    if (!videoFile) {
+      setErrorMessage('Please select a video file to upload');
+      setShowErrorPopup('video');
+      return;
+    }
+
+    setIsUploadingVideo(true);
+    const formData = new FormData();
+    formData.append('videoResume', videoFile);
+
+    try {
+      const response = await axios.post(`${BASE_URL}/api/upload/video-resume`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+        withCredentials: true,
+      });
+      setShowSuccessPopup('video');
+      setVideoFile(null);
+      await fetchProfileData();
+    } catch (error) {
+      console.error('Error uploading video resume:', error);
+      setErrorMessage(error.response?.data?.message || 'Failed to upload video resume');
+      setShowErrorPopup('video');
+    } finally {
+      setIsUploadingVideo(false);
     }
   };
 
@@ -157,47 +227,101 @@ function CompProfile() {
 
   const sections = {
     'Personal Information': (
-    <>
-      <h2>Personal Information</h2>
-      <p>
-        <strong>Date of Birth:</strong>{' '}
-        {profileData.personal?.dob
-          ? format(new Date(profileData.personal.dob), 'MMMM dd, yyyy')
-          : 'Not provided'}
-      </p>
-      <p>
-        <strong>Gender:</strong> {profileData.personal?.gender || 'Not provided'}
-      </p>
-      {/* Display Resume Link */}
-      <p>
-        <strong>Resume:</strong>{' '}
-        {profileData.personal?.resumeUrl ? (
-          <a
-            href={profileData.personal.resumeUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            download="resume.pdf" // Force download with .pdf extension
+      <>
+        <h2>Personal Information</h2>
+        <p>
+          <strong>Date of Birth:</strong>{' '}
+          {profileData.personal?.dob
+            ? format(new Date(profileData.personal.dob), 'MMMM dd, yyyy')
+            : 'Not provided'}
+        </p>
+        <p>
+          <strong>Gender:</strong> {profileData.personal?.gender || 'Not provided'}
+        </p>
+        {/* Display Resume Link */}
+        <p>
+          <strong>Resume:</strong>{' '}
+          {profileData.personal?.resumeUrl ? (
+            <a
+              href={profileData.personal.resumeUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              download="resume.pdf"
+            >
+              View Resume
+            </a>
+          ) : (
+            'Not uploaded'
+          )}
+        </p>
+        {/* Upload Resume Section */}
+        <div className="upload-resume">
+          <input
+            type="file"
+            accept=".pdf"
+            onChange={handleResumeChange}
+            className="resume-upload-input"
+            key={resumeFile ? resumeFile.name : 'resume-input'}
+          />
+          <button
+            className={`profile-btn ${isUploadingResume ? 'loading-btn' : ''}`}
+            onClick={handleResumeUpload}
+            disabled={isUploadingResume}
           >
-            View Resume
-          </a>
-        ) : (
-          'Not uploaded'
-        )}
-      </p>
-      {/* Upload Resume Section */}
-      <div className="upload-resume">
-        <input
-          type="file"
-          accept=".pdf"
-          onChange={handleResumeChange}
-          className="resume-upload-input"
-        />
-        <button className="profile-btn" onClick={handleResumeUpload}>
-          {profileData.personal?.resumeUrl ? 'Change Resume' : 'Upload Resume'}
-        </button>
-      </div>
-    </>
-  ),
+            {isUploadingResume ? (
+              <>
+                <span className="loader"></span> Uploading...
+              </>
+            ) : profileData.personal?.resumeUrl ? (
+              'Change Resume'
+            ) : (
+              'Upload Resume'
+            )}
+          </button>
+        </div>
+        {/* Display Video Resume */}
+        <p>
+          <strong>Video Resume:</strong>{' '}
+          {profileData.personal?.videoResumeUrl ? (
+            <video
+              controls
+              src={profileData.personal.videoResumeUrl}
+              className="video-resume"
+              style={{ maxWidth: '100%', height: 'auto' }}
+            >
+              Your browser does not support the video tag.
+            </video>
+          ) : (
+            'Not uploaded'
+          )}
+        </p>
+        {/* Upload Video Resume Section */}
+        <div className="upload-video-resume">
+          <input
+            type="file"
+            accept="video/mp4,video/webm"
+            onChange={handleVideoChange}
+            className="video-upload-input"
+            key={videoFile ? videoFile.name : 'video-input'}
+          />
+          <button
+            className={`profile-btn ${isUploadingVideo ? 'loading-btn' : ''}`}
+            onClick={handleVideoUpload}
+            disabled={isUploadingVideo}
+          >
+            {isUploadingVideo ? (
+              <>
+                <span className="loader"></span> Uploading...
+              </>
+            ) : profileData.personal?.videoResumeUrl ? (
+              'Change Video Resume'
+            ) : (
+              'Upload Video Resume'
+            )}
+          </button>
+        </div>
+      </>
+    ),
     'Job History': (
       <>
         <h2>Job History</h2>
@@ -258,6 +382,41 @@ function CompProfile() {
 
   return (
     <div className="Compprofile-container">
+      {/* Success Pop-up */}
+      {showSuccessPopup && (
+        <div className="success-popup" onClick={() => setShowSuccessPopup(null)}>
+          <div className="success-popup-content" onClick={(e) => e.stopPropagation()}>
+            <i className="fa-solid fa-check checkmark-icon"></i>
+            <h2>
+              {showSuccessPopup === 'resume'
+                ? 'Resume Uploaded Successfully!'
+                : 'Video Resume Uploaded Successfully!'}
+            </h2>
+            <button
+              className="profile-btn popup-btn"
+              onClick={() => setShowSuccessPopup(null)}
+            >
+              Okay
+            </button>
+          </div>
+        </div>
+      )}
+      {/* Error Pop-up */}
+      {showErrorPopup && (
+        <div className="success-popup" onClick={() => setShowErrorPopup(null)}>
+          <div className="success-popup-content error-popup-content" onClick={(e) => e.stopPropagation()}>
+            <i className="fa-solid fa-exclamation-circle error-icon"></i>
+            <h2>{errorMessage}</h2>
+            <button
+              className="profile-btn popup-btn"
+              onClick={() => setShowErrorPopup(null)}
+            >
+              Okay
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="profile-holder">
         <div className="profile-dets">
           <img

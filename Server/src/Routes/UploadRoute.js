@@ -1,8 +1,10 @@
 import express from "express";
 import { v2 as cloudinary } from "cloudinary";
 import { protectRoute } from "../Middlewares/AuthMiddleware.js";
-import Profile from "../Models/ProfileModel.js"; // Import Profile model
+import Profile from "../Models/ProfileModel.js";
 import dotenv from "dotenv";
+import { getVideoDurationInSeconds } from "get-video-duration";
+import fs from "fs";
 
 dotenv.config();
 
@@ -56,8 +58,7 @@ router.post("/", protectRoute, async (req, res) => {
       bytes: result.bytes,
     });
 
-    // Update the profile with the new profile picture URL
-    const userId = req.user._id; // Assuming protectRoute attaches user to req
+    const userId = req.user._id;
     const updatedProfile = await Profile.findOneAndUpdate(
       { user: userId },
       { $set: { "personal.profilePicture": result.secure_url } },
@@ -106,25 +107,21 @@ router.post("/resume", protectRoute, async (req, res) => {
 
     const file = req.files.resume;
 
-    // Validate file type (PDF only)
     if (file.mimetype !== "application/pdf") {
       return res.status(400).json({ message: "Only PDF files are allowed" });
     }
 
-    // Validate file size (10MB limit for resumes)
     if (file.size > 10 * 1024 * 1024) {
       return res.status(400).json({ message: "File size must be less than 10MB" });
     }
 
-    // Generate a unique public_id with .pdf extension
     const publicId = `resumes/${req.user._id}_${Date.now()}.pdf`;
 
-    // Upload to Cloudinary
     const result = await cloudinary.uploader.upload(file.tempFilePath || file.data, {
       folder: "resumes",
       resource_type: "raw",
       public_id: publicId,
-      format: "pdf", // Explicitly set format to PDF
+      format: "pdf",
     });
 
     console.log("Cloudinary Upload Result:", {
@@ -133,7 +130,6 @@ router.post("/resume", protectRoute, async (req, res) => {
       bytes: result.bytes,
     });
 
-    // Update the profile with the new resume URL and public_id
     const userId = req.user._id;
     const updatedProfile = await Profile.findOneAndUpdate(
       { user: userId },
@@ -154,6 +150,149 @@ router.post("/resume", protectRoute, async (req, res) => {
   } catch (error) {
     console.error("Resume Upload Error:", error);
     res.status(500).json({ message: "Failed to upload resume", error: error.message });
+  }
+});
+
+// Route for uploading video resume
+router.post("/video-resume", protectRoute, async (req, res) => {
+  let file; // Declare file variable for cleanup in catch block
+  try {
+    // Log request details
+    console.log("Received video upload request:", {
+      userId: req.user?._id,
+      files: req.files,
+    });
+
+    // Check if file is uploaded
+    if (!req.files || !req.files.videoResume) {
+      console.error("No video file uploaded");
+      return res.status(400).json({ message: "No video uploaded" });
+    }
+
+    file = req.files.videoResume;
+    console.log("Received File:", {
+      name: file.name,
+      size: file.size,
+      mimetype: file.mimetype,
+      tempFilePath: file.tempFilePath,
+    });
+
+    // Validate file type (MP4, WebM)
+    const filetypes = /mp4|webm/;
+    if (!filetypes.test(file.mimetype)) {
+      console.error("Invalid file type:", file.mimetype);
+      return res.status(400).json({ message: "Only MP4 and WebM videos are allowed" });
+    }
+
+    // Validate file size (50MB limit)
+    if (file.size > 50 * 1024 * 1024) {
+      console.error("File size too large:", file.size);
+      return res.status(400).json({ message: "File size must be less than 50MB" });
+    }
+
+    // Validate temporary file exists
+    if (!file.tempFilePath || !fs.existsSync(file.tempFilePath)) {
+      console.error("Temporary file not found:", file.tempFilePath);
+      return res.status(400).json({ message: "Temporary file not found" });
+    }
+
+    // Validate video duration (<= 30 seconds)
+    const duration = await getVideoDurationInSeconds(file.tempFilePath);
+    console.log("Video Duration:", duration, "seconds");
+    if (duration > 30) {
+      console.error("Video duration exceeds 30 seconds:", duration);
+      return res.status(400).json({ message: "Video must be 30 seconds or shorter" });
+    }
+
+    // Generate unique public_id
+    const publicId = `video-resumes/${req.user._id}_${Date.now()}`;
+
+    // Upload to Cloudinary
+    const result = await cloudinary.uploader.upload(file.tempFilePath, {
+      folder: "video-resumes",
+      resource_type: "video",
+      public_id: publicId,
+      format: file.mimetype === "video/mp4" ? "mp4" : "webm",
+    });
+
+    console.log("Cloudinary Video Upload Result:", {
+      secure_url: result.secure_url,
+      public_id: result.public_id,
+      bytes: result.bytes,
+    });
+
+    // Delete old video from Cloudinary if it exists
+    const userId = req.user._id;
+    const profile = await Profile.findOne({ user: userId });
+    console.log("Profile Found:", profile ? profile._id : "No profile");
+    if (profile && profile.personal.videoResumePublicId) {
+      console.log("Deleting old video:", profile.personal.videoResumePublicId);
+      await cloudinary.uploader.destroy(profile.personal.videoResumePublicId, {
+        resource_type: "video",
+      });
+    }
+
+    // Update profile with new video URL and public_id
+    const updatedProfile = await Profile.findOneAndUpdate(
+      { user: userId },
+      {
+        $set: {
+          "personal.videoResumeUrl": result.secure_url,
+          "personal.videoResumePublicId": result.public_id,
+        },
+      },
+      { new: true, upsert: true }
+    );
+
+    console.log("Updated Profile:", updatedProfile ? updatedProfile._id : "Update failed");
+
+    if (!updatedProfile) {
+      console.error("Failed to update profile with video resume URL");
+      return res.status(500).json({ message: "Failed to update profile with video resume URL" });
+    }
+
+    // Clean up temporary file
+    if (file.tempFilePath && fs.existsSync(file.tempFilePath)) {
+      console.log("Cleaning up temporary file:", file.tempFilePath);
+      fs.unlinkSync(file.tempFilePath);
+    }
+
+    res.json({ url: result.secure_url });
+  } catch (error) {
+    // Detailed error logging
+    console.error("Video Resume Upload Error:", {
+      message: error.message,
+      stack: error.stack,
+      name: error.name,
+      cloudinaryError: error.http_code
+        ? { http_code: error.http_code, details: error.message }
+        : undefined,
+    });
+
+    // Clean up temporary file on error
+    if (file?.tempFilePath && fs.existsSync(file.tempFilePath)) {
+      console.log("Cleaning up temporary file on error:", file.tempFilePath);
+      fs.unlinkSync(file.tempFilePath);
+    }
+
+    // Handle specific errors
+    if (error.message.includes("30 seconds")) {
+      return res.status(400).json({ message: error.message });
+    }
+    if (error.http_code) {
+      if (error.http_code === 400) {
+        return res.status(400).json({ message: "Invalid file or upload parameters" });
+      } else if (error.http_code === 401 || error.http_code === 403) {
+        return res.status(401).json({ message: "Cloudinary authentication failed" });
+      } else if (error.http_code === 429) {
+        return res.status(429).json({ message: "Cloudinary rate limit exceeded" });
+      }
+    }
+
+    res.status(500).json({
+      message: "Failed to upload video resume",
+      error: error.message,
+    });
   }
 });
 
