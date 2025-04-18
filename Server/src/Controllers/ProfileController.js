@@ -1,5 +1,4 @@
-import Profile from '../models/ProfileModel.js'; // Adjust path as needed
-
+import Profile from '../Models/ProfileModel.js'; 
 // @desc    Create a new user profile
 // @route   POST /api/profile (not used here, kept for reference)
 // @access  Private

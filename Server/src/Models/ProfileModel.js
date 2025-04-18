@@ -11,9 +11,20 @@ const PersonalSchema = new mongoose.Schema({
     },
     profilePicture: {
         type: String,
-        default: "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y", // Default avatar
+        default: "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y", 
         trim: true
-    }
+    },
+    resumeUrl: {
+        type: String,
+        trim: true,
+        default: "",
+      },
+      resumePublicId: {
+        // New field to store Cloudinary public_id
+        type: String,
+        trim: true,
+        default: "",
+      },
 });
 
 const JobHistorySchema = new mongoose.Schema({

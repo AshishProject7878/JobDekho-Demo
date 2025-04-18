@@ -8,12 +8,12 @@ import '../styles/CompProfile.css';
 // Use environment variable for API URL (create .env with REACT_APP_API_URL)
 const BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
-// Note: Ensure Font Awesome is included (e.g., import '@fortawesome/fontawesome-free/css/all.min.css')
 function CompProfile() {
   const [profileData, setProfileData] = useState(null);
   const [user, setUser] = useState({ name: '', email: '' });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [resumeFile, setResumeFile] = useState(null); // To store selected resume file
   const [sectionOrder, setSectionOrder] = useState([
     'Personal Information',
     'Job History',
@@ -32,31 +32,29 @@ function CompProfile() {
     'Job Preferences',
   ];
 
+  const fetchProfileData = async () => {
+    setIsLoading(true);
+    try {
+      const response = await axios.get(API_URL, {
+        withCredentials: true,
+        headers: { 'Content-Type': 'application/json' },
+      });
+      console.log('API Response:', response.data);
+      setProfileData(response.data);
+    } catch (error) {
+      console.error('Failed to fetch profile data:', error);
+      setError(error.response?.data?.message || 'Failed to load profile data');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem('user'));
     if (!userData) {
       navigate('/login');
     } else {
       setUser(userData);
-
-      const fetchProfileData = async () => {
-        setIsLoading(true);
-        try {
-          const response = await axios.get(API_URL, {
-            withCredentials: true,
-            headers: { 'Content-Type': 'application/json' },
-          });
-          console.log('API Response:', response.data);
-          console.log('Profile Picture:', response.data.personal?.profilePicture);
-          setProfileData(response.data);
-        } catch (error) {
-          console.error('Failed to fetch profile data:', error);
-          setError(error.response?.data?.message || 'Failed to load profile data');
-        } finally {
-          setIsLoading(false);
-        }
-      };
-
       fetchProfileData();
     }
   }, [API_URL, navigate]);
@@ -65,12 +63,46 @@ function CompProfile() {
     setSectionOrder((prevOrder) => {
       const newOrder = [...prevOrder];
       const index = newOrder.indexOf(tab);
-      if (index > 0) { // Only swap if not already at the top
+      if (index > 0) {
         newOrder.splice(index, 1);
         newOrder.unshift(tab);
       }
       return newOrder;
     });
+  };
+
+  const handleResumeChange = (e) => {
+    const file = e.target.files[0];
+    if (file && file.type === 'application/pdf') {
+      setResumeFile(file);
+    } else {
+      alert('Please upload a valid PDF file');
+    }
+  };
+
+  const handleResumeUpload = async () => {
+    if (!resumeFile) {
+      alert('Please select a file to upload');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('resume', resumeFile);
+
+    try {
+      const response = await axios.post(`${BASE_URL}/api/upload/resume`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+        withCredentials: true,
+      });
+      alert('Resume uploaded successfully!');
+      setResumeFile(null); // Clear file input
+      await fetchProfileData(); // Refetch profile data to get updated resumeUrl
+    } catch (error) {
+      console.error('Error uploading resume:', error);
+      alert('Failed to upload resume');
+    }
   };
 
   const renderTimeline = (items, type) => {
@@ -125,19 +157,47 @@ function CompProfile() {
 
   const sections = {
     'Personal Information': (
-      <>
-        <h2>Personal Information</h2>
-        <p>
-          <strong>Date of Birth:</strong>{' '}
-          {profileData.personal?.dob
-            ? format(new Date(profileData.personal.dob), 'MMMM dd, yyyy')
-            : 'Not provided'}
-        </p>
-        <p>
-          <strong>Gender:</strong> {profileData.personal?.gender || 'Not provided'}
-        </p>
-      </>
-    ),
+    <>
+      <h2>Personal Information</h2>
+      <p>
+        <strong>Date of Birth:</strong>{' '}
+        {profileData.personal?.dob
+          ? format(new Date(profileData.personal.dob), 'MMMM dd, yyyy')
+          : 'Not provided'}
+      </p>
+      <p>
+        <strong>Gender:</strong> {profileData.personal?.gender || 'Not provided'}
+      </p>
+      {/* Display Resume Link */}
+      <p>
+        <strong>Resume:</strong>{' '}
+        {profileData.personal?.resumeUrl ? (
+          <a
+            href={profileData.personal.resumeUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            download="resume.pdf" // Force download with .pdf extension
+          >
+            View Resume
+          </a>
+        ) : (
+          'Not uploaded'
+        )}
+      </p>
+      {/* Upload Resume Section */}
+      <div className="upload-resume">
+        <input
+          type="file"
+          accept=".pdf"
+          onChange={handleResumeChange}
+          className="resume-upload-input"
+        />
+        <button className="profile-btn" onClick={handleResumeUpload}>
+          {profileData.personal?.resumeUrl ? 'Change Resume' : 'Upload Resume'}
+        </button>
+      </div>
+    </>
+  ),
     'Job History': (
       <>
         <h2>Job History</h2>
@@ -214,12 +274,8 @@ function CompProfile() {
             }}
           />
           <div className="profile-text">
-            <h3 className="profile-title">
-              {user.name || 'Your Profile'}
-            </h3>
-            <p className="profile-email">
-              {user.email || 'Email not provided'}
-            </p>
+            <h3 className="profile-title">{user.name || 'Your Profile'}</h3>
+            <p className="profile-email">{user.email || 'Email not provided'}</p>
           </div>
         </div>
         <div className="edit-profile">
@@ -262,9 +318,7 @@ function CompProfile() {
                 <i className="fa-solid fa-briefcase"></i>
                 <span style={{ marginLeft: '20px' }}>Experience</span>
               </p>
-              <p className="dets">
-                {profileData.professional?.experience || '0'} years
-              </p>
+              <p className="dets">{profileData.professional?.experience || '0'} years</p>
 
               <p className="short-dets">
                 <i className="fa-solid fa-graduation-cap"></i>
@@ -280,9 +334,7 @@ function CompProfile() {
                 <i className="fa-solid fa-envelope"></i>
                 <span style={{ marginLeft: '20px' }}>Email</span>
               </p>
-              <p className="dets lang">
-                {user.email || 'Not specified'}
-              </p>
+              <p className="dets lang">{user.email || 'Not specified'}</p>
 
               <button className="profile-btn SM" style={{ marginTop: '20px' }}>
                 Send Message
@@ -293,7 +345,6 @@ function CompProfile() {
               <h3 className="title">Skills</h3>
               <hr />
               <div className="skills-list">
-                {/* Backend ensures skills is non-empty, but check for robustness */}
                 {profileData.professional?.skills?.length > 0 ? (
                   profileData.professional.skills.map((skill, index) => (
                     <div key={index} className="skillColor">

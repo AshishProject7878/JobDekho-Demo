@@ -239,3 +239,15 @@
 .btn-share:hover {
   background-color: #218838;
 }
+
+.upload-resume {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.resume-upload-input {
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+}
