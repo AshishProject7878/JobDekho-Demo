@@ -73,3 +73,4 @@ export const logout = async (req, res) => {
         res.status(500).json({message: "Internal Server Error in Logout Controller", error: error.message});
     }
 }
+ 
