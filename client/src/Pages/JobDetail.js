@@ -46,6 +46,7 @@ function JobDetail() {
 
   const BASE_URL = "http://localhost:5000";
   const PROFILE_API_URL = `${BASE_URL}/api/profile`;
+  const UPLOAD_RESUME_URL = `${BASE_URL}/api/upload/resume`;
   const JOB_URL = `${window.location.origin}/job/${id}`;
 
   // Initialize EmailJS
@@ -68,8 +69,8 @@ function JobDetail() {
         });
         console.log("Profile API Response:", profileResponse.data);
         console.log("Personal Data:", profileResponse.data.personal);
-        setProfileResume(profileResponse.data.personal?.resume || null);
-        setApplicantEmail(profileResponse.data.personal?.email || null);
+        setProfileResume(profileResponse.data.personal?.resumeUrl || null);
+        setApplicantEmail(profileResponse.data.user?.email || null); // Use user.email
 
         setLoading(false);
       } catch (err) {
@@ -154,6 +155,7 @@ function JobDetail() {
   const handleApplyClick = () => {
     setShowApplyModal(true);
     setEmailStatus(null);
+    setNewResume(null);
   };
 
   const handleShareClick = () => {
@@ -162,19 +164,34 @@ function JobDetail() {
     setShareEmail("");
   };
 
-  const handleResumeChange = (e) => {
+  const handleResumeChange = async (e) => {
     const file = e.target.files[0];
-    if (file) {
-      if (file.type !== "application/pdf") {
-        setEmailStatus("Error: Only PDF files are allowed.");
-        return;
-      }
-      if (file.size > 10 * 1024 * 1024) {
-        setEmailStatus("Error: File size must be less than 10MB.");
-        return;
-      }
-      setNewResume(file);
-      setEmailStatus(null);
+    if (!file) return;
+
+    if (file.type !== "application/pdf") {
+      setEmailStatus("Error: Only PDF files are allowed.");
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      setEmailStatus("Error: File size must be less than 10MB.");
+      return;
+    }
+
+    // Upload to /api/upload/resume
+    try {
+      const formData = new FormData();
+      formData.append("resume", file);
+      const response = await axios.post(UPLOAD_RESUME_URL, formData, {
+        withCredentials: true,
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      console.log("Resume Upload Response:", response.data);
+      setProfileResume(response.data.url); // Update profile resume
+      setNewResume(null); // Clear local file
+      setEmailStatus("Resume uploaded successfully!");
+    } catch (err) {
+      console.error("Resume Upload Error:", err);
+      setEmailStatus("Error: Failed to upload resume.");
     }
   };
 
@@ -184,9 +201,8 @@ function JobDetail() {
       return;
     }
 
-    const resumeToSend = newResume || profileResume;
-    if (!resumeToSend) {
-      setEmailStatus("Error: Please upload a resume or ensure one is in your profile.");
+    if (!profileResume) {
+      setEmailStatus("Error: Please upload a resume.");
       return;
     }
 
@@ -201,7 +217,7 @@ function JobDetail() {
       reply_to: applicantEmail,
       job_title: job.title,
       company: typeof job.company === "string" ? job.company : job.company?.name || "Unknown Company",
-      resume_url: typeof resumeToSend === "string" ? resumeToSend : URL.createObjectURL(resumeToSend),
+      resume_url: profileResume, // Use profileResume (updated via upload)
     };
 
     console.log("Sending email with params:", templateParams);
@@ -442,14 +458,23 @@ function JobDetail() {
                     disabled={!profileResume}
                   />
                   Use Profile Resume
-                  {profileResume ? (
-                    <a href={profileResume} target="_blank" rel="noopener noreferrer">
-                      (View)
-                    </a>
-                  ) : (
-                    <span> (Not available)</span>
-                  )}
                 </label>
+                {profileResume ? (
+                  <div className="resume-preview">
+                    <a href={profileResume} target="_blank" rel="noopener noreferrer">
+                      View Resume
+                    </a>
+                    <embed
+                      src={profileResume}
+                      type="application/pdf"
+                      width="100%"
+                      height="200px"
+                      style={{ marginTop: "10px" }}
+                    />
+                  </div>
+                ) : (
+                  <p>No resume available in profile.</p>
+                )}
               </div>
 
               <div className="resume-option">
@@ -458,7 +483,7 @@ function JobDetail() {
                     type="radio"
                     name="resume"
                     checked={!!newResume}
-                    onChange={() => setNewResume(null)}
+                    onChange={() => {}}
                   />
                   Upload New Resume
                 </label>

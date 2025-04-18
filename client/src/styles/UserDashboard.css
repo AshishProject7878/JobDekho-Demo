@@ -1,0 +1,256 @@
+.dashboard-container {
+    padding: 40px 20px;
+    max-width: 1200px;
+    margin: auto;
+    font-family: "Segoe UI", sans-serif;
+  }
+  
+  .dashboard-header {
+    text-align: center;
+    font-size: 32px;
+    font-weight: bold;
+    color: #1f2937;
+    margin-bottom: 40px;
+  }
+  
+  .dashboard-loading,
+  .dashboard-error {
+    text-align: center;
+    font-size: 18px;
+    color: #6b7280;
+    padding: 40px 0;
+  }
+  
+  .dashboard-error {
+    color: #dc3545;
+  }
+  
+  /* Profile Section */
+  .profile-section {
+    margin-bottom: 40px;
+  }
+  
+  .profile-section h2 {
+    font-size: 24px;
+    color: #1f2937;
+    margin-bottom: 20px;
+  }
+  
+  .profile-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    max-width: 500px;
+  }
+  
+  .profile-card p {
+    margin: 10px 0;
+    font-size: 16px;
+    color: #333;
+  }
+  
+  .profile-card p strong {
+    color: #1f2937;
+  }
+  
+  .edit-profile-btn {
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #2575fc, #6a11cb);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  
+  .edit-profile-btn:hover {
+    background: linear-gradient(135deg, #6a11cb, #6a11cb);
+  }
+  
+  /* Posts Section */
+  .posts-section {
+    margin-bottom: 40px;
+  }
+  
+  .posts-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .posts-header h2 {
+    font-size: 24px;
+    color: #1f2937;
+  }
+  
+  .create-post-btn {
+    padding: 10px 20px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  
+  .create-post-btn:hover {
+    background: #0056b3;
+  }
+  
+  .posts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+  }
+  
+  .post-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .post-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  }
+  
+  .post-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  
+  .post-card-header h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0;
+  }
+  
+  .post-type {
+    background: #e9ecef;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    color: #333;
+  }
+  
+  .post-card p {
+    font-size: 14px;
+    color: #555;
+    margin: 8px 0;
+  }
+  
+  .post-card p strong {
+    color: #1f2937;
+  }
+  
+  .post-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+  }
+  
+  .edit-post-btn,
+  .delete-post-btn,
+  .view-post-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  
+  .edit-post-btn {
+    background: #28a745;
+    color: white;
+  }
+  
+  .edit-post-btn:hover {
+    background: #218838;
+  }
+  
+  .delete-post-btn {
+    background: #dc3545;
+    color: white;
+  }
+  
+  .delete-post-btn:hover {
+    background: #c82333;
+  }
+  
+  .view-post-btn {
+    background: #007bff;
+    color: white;
+  }
+  
+  .view-post-btn:hover {
+    background: #0056b3;
+  }
+  
+  .no-posts {
+    text-align: center;
+    font-size: 16px;
+    color: #6b7280;
+    padding: 20px;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .dashboard-container {
+      padding: 20px 15px;
+    }
+  
+    .dashboard-header {
+      font-size: 28px;
+    }
+  
+    .posts-header {
+      flex-direction: column;
+      gap: 15px;
+      align-items: flex-start;
+    }
+  
+    .posts-grid {
+      grid-template-columns: 1fr;
+    }
+  
+    .profile-card {
+      max-width: 100%;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .dashboard-header {
+      font-size: 24px;
+    }
+  
+    .profile-section h2,
+    .posts-header h2 {
+      font-size: 20px;
+    }
+  
+    .post-card-header h3 {
+      font-size: 16px;
+    }
+  
+    .post-card p {
+      font-size: 13px;
+    }
+  
+    .edit-post-btn,
+    .delete-post-btn,
+    .view-post-btn {
+      padding: 6px 12px;
+      font-size: 12px;
+    }
+  }

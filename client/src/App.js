@@ -16,6 +16,7 @@ import CompProfile from './Pages/CompProfile';
 import CompanyForm from './Pages/CompanyForm';
 import CompanyList from './Pages/CompanyList';
 import CompanyDetail from './Pages/CompanyDetail';
+import UserDashboard from './Pages/UserDashboard';
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
         <Route element={<ProtectedRoute />}>
         <Route path="/jobPostingForm" element={<JobPostingForm />}/>
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/userDashboard" element={<UserDashboard />} />
           <Route path="/companyForm" element={<CompanyForm />} />
           <Route path="/companyList" element={<CompanyList />} />
           <Route path="/profileForm" element={<ProfileForm />} />
