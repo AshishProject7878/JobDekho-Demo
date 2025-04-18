@@ -8,6 +8,7 @@ import postRoutes from "./Routes/PostRoute.js";
 import profileRoutes from "./Routes/ProfileRoute.js";
 import uploadRoutes from "./Routes/UploadRoute.js";
 import fileUpload from "express-fileupload";
+import companyRoutes from "./Routes/CompanyRoute.js";
 
 // Load environment variables first 
 dotenv.config();
@@ -32,6 +33,7 @@ app.use("/api/auth", authRoute);
 app.use("/api/posts", postRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/upload", uploadRoutes);
+app.use("/api/companies", companyRoutes);
 
 // Error handling middleware (optional, for better debugging)
 app.use((err, req, res, next) => {

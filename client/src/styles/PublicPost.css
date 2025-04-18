@@ -86,7 +86,6 @@
   gap: 10px;
 }
 
-/* Assuming you have a company logo; adjust path if needed */
 .comp-img img {
   width: 60px;
   height: 60px;
@@ -285,6 +284,83 @@
   border-color: #007bff;
 }
 
+.skills {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.skill-tag {
+  background: #f0f0f0;
+  padding: 4px 10px;
+  border-radius: 16px;
+  font-size: 12px;
+  color: #555;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+.public-card:hover .skill-tag {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.company-card .public-title {
+  font-size: 20px;
+  margin-bottom: 8px;
+}
+
+.company-card .comp-gst {
+  font-size: 13px;
+  color: #888;
+  margin: 4px 0;
+}
+
+.company-card .comp-address {
+  font-size: 13px;
+  color: #555;
+  margin: 4px 0;
+}
+
+.company-card .public-description {
+  font-size: 13px;
+  color: #666;
+}
+
+.company-card .company-info {
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+}
+
+.view-mode-dropdown {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.view-mode-dropdown label {
+  font-size: 14px;
+  color: #1f2937;
+  font-weight: 500;
+}
+
+.view-mode-dropdown select {
+  padding: 10px 12px;
+  font-size: 14px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background-color: white;
+  cursor: pointer;
+  outline: none;
+  min-width: 120px;
+  transition: border-color 0.3s ease;
+}
+
+.view-mode-dropdown select:focus {
+  border-color: #007bff;
+}
+
 /* Responsive adjustments */
 @media (max-width: 600px) {
   .public-container {
@@ -311,6 +387,15 @@
   }
 
   .filter-dropdown select {
+    width: 100%;
+  }
+
+  .view-mode-dropdown {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .view-mode-dropdown select {
     width: 100%;
   }
 
@@ -360,6 +445,29 @@
   .public-card::before {
     height: 60px;
   }
+
+  .skills {
+    gap: 6px;
+  }
+
+  .skill-tag {
+    font-size: 10px;
+    padding: 3px 8px;
+  }
+
+  .company-card .public-title {
+    font-size: 16px;
+  }
+
+  .company-card .comp-gst,
+  .company-card .comp-address,
+  .company-card .public-description {
+    font-size: 11px;
+  }
+
+  .company-card .company-info {
+    font-size: 12px;
+  }
 }
 
 @media (max-width: 400px) {
@@ -387,45 +495,23 @@
     padding: 6px 12px;
     font-size: 10px;
   }
-}
 
-/* Add this to your existing PublicPost.css */
-.skills {
-  display: flex;
-  flex-wrap: nowrap;
-  gap: 8px;
-  margin-top: 10px;
-}
-
-.skill-tag {
-  background: #f0f0f0;
-  padding: 4px 10px;
-  border-radius: 16px;
-  font-size: 12px;
-  color: #555;
-  transition: background 0.3s ease, color 0.3s ease;
-}
-
-.public-card:hover .skill-tag {
-  background: rgba(255, 255, 255, 0.2);
-  color: #fff;
-}
-
-/* Responsive adjustments */
-@media (max-width: 600px) {
-  .skills {
-    gap: 6px;
-  }
-
-  .skill-tag {
-    font-size: 10px;
-    padding: 3px 8px;
-  }
-}
-
-@media (max-width: 400px) {
   .skill-tag {
     font-size: 9px;
     padding: 2px 6px;
+  }
+
+  .company-card .public-title {
+    font-size: 14px;
+  }
+
+  .company-card .comp-gst,
+  .company-card .comp-address,
+  .company-card .public-description {
+    font-size: 10px;
+  }
+
+  .company-card .company-info {
+    font-size: 11px;
   }
 }
