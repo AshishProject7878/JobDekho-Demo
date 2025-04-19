@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { format } from 'date-fns';
-import { Link } from 'react-router-dom';
 import '../styles/CompProfile.css';
 
 const BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
@@ -97,21 +96,39 @@ function CompProfile() {
 
   const handleResumeChange = (e) => {
     const file = e.target.files[0];
-    if (file && file.type === 'application/pdf') {
+    if (file) {
+      if (file.type !== 'application/pdf') {
+        setErrorMessage('Please upload a valid PDF file');
+        setShowErrorPopup('resume');
+        return;
+      }
+      if (file.size > 10 * 1024 * 1024) { // 10MB limit
+        setErrorMessage('File size must be less than 10MB');
+        setShowErrorPopup('resume');
+        return;
+      }
       setResumeFile(file);
-    } else {
-      setErrorMessage('Please upload a valid PDF file');
-      setShowErrorPopup('resume');
+      setErrorMessage('');
+      setShowErrorPopup(null);
     }
   };
 
   const handleVideoChange = (e) => {
     const file = e.target.files[0];
-    if (file && ['video/mp4', 'video/webm'].includes(file.type)) {
+    if (file) {
+      if (!['video/mp4', 'video/webm'].includes(file.type)) {
+        setErrorMessage('Please upload a valid MP4 or WebM video');
+        setShowErrorPopup('video');
+        return;
+      }
+      if (file.size > 50 * 1024 * 1024) { // 50MB limit
+        setErrorMessage('Video size must be less than 50MB');
+        setShowErrorPopup('video');
+        return;
+      }
       setVideoFile(file);
-    } else {
-      setErrorMessage('Please upload a valid MP4 or WebM video');
-      setShowErrorPopup('video');
+      setErrorMessage('');
+      setShowErrorPopup(null);
     }
   };
 
@@ -128,11 +145,10 @@ function CompProfile() {
 
     try {
       const response = await axios.post(`${BASE_URL}/api/upload/resume`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+        headers: { 'Content-Type': 'multipart/form-data' },
         withCredentials: true,
       });
+      console.log('Resume Upload Response:', response.data);
       setShowSuccessPopup('resume');
       setResumeFile(null);
       await fetchProfileData();
@@ -158,11 +174,10 @@ function CompProfile() {
 
     try {
       const response = await axios.post(`${BASE_URL}/api/upload/video-resume`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+        headers: { 'Content-Type': 'multipart/form-data' },
         withCredentials: true,
       });
+      console.log('Video Resume Upload Response:', response.data);
       setShowSuccessPopup('video');
       setVideoFile(null);
       await fetchProfileData();
@@ -238,87 +253,90 @@ function CompProfile() {
         <p>
           <strong>Gender:</strong> {profileData.personal?.gender || 'Not provided'}
         </p>
-        {/* Display Resume Link */}
-        <p>
-          <strong>Resume:</strong>{' '}
+        {/* Resume Preview (from JobDetail.js) */}
+        <div className="resume-option">
+          <h3>Resume</h3>
           {profileData.personal?.resumeUrl ? (
-            <a
-              href={profileData.personal.resumeUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              download="resume.pdf"
-            >
-              View Resume
-            </a>
+            <div className="resume-preview">
+              <a href={profileData.personal.resumeUrl} target="_blank" rel="noopener noreferrer">
+                View Resume
+              </a>
+              <embed
+                src={profileData.personal.resumeUrl}
+                type="application/pdf"
+                width="100%"
+                height="200px"
+                style={{ marginTop: '10px' }}
+              />
+            </div>
           ) : (
-            'Not uploaded'
+            <p>No resume available.</p>
           )}
-        </p>
-        {/* Upload Resume Section */}
-        <div className="upload-resume">
-          <input
-            type="file"
-            accept=".pdf"
-            onChange={handleResumeChange}
-            className="resume-upload-input"
-            key={resumeFile ? resumeFile.name : 'resume-input'}
-          />
-          <button
-            className={`profile-btn ${isUploadingResume ? 'loading-btn' : ''}`}
-            onClick={handleResumeUpload}
-            disabled={isUploadingResume}
-          >
-            {isUploadingResume ? (
-              <>
-                <span className="loader"></span> Uploading...
-              </>
-            ) : profileData.personal?.resumeUrl ? (
-              'Change Resume'
-            ) : (
-              'Upload Resume'
-            )}
-          </button>
+          <div className="upload-resume">
+            <input
+              type="file"
+              accept=".pdf"
+              onChange={handleResumeChange}
+              className="resume-upload-input"
+              key={resumeFile ? resumeFile.name : 'resume-input'}
+            />
+            <button
+              className={`profile-btn ${isUploadingResume ? 'loading-btn' : ''}`}
+              onClick={handleResumeUpload}
+              disabled={isUploadingResume || !resumeFile}
+            >
+              {isUploadingResume ? (
+                <>
+                  <span className="loader"></span> Uploading...
+                </>
+              ) : profileData.personal?.resumeUrl ? (
+                'Change Resume'
+              ) : (
+                'Upload Resume'
+              )}
+            </button>
+          </div>
         </div>
-        {/* Display Video Resume */}
-        <p>
-          <strong>Video Resume:</strong>{' '}
+        {/* Video Resume Preview (from JobDetail.js) */}
+        <div className="resume-option">
+          <h3>Video Resume</h3>
           {profileData.personal?.videoResumeUrl ? (
-            <video
-              controls
-              src={profileData.personal.videoResumeUrl}
-              className="video-resume"
-              style={{ maxWidth: '100%', height: 'auto' }}
-            >
-              Your browser does not support the video tag.
-            </video>
+            <div className="video-resume-preview">
+              <video
+                controls
+                src={profileData.personal.videoResumeUrl}
+                style={{ maxWidth: '100%', height: 'auto', marginTop: '10px' }}
+              >
+                Your browser does not support the video tag.
+              </video>
+            </div>
           ) : (
-            'Not uploaded'
+            <p>No video resume available.</p>
           )}
-        </p>
-        {/* Upload Video Resume Section */}
-        <div className="upload-video-resume">
-          <input
-            type="file"
-            accept="video/mp4,video/webm"
-            onChange={handleVideoChange}
-            className="video-upload-input"
-            key={videoFile ? videoFile.name : 'video-input'}
-          />
-          <button
-            className={`profile-btn ${isUploadingVideo ? 'loading-btn' : ''}`}
-            onClick={handleVideoUpload}
-            disabled={isUploadingVideo}
-          >
-            {isUploadingVideo ? (
-              <>
-                <span className="loader"></span> Uploading...
-              </>
-            ) : profileData.personal?.videoResumeUrl ? (
-              'Change Video Resume'
-            ) : (
-              'Upload Video Resume'
-            )}
-          </button>
+          <div className="upload-video-resume">
+            <input
+              type="file"
+              accept="video/mp4,video/webm"
+              onChange={handleVideoChange}
+              className="video-upload-input"
+              key={videoFile ? videoFile.name : 'video-input'}
+            />
+            <button
+              className={`profile-btn ${isUploadingVideo ? 'loading-btn' : ''}`}
+              onClick={handleVideoUpload}
+              disabled={isUploadingVideo || !videoFile}
+            >
+              {isUploadingVideo ? (
+                <>
+                  <span className="loader"></span> Uploading...
+                </>
+              ) : profileData.personal?.videoResumeUrl ? (
+                'Change Video Resume'
+              ) : (
+                'Upload Video Resume'
+              )}
+            </button>
+          </div>
         </div>
       </>
     ),

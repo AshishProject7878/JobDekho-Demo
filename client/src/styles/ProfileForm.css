@@ -1,3 +1,6 @@
+/* ProfileForm.css */
+
+/* Main container */
 .p-main {
   min-height: 100vh;
   display: flex;
@@ -7,11 +10,13 @@
   padding: 2rem;
 }
 
+/* Form holder */
 .pre-holder {
   width: 100%;
   max-width: 720px;
 }
 
+/* Form card */
 .pre-card {
   background: white;
   border-radius: 16px;
@@ -21,6 +26,7 @@
   overflow: hidden;
 }
 
+/* Progress bar */
 .progress-bar {
   width: 100%;
   height: 8px;
@@ -61,6 +67,7 @@
   100% { transform: translateX(100%); }
 }
 
+/* Form title */
 .pre-title {
   margin-bottom: 2rem;
   color: #2c3e50;
@@ -69,17 +76,19 @@
   letter-spacing: -0.02em;
 }
 
+/* Form container */
 .pre-form {
   display: grid;
   gap: 0.45rem;
-
 }
 
+/* Form group */
 .form-group {
   display: grid;
   gap: 0.5rem;
 }
 
+/* Labels */
 label {
   color: #34495e;
   font-weight: 600;
@@ -87,7 +96,10 @@ label {
   font-size: 0.95rem;
 }
 
-.form-group input, select, textarea {
+/* Inputs, selects, textareas */
+.form-group input,
+select,
+textarea {
   padding: 0.875rem;
   border: 2px solid #ddd;
   border-radius: 8px;
@@ -96,6 +108,7 @@ label {
   transition: all 0.2s ease;
 }
 
+/* Checkbox option */
 .checkbox-option {
   display: flex;
   align-items: center;
@@ -141,6 +154,7 @@ label {
   font-size: 1rem;
 }
 
+/* Fresher section */
 .fresher-section {
   padding: 1.5rem;
   background: #f8fafc;
@@ -156,6 +170,7 @@ label {
   margin: 0;
 }
 
+/* Radio group */
 .radio-group {
   display: flex;
   gap: 15px;
@@ -172,17 +187,21 @@ label {
 }
 
 .radio-label input {
-  accent-color: #007bff; /* Customize the radio button color */
+  accent-color: #007bff;
   width: 18px;
   height: 18px;
 }
 
-input:focus, select:focus, textarea:focus {
+/* Focus states */
+input:focus,
+select:focus,
+textarea:focus {
   outline: none;
   border-color: #007bff;
   box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
 }
 
+/* Error states */
 .error {
   border-color: #dc3545;
   background: #fff5f5;
@@ -194,6 +213,7 @@ input:focus, select:focus, textarea:focus {
   font-weight: 500;
 }
 
+/* Form buttons container */
 .pre-buttons {
   margin-top: 2.5rem;
   display: flex;
@@ -202,79 +222,43 @@ input:focus, select:focus, textarea:focus {
   align-items: center;
 }
 
-/* -------------------- Resume ------------------------------ */
-
-.resume-upload {
-  padding: 0.5rem;
-  border: 2px dashed #e2e8f0;
-  border-radius: 8px;
-  background: #f8fafc;
-  width: 100%;
-  cursor: pointer;
-  font-size: 1rem;
-  color: #4a5568;
-}
-
-.resume-upload:hover {
-  border-color: #cbd5e0;
-}
-
-.upload-success {
-  color: #28a745;
-  font-size: 0.9rem;
-  margin-top: 0.5rem;
-}
-
-.upload-note {
-  color: #718096;
-  font-size: 0.9rem;
-  margin-top: 1rem;
-  line-height: 1.5;
-}
-
-
-/* Style for the checkbox group container */
+/* Checkbox group */
 .checkbox-group {
-display: flex;
-flex-wrap: wrap;
-gap: 12px; /* Space between checkboxes */
-margin-top: 5px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 5px;
 }
 
-/* Style for each checkbox label */
 .checkbox-label {
-display: flex;
-align-items: center;
-gap: 8px;
-padding: 8px 12px;
-border: 1px solid #ccc;
-border-radius: 6px;
-background-color: #f9f9f9;
-cursor: pointer;
-transition: all 0.3s ease-in-out;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background-color: #f9f9f9;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
 }
 
-/* Hover effect */
 .checkbox-label:hover {
-background-color: #f0f0f0;
-border-color: #999;
+  background-color: #f0f0f0;
+  border-color: #999;
 }
 
-/* Checkbox styling (hides default checkbox appearance) */
 .checkbox-label input[type="checkbox"] {
-width: 16px;
-height: 16px;
-accent-color: #007bff; /* Change to your primary color */
+  width: 16px;
+  height: 16px;
+  accent-color: #007bff;
 }
 
-/* Selected (checked) state */
 .checkbox-label input[type="checkbox"]:checked + span {
-font-weight: bold;
-color: #007bff;
+  font-weight: bold;
+  color: #007bff;
 }
 
-/* -------- Skills ------------------------------------- */
-
+/* Skills container */
 .skills-container {
   display: flex;
   flex-direction: column;
@@ -285,7 +269,7 @@ color: #007bff;
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
-  min-height: 2rem; /* Ensures space even when empty */
+  min-height: 2rem;
 }
 
 .skill-tag {
@@ -330,9 +314,7 @@ color: #007bff;
   background: #fff5f5;
 }
 
-
-
-
+/* Buttons */
 button {
   padding: 0.875rem 1.75rem;
   border: none;
@@ -345,7 +327,8 @@ button {
   overflow: hidden;
 }
 
-.next-btn, .form-submit-btn {
+.next-btn,
+.form-submit-btn {
   background: linear-gradient(90deg, #007bff, #00b7ff);
   color: white;
 }
@@ -361,7 +344,8 @@ button {
   padding: 0.875rem 1rem;
 }
 
-.next-btn:hover, .form-submit-btn:hover {
+.next-btn:hover,
+.form-submit-btn:hover {
   background: linear-gradient(90deg, #0056b3, #0096d6);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2);
@@ -377,6 +361,7 @@ button {
   transform: translateY(-1px);
 }
 
+/* History entry */
 .history-entry {
   border: 2px solid #edf2f7;
   padding: 1.5rem;
@@ -394,11 +379,13 @@ button {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
+/* Textarea */
 textarea {
   min-height: 120px;
   resize: vertical;
 }
 
+/* Add button */
 .add-btn {
   background: linear-gradient(90deg, #28a745, #48bb78);
   color: white;
@@ -413,6 +400,7 @@ textarea {
   box-shadow: 0 4px 12px rgba(40, 167, 69, 0.2);
 }
 
+/* Remove button */
 .remove-btn {
   background: linear-gradient(90deg, #dc3545, #ef4444);
   color: white;
@@ -430,6 +418,7 @@ textarea {
   box-shadow: 0 4px 12px rgba(220, 53, 69, 0.2);
 }
 
+/* Spinner */
 .spinner {
   display: inline-block;
   width: 20px;
@@ -444,6 +433,7 @@ textarea {
   to { transform: rotate(360deg); }
 }
 
+/* Disabled buttons */
 button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
@@ -451,6 +441,7 @@ button:disabled {
   box-shadow: none;
 }
 
+/* Form section animation */
 .form-section {
   animation: fadeIn 0.3s ease-in;
 }
@@ -656,6 +647,7 @@ button:disabled {
   }
 }
 
+/* Loading overlay */
 .loading-overlay {
   position: absolute;
   top: 0;
@@ -669,6 +661,7 @@ button:disabled {
   z-index: 1000;
 }
 
+/* Global error */
 .global-error {
   background: #ffebee;
   color: #c62828;
@@ -677,6 +670,7 @@ button:disabled {
   border-radius: 4px;
 }
 
+/* Spinner */
 .spinner {
   display: inline-block;
   width: 20px;
@@ -692,6 +686,7 @@ button:disabled {
   100% { transform: rotate(360deg); }
 }
 
+/* Profile picture preview */
 .profile-preview {
   width: 100px;
   height: 100px;
@@ -701,14 +696,234 @@ button:disabled {
   display: block;
 }
 
+/* File input */
 .form-group input[type="file"] {
   padding: 5px;
 }
 
+/* Summary profile picture */
 .summary-profile-pic {
   width: 50px;
   height: 50px;
   border-radius: 50%;
   margin-left: 10px;
   vertical-align: middle;
+}
+
+/* New Styles for Resume and Video Resume Uploads */
+.upload-resume,
+.upload-video-resume {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.resume-upload-input,
+.video-upload-input {
+  padding: 0.5rem;
+  border: 2px dashed #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
+  font-size: 0.95rem;
+  color: #4a5568;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.resume-upload-input:hover,
+.video-upload-input:hover {
+  border-color: #cbd5e0;
+}
+
+.form-btn {
+  background: linear-gradient(90deg, #007bff, #00b7ff);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  align-self: flex-start;
+  transition: all 0.3s ease;
+}
+
+.form-btn:hover {
+  background: linear-gradient(90deg, #0056b3, #0096d6);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2);
+}
+
+.form-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.form-btn.loading-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(90deg, #0056b3, #0096d6);
+  cursor: not-allowed;
+}
+
+.loader {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 1s ease-in-out infinite;
+}
+
+.resume-preview {
+  margin-top: 0.75rem;
+}
+
+.resume-preview a {
+  display: inline-block;
+  margin-bottom: 0.5rem;
+  color: #007bff;
+  font-size: 0.95rem;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.resume-preview a:hover {
+  text-decoration: underline;
+}
+
+.resume-preview embed {
+  width: 100%;
+  height: 200px;
+  border: 2px dashed #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.video-resume-preview {
+  margin-top: 0.75rem;
+}
+
+.video-resume-preview video {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  border: 2px dashed #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.upload-success {
+  color: #28a745;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-top: 0.5rem;
+}
+
+.upload-note {
+  color: #718096;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  line-height: 1.5;
+}
+
+/* Error messages for specific fields */
+.form-group .error-message {
+  margin-top: 0.25rem;
+}
+
+/* Responsive adjustments for resume and video resume */
+@media (max-width: 480px) {
+  .resume-preview embed {
+    height: 150px;
+  }
+
+  .video-resume-preview video {
+    max-width: 100%;
+  }
+
+  .form-btn {
+    width: 100%;
+    padding: 0.75rem;
+  }
+
+  .resume-upload-input,
+  .video-upload-input {
+    font-size: 0.9rem;
+  }
+}
+
+.success-popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.success-popup-content {
+  background: #fff;
+  padding: 1.5rem;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  max-width: 400px;
+  width: 90%;
+}
+
+.error-popup-content {
+  background: #fff;
+  padding: 1.5rem;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  max-width: 400px;
+  width: 90%;
+  border: 2px solid #dc3545;
+}
+
+.checkmark-icon {
+  color: #28a745;
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.error-icon {
+  color: #dc3545;
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.success-popup-content h2,
+.error-popup-content h2 {
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.popup-btn {
+  background: linear-gradient(90deg, #007bff, #00b7ff);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.popup-btn:hover {
+  background: linear-gradient(90deg, #0056b3, #0096d6);
+  transform: translateY(-1px);
 }

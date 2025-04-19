@@ -1,7 +1,7 @@
 import Profile from '../Models/ProfileModel.js'; // Adjust path as needed
 
 // @desc    Create a new user profile
-// @route   POST /api/profile (not used here, kept for reference)
+// @route   POST /api/profile
 // @access  Private
 export const createProfile = async (req, res) => {
   try {
@@ -19,7 +19,11 @@ export const createProfile = async (req, res) => {
         email: personal.email,
         dob: personal.dob,
         gender: personal.gender,
-        profilePicture: personal.profilePicture || undefined // Nested under personal, optional
+        profilePicture: personal.profilePicture || undefined,
+        resumeUrl: personal.resumeUrl || '', // Include resumeUrl
+        videoResumeUrl: personal.videoResumeUrl || '', // Include videoResumeUrl
+        resumePublicId: personal.resumePublicId || '', // Include resumePublicId
+        videoResumePublicId: personal.videoResumePublicId || '' // Include videoResumePublicId
       },
       isFresher,
       jobHistory: isFresher ? [] : jobHistory,
@@ -70,23 +74,32 @@ export const updateProfile = async (req, res) => {
       updatedJobHistory = []; // Clear jobHistory for freshers
     }
 
+    // Fetch existing profile to preserve fields
+    const existingProfile = await Profile.findOne({ user: userId });
+
     const profile = await Profile.findOneAndUpdate(
       { user: userId },
       { 
-        personal: {
-          fullName: personal?.fullName || '',
-          email: personal?.email || '',
-          dob: personal?.dob || null,
-          gender: personal?.gender || '',
-          profilePicture: personal?.profilePicture || undefined // Nested under personal, optional
-        },
-        isFresher: isFresher || false,
-        jobHistory: updatedJobHistory,
-        educationHistory: educationHistory || [],
-        professional: professional || {},
-        jobPrefs: jobPrefs || {},
-        user: userId,
-        updatedAt: new Date()
+        $set: {
+          personal: {
+            // Merge existing personal fields with updates
+            fullName: personal?.fullName || existingProfile?.personal?.fullName || '',
+            email: personal?.email || existingProfile?.personal?.email || '',
+            dob: personal?.dob || existingProfile?.personal?.dob || null,
+            gender: personal?.gender || existingProfile?.personal?.gender || '',
+            profilePicture: personal?.profilePicture || existingProfile?.personal?.profilePicture || undefined,
+            resumeUrl: personal?.resumeUrl || existingProfile?.personal?.resumeUrl || '',
+            videoResumeUrl: personal?.videoResumeUrl || existingProfile?.personal?.videoResumeUrl || '',
+            resumePublicId: personal?.resumePublicId || existingProfile?.personal?.resumePublicId || '',
+            videoResumePublicId: personal?.videoResumePublicId || existingProfile?.personal?.videoResumePublicId || ''
+          },
+          isFresher: isFresher !== undefined ? isFresher : existingProfile?.isFresher || false,
+          jobHistory: updatedJobHistory,
+          educationHistory: educationHistory || existingProfile?.educationHistory || [],
+          professional: professional || existingProfile?.professional || {},
+          jobPrefs: jobPrefs || existingProfile?.jobPrefs || {},
+          updatedAt: new Date()
+        }
       },
       { new: true, runValidators: true, upsert: true }
     );
@@ -143,7 +156,7 @@ export const deleteProfile = async (req, res) => {
 
 // @desc    Get profile by ID (optional, for admin or specific use cases)
 // @route   GET /api/profile/:id
-// @access  Private (or Public depending on your needs)
+// @access  Private
 export const getProfileById = async (req, res) => {
   try {
     const profile = await Profile.findById(req.params.id).populate('user', 'email');

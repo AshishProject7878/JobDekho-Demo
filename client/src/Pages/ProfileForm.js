@@ -10,11 +10,13 @@ function ProfileForm() {
   const [step, setStep] = useState(0);
   const [formData, setFormData] = useState({
     personal: {
-      fullName: "", // Initialize empty, will be set from localStorage
-      email: "", // Initialize empty, will be set from localStorage
+      fullName: "",
+      email: "",
       dob: "",
       gender: "",
-      profilePicture: "", // Will store Cloudinary URL
+      profilePicture: "",
+      resumeUrl: "",
+      videoResumeUrl: "",
     },
     isFresher: false,
     jobHistory: [{ company: "", position: "", startDate: "", endDate: "", description: "" }],
@@ -27,23 +29,28 @@ function ProfileForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null); // New for success popups
   const [skillInput, setSkillInput] = useState("");
   const [roleInput, setRoleInput] = useState("");
   const [locationInput, setLocationInput] = useState("");
+  const [resumeFile, setResumeFile] = useState(null);
+  const [videoFile, setVideoFile] = useState(null);
+  const [isUploadingResume, setIsUploadingResume] = useState(false);
+  const [isUploadingVideo, setIsUploadingVideo] = useState(false);
 
   const API_URL = "http://localhost:5000/api/profile";
   const UPLOAD_URL = "http://localhost:5000/api/upload";
+  const UPLOAD_RESUME_URL = "http://localhost:5000/api/upload/resume";
+  const UPLOAD_VIDEO_URL = "http://localhost:5000/api/upload/video-resume";
 
-  // Fetch user data from localStorage and profile data from API
+  // Fetch user data and profile
   useEffect(() => {
-    // Check for user data in localStorage
     const userData = JSON.parse(localStorage.getItem("user"));
     if (!userData) {
       navigate("/login");
       return;
     }
 
-    // Set name and email from localStorage or location.state as fallback
     setFormData((prev) => ({
       ...prev,
       personal: {
@@ -53,7 +60,6 @@ function ProfileForm() {
       },
     }));
 
-    // Fetch profile data
     const fetchProfile = async () => {
       setIsLoading(true);
       try {
@@ -62,11 +68,13 @@ function ProfileForm() {
           ...prev,
           ...response.data,
           personal: {
-            fullName: userData.name || location.state?.name || "", // Enforce from User
-            email: userData.email || location.state?.email || "", // Enforce from User
+            fullName: userData.name || location.state?.name || "",
+            email: userData.email || location.state?.email || "",
             profilePicture: response.data.personal?.profilePicture || "",
             dob: response.data.personal?.dob || "",
             gender: response.data.personal?.gender || "",
+            resumeUrl: response.data.personal?.resumeUrl || "",
+            videoResumeUrl: response.data.personal?.videoResumeUrl || "",
           },
           jobHistory: response.data.jobHistory || prev.jobHistory,
           educationHistory: response.data.educationHistory || prev.educationHistory,
@@ -83,6 +91,8 @@ function ProfileForm() {
               dob: "",
               gender: "",
               profilePicture: "",
+              resumeUrl: "",
+              videoResumeUrl: "",
             },
             isFresher: false,
             jobHistory: [{ company: "", position: "", startDate: "", endDate: "", description: "" }],
@@ -102,6 +112,18 @@ function ProfileForm() {
     fetchProfile();
   }, [navigate, location.state]);
 
+  // Clear success/error messages after 5 seconds
+  useEffect(() => {
+    if (successMessage || errorMessage) {
+      const timer = setTimeout(() => {
+        setSuccessMessage(null);
+        setErrorMessage(null);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage, errorMessage]);
+
+  // Validate fields
   const validateField = (section, field, value, index = null) => {
     const newErrors = { ...errors };
     const fieldKey = index !== null ? `${field}${index}` : field;
@@ -110,8 +132,10 @@ function ProfileForm() {
       if (
         (field !== "experience" &&
           field !== "profilePicture" &&
-          field !== "email" && // Skip email validation since it's read-only
-          field !== "fullName" && // Skip fullName validation since it's read-only
+          field !== "email" &&
+          field !== "fullName" &&
+          field !== "resumeUrl" &&
+          field !== "videoResumeUrl" &&
           section !== "jobHistory" &&
           !value) ||
         (field === "skills" && value.length === 0) ||
@@ -145,6 +169,7 @@ function ProfileForm() {
     return !newErrors[fieldKey];
   };
 
+  // Validate step
   const validateStep = (currentStep) => {
     const section = Object.keys(formData)[currentStep];
     const currentData = formData[section];
@@ -164,7 +189,8 @@ function ProfileForm() {
       });
     } else if (!Array.isArray(currentData)) {
       Object.entries(currentData).forEach(([key, value]) => {
-        if (key !== "profilePicture" && key !== "email" && key !== "fullName" && !validateField(section, key, value)) {
+        if (key !== "profilePicture" && key !== "email" && key !== "fullName" &&
+            key !== "resumeUrl" && key !== "videoResumeUrl" && !validateField(section, key, value)) {
           newErrors[key] = "This field is required";
           isValid = false;
         }
@@ -174,6 +200,103 @@ function ProfileForm() {
     return isValid;
   };
 
+  // Handle resume file change
+  const handleResumeChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.type !== "application/pdf") {
+        setErrorMessage("Please upload a valid PDF file");
+        return;
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        setErrorMessage("File size must be less than 10MB");
+        return;
+      }
+      setResumeFile(file);
+      setErrorMessage(null);
+    }
+  };
+
+  // Handle video resume file change
+  const handleVideoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (!["video/mp4", "video/webm"].includes(file.type)) {
+        setErrorMessage("Please upload a valid MP4 or WebM video");
+        return;
+      }
+      if (file.size > 50 * 1024 * 1024) {
+        setErrorMessage("Video size must be less than 50MB");
+        return;
+      }
+      setVideoFile(file);
+      setErrorMessage(null);
+    }
+  };
+
+  // Upload resume
+  const handleResumeUpload = async () => {
+    if (!resumeFile) {
+      setErrorMessage("Please select a file to upload");
+      return;
+    }
+
+    setIsUploadingResume(true);
+    const formDataUpload = new FormData();
+    formDataUpload.append("resume", resumeFile);
+
+    try {
+      const response = await axios.post(UPLOAD_RESUME_URL, formDataUpload, {
+        withCredentials: true,
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      const resumeUrl = response.data.url;
+      setFormData((prev) => ({
+        ...prev,
+        personal: { ...prev.personal, resumeUrl },
+      }));
+      setResumeFile(null);
+      setSuccessMessage("Resume uploaded successfully!");
+    } catch (error) {
+      console.error("Resume upload failed:", error);
+      setErrorMessage(error.response?.data?.message || "Failed to upload resume");
+    } finally {
+      setIsUploadingResume(false);
+    }
+  };
+
+  // Upload video resume
+  const handleVideoUpload = async () => {
+    if (!videoFile) {
+      setErrorMessage("Please select a video file to upload");
+      return;
+    }
+
+    setIsUploadingVideo(true);
+    const formDataUpload = new FormData();
+    formDataUpload.append("videoResume", videoFile);
+
+    try {
+      const response = await axios.post(UPLOAD_VIDEO_URL, formDataUpload, {
+        withCredentials: true,
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      const videoResumeUrl = response.data.url;
+      setFormData((prev) => ({
+        ...prev,
+        personal: { ...prev.personal, videoResumeUrl },
+      }));
+      setVideoFile(null);
+      setSuccessMessage("Video resume uploaded successfully!");
+    } catch (error) {
+      console.error("Video resume upload failed:", error);
+      setErrorMessage(error.response?.data?.message || "Failed to upload video resume");
+    } finally {
+      setIsUploadingVideo(false);
+    }
+  };
+
+  // Handle profile picture upload
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -187,7 +310,7 @@ function ProfileForm() {
       return;
     }
 
-    const maxSize = 5 * 1024 * 1024; // 5MB
+    const maxSize = 5 * 1024 * 1024;
     if (file.size > maxSize) {
       setErrors((prev) => ({
         ...prev,
@@ -206,21 +329,23 @@ function ProfileForm() {
         withCredentials: true,
         headers: { "Content-Type": "multipart/form-data" },
       });
-      const imageUrl = response.data.url; // Cloudinary full URL
-      console.log("Uploaded Image URL:", imageUrl); // Debug
+      const imageUrl = response.data.url;
       setFormData((prev) => ({
         ...prev,
         personal: { ...prev.personal, profilePicture: imageUrl },
       }));
+      setSuccessMessage("Profile picture uploaded successfully!");
     } catch (error) {
       console.error("Image upload failed:", error);
       setErrors((prev) => ({
         ...prev,
         profilePicture: error.response?.data?.message || "Failed to upload image",
       }));
+      setErrorMessage(error.response?.data?.message || "Failed to upload profile picture");
     }
   };
 
+  // Other handlers
   const handleChange = (section, field, value, index = null) => {
     setFormData((prev) => {
       if (section === "isFresher") {
@@ -310,7 +435,7 @@ function ProfileForm() {
         ...prev,
         jobPrefs: { ...prev.jobPrefs, locations: newLocations },
       }));
-      setLocationInput(""); // Reset input field
+      setLocationInput("");
       validateField("jobPrefs", "locations", newLocations);
     }
   };
@@ -376,7 +501,7 @@ function ProfileForm() {
         });
       } else if (section !== "isFresher") {
         Object.keys(currentData).forEach((key) => {
-          if (key !== "email" && key !== "fullName") {
+          if (key !== "email" && key !== "fullName" && key !== "resumeUrl" && key !== "videoResumeUrl") {
             newTouched[key] = true;
           }
         });
@@ -395,19 +520,26 @@ function ProfileForm() {
     setTouched({});
   };
 
+  // Handle form submission
   const handleSubmit = async () => {
     if (step === 5 && validateStep(4)) {
       setIsSubmitting(true);
       try {
+        console.log("Submitting formData:", formData); // Debug payload
         const response = await axios.put(API_URL, formData, {
           withCredentials: true,
           headers: { "Content-Type": "application/json" },
         });
         console.log("Profile updated:", response.data);
-        alert(response.data.message || "Profile successfully updated!");
-        navigate("/profileComp");
+        setSuccessMessage(response.data.message || "Profile successfully updated!");
+        setTimeout(() => navigate("/profileComp"), 2000); // Navigate after showing success
       } catch (error) {
-        console.error("Profile update failed:", error);
+        console.error("Profile update failed:", {
+          message: error.message,
+          code: error.code,
+          response: error.response?.data,
+          status: error.response?.status,
+        });
         setErrorMessage(error.response?.data?.message || "Profile update failed");
       } finally {
         setIsSubmitting(false);
@@ -423,13 +555,43 @@ function ProfileForm() {
         return (
           <div className="form-section">
             <h3 className="pre-title">Personal Information</h3>
+            {/* Success Popup */}
+            {successMessage && (
+              <div className="success-popup" onClick={() => setSuccessMessage(null)}>
+                <div className="success-popup-content" onClick={(e) => e.stopPropagation()}>
+                  <i className="fa-solid fa-check checkmark-icon"></i>
+                  <h2>{successMessage}</h2>
+                  <button
+                    className="form-btn popup-btn"
+                    onClick={() => setSuccessMessage(null)}
+                  >
+                    Okay
+                  </button>
+                </div>
+              </div>
+            )}
+            {/* Error Popup */}
+            {errorMessage && (
+              <div className="success-popup" onClick={() => setErrorMessage(null)}>
+                <div className="success-popup-content error-popup-content" onClick={(e) => e.stopPropagation()}>
+                  <i className="fa-solid fa-exclamation-circle error-icon"></i>
+                  <h2>{errorMessage}</h2>
+                  <button
+                    className="form-btn popup-btn"
+                    onClick={() => setErrorMessage(null)}
+                  >
+                    Okay
+                  </button>
+                </div>
+              </div>
+            )}
             <div className="pre-form">
               <div className="form-group">
                 <label>Full Name:</label>
                 <input
                   type="text"
                   value={formData.personal.fullName}
-                  readOnly // Make fullName read-only
+                  readOnly
                   className={errors.fullName ? "error" : ""}
                 />
                 {errors.fullName && <span className="error-message">{errors.fullName}</span>}
@@ -439,7 +601,7 @@ function ProfileForm() {
                 <input
                   type="email"
                   value={formData.personal.email}
-                  readOnly // Make email read-only
+                  readOnly
                   className={errors.email ? "error" : ""}
                 />
                 {errors.email && <span className="error-message">{errors.email}</span>}
@@ -471,6 +633,89 @@ function ProfileForm() {
                   />
                 )}
                 {errors.profilePicture && <span className="error-message">{errors.profilePicture}</span>}
+              </div>
+              <div className="form-group">
+                <label>Resume (optional, PDF, max 10MB):</label>
+                {formData.personal.resumeUrl ? (
+                  <div className="resume-preview">
+                    <a href={formData.personal.resumeUrl} target="_blank" rel="noopener noreferrer">
+                      View Resume
+                    </a>
+                    <embed
+                      src={formData.personal.resumeUrl}
+                      type="application/pdf"
+                      width="100%"
+                      height="200px"
+                      style={{ marginTop: "10px" }}
+                    />
+                  </div>
+                ) : (
+                  <p>No resume uploaded.</p>
+                )}
+                <div className="upload-resume">
+                  <input
+                    type="file"
+                    accept="application/pdf"
+                    onChange={handleResumeChange}
+                    className="resume-upload-input"
+                    key={resumeFile ? resumeFile.name : "resume-input"}
+                  />
+                  <button
+                    className={`form-btn ${isUploadingResume ? "loading-btn" : ""}`}
+                    onClick={handleResumeUpload}
+                    disabled={isUploadingResume || !resumeFile}
+                  >
+                    {isUploadingResume ? (
+                      <>
+                        <span className="loader"></span> Uploading...
+                      </>
+                    ) : formData.personal.resumeUrl ? (
+                      "Change Resume"
+                    ) : (
+                      "Upload Resume"
+                    )}
+                  </button>
+                </div>
+              </div>
+              <div className="form-group">
+                <label>Video Resume (optional, MP4/WebM, max 50MB):</label>
+                {formData.personal.videoResumeUrl ? (
+                  <div className="video-resume-preview">
+                    <video
+                      controls
+                      src={formData.personal.videoResumeUrl}
+                      style={{ maxWidth: "100%", height: "auto", marginTop: "10px" }}
+                    >
+                      Your browser does not support the video tag.
+                    </video>
+                  </div>
+                ) : (
+                  <p>No video resume uploaded.</p>
+                )}
+                <div className="upload-video-resume">
+                  <input
+                    type="file"
+                    accept="video/mp4,video/webm"
+                    onChange={handleVideoChange}
+                    className="video-upload-input"
+                    key={videoFile ? videoFile.name : "video-input"}
+                  />
+                  <button
+                    className={`form-btn ${isUploadingVideo ? "loading-btn" : ""}`}
+                    onClick={handleVideoUpload}
+                    disabled={isUploadingVideo || !videoFile}
+                  >
+                    {isUploadingVideo ? (
+                      <>
+                        <span className="loader"></span> Uploading...
+                      </>
+                    ) : formData.personal.videoResumeUrl ? (
+                      "Change Video Resume"
+                    ) : (
+                      "Upload Video Resume"
+                    )}
+                  </button>
+                </div>
               </div>
               <div className="form-group">
                 <label>Date of Birth:</label>
@@ -911,6 +1156,26 @@ function ProfileForm() {
                   />
                 </p>
                 <p>
+                  <strong>Resume:</strong>
+                  {formData.personal.resumeUrl ? (
+                    <a href={formData.personal.resumeUrl} target="_blank" rel="noopener noreferrer">
+                      View Resume
+                    </a>
+                  ) : (
+                    "Not provided"
+                  )}
+                </p>
+                <p>
+                  <strong>Video Resume:</strong>
+                  {formData.personal.videoResumeUrl ? (
+                    <a href={formData.personal.videoResumeUrl} target="_blank" rel="noopener noreferrer">
+                      View Video Resume
+                    </a>
+                  ) : (
+                    "Not provided"
+                  )}
+                </p>
+                <p>
                   <strong>Date of Birth:</strong> {formData.personal.dob || "Not provided"}
                 </p>
                 <p>
@@ -1048,7 +1313,6 @@ function ProfileForm() {
       <div className="pre-holder">
         <div className="pre-card">
           {isLoading && <div className="loading-overlay">Loading profile...</div>}
-          {errorMessage && <div className="error-message global-error">{errorMessage}</div>}
 
           <div className="progress-bar">
             <div className="progress" style={{ width: `${(step / 5) * 100}%` }}></div>
@@ -1106,3 +1370,4 @@ function ProfileForm() {
 }
 
 export default ProfileForm;
+

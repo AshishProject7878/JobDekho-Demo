@@ -38,15 +38,20 @@ function JobDetail() {
   const [showApplyModal, setShowApplyModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [profileResume, setProfileResume] = useState(null);
+  const [profileVideoResume, setProfileVideoResume] = useState(null); // New state for video resume
   const [applicantEmail, setApplicantEmail] = useState(null);
   const [newResume, setNewResume] = useState(null);
+  const [newVideoResume, setNewVideoResume] = useState(null); // New state for video resume file
+  const [isUploadingVideo, setIsUploadingVideo] = useState(false); // New state for video upload status
   const [emailStatus, setEmailStatus] = useState(null);
   const [shareEmail, setShareEmail] = useState("");
   const [shareStatus, setShareStatus] = useState(null);
+  const [videoError, setVideoError] = useState(null); // New state for video upload errors
 
   const BASE_URL = "http://localhost:5000";
   const PROFILE_API_URL = `${BASE_URL}/api/profile`;
   const UPLOAD_RESUME_URL = `${BASE_URL}/api/upload/resume`;
+  const UPLOAD_VIDEO_URL = `${BASE_URL}/api/upload/video-resume`; // Video resume upload endpoint
   const JOB_URL = `${window.location.origin}/job/${id}`;
 
   // Initialize EmailJS
@@ -70,7 +75,8 @@ function JobDetail() {
         console.log("Profile API Response:", profileResponse.data);
         console.log("Personal Data:", profileResponse.data.personal);
         setProfileResume(profileResponse.data.personal?.resumeUrl || null);
-        setApplicantEmail(profileResponse.data.user?.email || null); // Use user.email
+        setProfileVideoResume(profileResponse.data.personal?.videoResumeUrl || null); // Set video resume
+        setApplicantEmail(profileResponse.data.user?.email || null);
 
         setLoading(false);
       } catch (err) {
@@ -156,6 +162,8 @@ function JobDetail() {
     setShowApplyModal(true);
     setEmailStatus(null);
     setNewResume(null);
+    setNewVideoResume(null); // Reset video resume
+    setVideoError(null); // Reset video error
   };
 
   const handleShareClick = () => {
@@ -177,7 +185,6 @@ function JobDetail() {
       return;
     }
 
-    // Upload to /api/upload/resume
     try {
       const formData = new FormData();
       formData.append("resume", file);
@@ -186,12 +193,57 @@ function JobDetail() {
         headers: { "Content-Type": "multipart/form-data" },
       });
       console.log("Resume Upload Response:", response.data);
-      setProfileResume(response.data.url); // Update profile resume
-      setNewResume(null); // Clear local file
+      setProfileResume(response.data.url);
+      setNewResume(null);
       setEmailStatus("Resume uploaded successfully!");
     } catch (err) {
       console.error("Resume Upload Error:", err);
       setEmailStatus("Error: Failed to upload resume.");
+    }
+  };
+
+  const handleVideoResumeChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (!["video/mp4", "video/webm"].includes(file.type)) {
+      setVideoError("Error: Only MP4 or WebM videos are allowed.");
+      return;
+    }
+    if (file.size > 50 * 1024 * 1024) { // Example: 50MB limit
+      setVideoError("Error: Video size must be less than 50MB.");
+      return;
+    }
+
+    setNewVideoResume(file);
+    setVideoError(null);
+  };
+
+  const handleVideoResumeUpload = async () => {
+    if (!newVideoResume) {
+      setVideoError("Error: Please select a video file to upload.");
+      return;
+    }
+
+    setIsUploadingVideo(true);
+    const formData = new FormData();
+    formData.append("videoResume", newVideoResume);
+
+    try {
+      const response = await axios.post(UPLOAD_VIDEO_URL, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+        withCredentials: true,
+      });
+      console.log("Video Resume Upload Response:", response.data);
+      setProfileVideoResume(response.data.url); // Update profile video resume
+      setNewVideoResume(null);
+      setVideoError(null);
+      setEmailStatus("Video resume uploaded successfully!");
+    } catch (err) {
+      console.error("Video Resume Upload Error:", err);
+      setVideoError(err.response?.data?.message || "Error: Failed to upload video resume.");
+    } finally {
+      setIsUploadingVideo(false);
     }
   };
 
@@ -217,7 +269,8 @@ function JobDetail() {
       reply_to: applicantEmail,
       job_title: job.title,
       company: typeof job.company === "string" ? job.company : job.company?.name || "Unknown Company",
-      resume_url: profileResume, // Use profileResume (updated via upload)
+      resume_url: profileResume,
+      video_resume_url: profileVideoResume || "", // Include video resume if available
     };
 
     console.log("Sending email with params:", templateParams);
@@ -229,11 +282,11 @@ function JobDetail() {
         templateParams
       );
       console.log("Email sent successfully:", response);
-      setEmailStatus("Resume sent successfully!");
+      setEmailStatus("Application sent successfully!");
       setShowApplyModal(false);
     } catch (err) {
       console.error("Failed to send email:", err);
-      setEmailStatus("Failed to send resume. Please try again.");
+      setEmailStatus("Failed to send application. Please try again.");
     }
   };
 
@@ -495,6 +548,65 @@ function JobDetail() {
                 />
               </div>
 
+              <div className="resume-option">
+                <label>
+                  <input
+                    type="radio"
+                    name="videoResume"
+                    checked={!newVideoResume && profileVideoResume}
+                    onChange={() => setNewVideoResume(null)}
+                    disabled={!profileVideoResume}
+                  />
+                  Use Profile Video Resume
+                </label>
+                {profileVideoResume ? (
+                  <div className="video-resume-preview">
+                    <video
+                      controls
+                      src={profileVideoResume}
+                      style={{ maxWidth: "100%", height: "auto", marginTop: "10px" }}
+                    >
+                      Your browser does not support the video tag.
+                    </video>
+                  </div>
+                ) : (
+                  <p>No video resume available in profile.</p>
+                )}
+              </div>
+
+              <div className="resume-option">
+                <label>
+                  <input
+                    type="radio"
+                    name="videoResume"
+                    checked={!!newVideoResume}
+                    onChange={() => {}}
+                  />
+                  Upload New Video Resume
+                </label>
+                <input
+                  type="file"
+                  accept="video/mp4,video/webm"
+                  onChange={handleVideoResumeChange}
+                  className="video-upload"
+                />
+                <button
+                  className={`Jobbtn1 ${isUploadingVideo ? "loading-btn" : ""}`}
+                  onClick={handleVideoResumeUpload}
+                  disabled={isUploadingVideo || !newVideoResume}
+                  style={{ marginTop: "10px" }}
+                >
+                  {isUploadingVideo ? (
+                    <>
+                      <span className="loader"></span> Uploading...
+                    </>
+                  ) : (
+                    "Upload Video Resume"
+                  )}
+                </button>
+                {videoError && <p className="error-text">{videoError}</p>}
+              </div>
+
               {emailStatus && (
                 <p className={emailStatus.includes("Error") ? "error-text" : "success-text"}>
                   {emailStatus}
@@ -503,7 +615,7 @@ function JobDetail() {
 
               <div className="modal-buttons">
                 <button className="Jobbtn1" onClick={sendResumeEmail}>
-                  Send Resume
+                  Send Application
                 </button>
                 <button className="Jobbtn1 btn-cancel" onClick={() => setShowApplyModal(false)}>
                   Cancel
