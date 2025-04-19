@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
+import React, { useState, useEffect, useCallback } from "react";
+import { debounce } from "lodash";
+import api from "../api";
 import { useNavigate, useLocation } from "react-router-dom";
 import "../styles/ProfileForm.css";
 
@@ -8,6 +9,7 @@ function ProfileForm() {
   const navigate = useNavigate();
 
   const [step, setStep] = useState(0);
+  const [hasProfile, setHasProfile] = useState(false);
   const [formData, setFormData] = useState({
     personal: {
       fullName: "",
@@ -23,13 +25,22 @@ function ProfileForm() {
     educationHistory: [{ degree: "", institution: "", field: "", graduationYear: "" }],
     professional: { jobTitle: "", company: "", experience: "", skills: [] },
     jobPrefs: { roles: [], locations: [], salary: "", employmentType: [] },
+    autoJobPrefs: {
+      enabled: false,
+      minSalary: 0,
+      experienceLevel: "",
+      categories: [],
+      skills: [],
+      remoteOnly: false,
+      minCompanyRating: 0,
+    },
   });
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
-  const [successMessage, setSuccessMessage] = useState(null); // New for success popups
+  const [successMessage, setSuccessMessage] = useState(null);
   const [skillInput, setSkillInput] = useState("");
   const [roleInput, setRoleInput] = useState("");
   const [locationInput, setLocationInput] = useState("");
@@ -37,13 +48,12 @@ function ProfileForm() {
   const [videoFile, setVideoFile] = useState(null);
   const [isUploadingResume, setIsUploadingResume] = useState(false);
   const [isUploadingVideo, setIsUploadingVideo] = useState(false);
+  const [categoryInput, setCategoryInput] = useState("");
 
-  const API_URL = "http://localhost:5000/api/profile";
   const UPLOAD_URL = "http://localhost:5000/api/upload";
   const UPLOAD_RESUME_URL = "http://localhost:5000/api/upload/resume";
   const UPLOAD_VIDEO_URL = "http://localhost:5000/api/upload/video-resume";
 
-  // Fetch user data and profile
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem("user"));
     if (!userData) {
@@ -63,7 +73,8 @@ function ProfileForm() {
     const fetchProfile = async () => {
       setIsLoading(true);
       try {
-        const response = await axios.get(API_URL, { withCredentials: true });
+        const response = await api.get("/api/profile", { withCredentials: true });
+        setHasProfile(true);
         setFormData((prev) => ({
           ...prev,
           ...response.data,
@@ -76,30 +87,19 @@ function ProfileForm() {
             resumeUrl: response.data.personal?.resumeUrl || "",
             videoResumeUrl: response.data.personal?.videoResumeUrl || "",
           },
-          jobHistory: response.data.jobHistory || prev.jobHistory,
-          educationHistory: response.data.educationHistory || prev.educationHistory,
+          jobHistory: response.data.jobHistory?.length
+            ? response.data.jobHistory
+            : prev.jobHistory,
+          educationHistory: response.data.educationHistory?.length
+            ? response.data.educationHistory
+            : prev.educationHistory,
           professional: { ...prev.professional, ...response.data.professional },
           jobPrefs: { ...prev.jobPrefs, ...response.data.jobPrefs },
+          autoJobPrefs: { ...prev.autoJobPrefs, ...response.data.autoJobPrefs },
         }));
       } catch (error) {
         if (error.response?.status === 404) {
-          setFormData((prev) => ({
-            ...prev,
-            personal: {
-              fullName: userData.name || location.state?.name || "",
-              email: userData.email || location.state?.email || "",
-              dob: "",
-              gender: "",
-              profilePicture: "",
-              resumeUrl: "",
-              videoResumeUrl: "",
-            },
-            isFresher: false,
-            jobHistory: [{ company: "", position: "", startDate: "", endDate: "", description: "" }],
-            educationHistory: [{ degree: "", institution: "", field: "", graduationYear: "" }],
-            professional: { jobTitle: "", company: "", experience: "", skills: [] },
-            jobPrefs: { roles: [], locations: [], salary: "", employmentType: [] },
-          }));
+          setHasProfile(false);
           console.log("No profile found, starting with empty form.");
         } else {
           console.error("Failed to fetch profile:", error);
@@ -112,7 +112,6 @@ function ProfileForm() {
     fetchProfile();
   }, [navigate, location.state]);
 
-  // Clear success/error messages after 5 seconds
   useEffect(() => {
     if (successMessage || errorMessage) {
       const timer = setTimeout(() => {
@@ -123,45 +122,72 @@ function ProfileForm() {
     }
   }, [successMessage, errorMessage]);
 
-  // Validate fields
   const validateField = (section, field, value, index = null) => {
     const newErrors = { ...errors };
     const fieldKey = index !== null ? `${field}${index}` : field;
 
     if (touched[fieldKey] || isSubmitting) {
       if (
-        (field !== "experience" &&
-          field !== "profilePicture" &&
-          field !== "email" &&
-          field !== "fullName" &&
-          field !== "resumeUrl" &&
-          field !== "videoResumeUrl" &&
-          section !== "jobHistory" &&
-          !value) ||
-        (field === "skills" && value.length === 0) ||
-        (field === "roles" && value.length === 0) ||
-        (field === "locations" && value.length === 0)
+        section === "personal" &&
+        ["dob", "gender"].includes(field) &&
+        !value
       ) {
         newErrors[fieldKey] = "This field is required";
-      } else if (section === "jobHistory" && !formData.isFresher && !value) {
+      } else if (
+        section === "professional" &&
+        ["jobTitle", "company", "skills"].includes(field) &&
+        !value
+      ) {
+        newErrors[fieldKey] = field === "skills" ? "At least one skill is required" : "This field is required";
+      } else if (
+        section === "jobPrefs" &&
+        ["roles", "locations"].includes(field) &&
+        value.length === 0
+      ) {
+        newErrors[fieldKey] = `At least one ${field} is required`;
+      } else if (
+        section === "autoJobPrefs" &&
+        field === "minSalary" &&
+        value < 0
+      ) {
+        newErrors[fieldKey] = "Minimum salary cannot be negative";
+      } else if (
+        section === "autoJobPrefs" &&
+        field === "minCompanyRating" &&
+        (value < 0 || value > 5)
+      ) {
+        newErrors[fieldKey] = "Company rating must be between 0 and 5";
+      } else if (
+        section === "educationHistory" &&
+        ["degree", "institution"].includes(field) &&
+        !value
+      ) {
         newErrors[fieldKey] = "This field is required";
+      } else if (
+        section === "educationHistory" &&
+        field === "graduationYear" &&
+        value
+      ) {
+        const year = parseInt(value);
+        if (year < 1900 || year > new Date().getFullYear()) {
+          newErrors[fieldKey] = `Year must be between 1900 and ${new Date().getFullYear()}`;
+        }
+      } else if (
+        section === "jobHistory" &&
+        index !== null &&
+        !formData.isFresher &&
+        ["company", "position", "startDate"].includes(field) &&
+        !value
+      ) {
+        newErrors[fieldKey] = "This field is required for non-freshers";
       } else {
         delete newErrors[fieldKey];
+      }
 
-        if (field === "experience" && value && (isNaN(value) || value < 0)) {
-          newErrors[fieldKey] = "Experience must be a positive number";
-        }
-        if (field === "graduationYear" && value) {
-          const year = parseInt(value);
-          if (year < 1900 || year > new Date().getFullYear()) {
-            newErrors[fieldKey] = `Year must be between 1900 and ${new Date().getFullYear()}`;
-          }
-        }
-        if (section === "jobHistory" && index !== null && !formData.isFresher) {
-          const job = formData.jobHistory[index];
-          if (field === "endDate" && job.startDate && value && new Date(job.startDate) > new Date(value)) {
-            newErrors[fieldKey] = "End date must be after start date";
-          }
+      if (section === "jobHistory" && index !== null && !formData.isFresher) {
+        const job = formData.jobHistory[index];
+        if (field === "endDate" && job.startDate && value && new Date(job.startDate) > new Date(value)) {
+          newErrors[fieldKey] = "End date must be after start date";
         }
       }
     }
@@ -169,7 +195,6 @@ function ProfileForm() {
     return !newErrors[fieldKey];
   };
 
-  // Validate step
   const validateStep = (currentStep) => {
     const section = Object.keys(formData)[currentStep];
     const currentData = formData[section];
@@ -178,20 +203,47 @@ function ProfileForm() {
 
     if (section === "isFresher") return true;
 
-    if (Array.isArray(currentData) && section === "jobHistory" && !formData.isFresher) {
-      currentData.forEach((item, index) => {
-        Object.entries(item).forEach(([key, value]) => {
-          if (!validateField(section, key, value, index)) {
-            newErrors[`${key}${index}`] = "This field is required";
-            isValid = false;
-          }
-        });
-      });
-    } else if (!Array.isArray(currentData)) {
+    if (Array.isArray(currentData)) {
+      if (section === "jobHistory" && !formData.isFresher) {
+        if (currentData.length === 0) {
+          newErrors.jobHistory = "At least one job entry is required for non-freshers";
+          isValid = false;
+        } else {
+          currentData.forEach((item, index) => {
+            ["company", "position", "startDate"].forEach((key) => {
+              if (!validateField(section, key, item[key], index)) {
+                newErrors[`${key}${index}`] = "This field is required";
+                isValid = false;
+              }
+            });
+          });
+        }
+      } else if (section === "educationHistory") {
+        if (currentData.length === 0) {
+          newErrors.educationHistory = "At least one education entry is required";
+          isValid = false;
+        } else {
+          currentData.forEach((item, index) => {
+            ["degree", "institution"].forEach((key) => {
+              if (!validateField(section, key, item[key], index)) {
+                newErrors[`${key}${index}`] = "This field is required";
+                isValid = false;
+              }
+            });
+          });
+        }
+      }
+    } else {
       Object.entries(currentData).forEach(([key, value]) => {
-        if (key !== "profilePicture" && key !== "email" && key !== "fullName" &&
-            key !== "resumeUrl" && key !== "videoResumeUrl" && !validateField(section, key, value)) {
-          newErrors[key] = "This field is required";
+        const optionalFields = [
+          "profilePicture", "email", "fullName", "resumeUrl", "videoResumeUrl",
+          "salary", "employmentType", "experience", "field", "graduationYear",
+          "remoteOnly", "categories", "skills", "experienceLevel",
+        ];
+        if (!optionalFields.includes(key) && !validateField(section, key, value)) {
+          newErrors[key] = key === "skills" || key === "roles" || key === "locations"
+            ? `At least one ${key} is required`
+            : "This field is required";
           isValid = false;
         }
       });
@@ -200,7 +252,6 @@ function ProfileForm() {
     return isValid;
   };
 
-  // Handle resume file change
   const handleResumeChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -217,7 +268,6 @@ function ProfileForm() {
     }
   };
 
-  // Handle video resume file change
   const handleVideoChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -234,7 +284,6 @@ function ProfileForm() {
     }
   };
 
-  // Upload resume
   const handleResumeUpload = async () => {
     if (!resumeFile) {
       setErrorMessage("Please select a file to upload");
@@ -246,7 +295,7 @@ function ProfileForm() {
     formDataUpload.append("resume", resumeFile);
 
     try {
-      const response = await axios.post(UPLOAD_RESUME_URL, formDataUpload, {
+      const response = await api.post("/api/upload/resume", formDataUpload, {
         withCredentials: true,
         headers: { "Content-Type": "multipart/form-data" },
       });
@@ -265,7 +314,6 @@ function ProfileForm() {
     }
   };
 
-  // Upload video resume
   const handleVideoUpload = async () => {
     if (!videoFile) {
       setErrorMessage("Please select a video file to upload");
@@ -277,7 +325,7 @@ function ProfileForm() {
     formDataUpload.append("videoResume", videoFile);
 
     try {
-      const response = await axios.post(UPLOAD_VIDEO_URL, formDataUpload, {
+      const response = await api.post("/api/upload/video-resume", formDataUpload, {
         withCredentials: true,
         headers: { "Content-Type": "multipart/form-data" },
       });
@@ -289,14 +337,13 @@ function ProfileForm() {
       setVideoFile(null);
       setSuccessMessage("Video resume uploaded successfully!");
     } catch (error) {
-      console.error("Video resume upload failed:", error);
+      console.error("Video upload failed:", error);
       setErrorMessage(error.response?.data?.message || "Failed to upload video resume");
     } finally {
       setIsUploadingVideo(false);
     }
   };
 
-  // Handle profile picture upload
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -325,7 +372,7 @@ function ProfileForm() {
     formDataUpload.append("profilePicture", file);
 
     try {
-      const response = await axios.post(UPLOAD_URL, formDataUpload, {
+      const response = await api.post("/api/upload", formDataUpload, {
         withCredentials: true,
         headers: { "Content-Type": "multipart/form-data" },
       });
@@ -345,7 +392,6 @@ function ProfileForm() {
     }
   };
 
-  // Other handlers
   const handleChange = (section, field, value, index = null) => {
     setFormData((prev) => {
       if (section === "isFresher") {
@@ -386,25 +432,34 @@ function ProfileForm() {
     }
   };
 
-  const addSkill = (e) => {
-    if (e.key === "Enter" && skillInput.trim()) {
-      const newSkills = [...formData.professional.skills, skillInput.trim()];
+  const addSkill = (e, section = "professional") => {
+    const input = section === "professional" ? skillInput : categoryInput;
+    if (e.key === "Enter" && input.trim()) {
+      const newItems = [...formData[section][section === "professional" ? "skills" : "categories"], input.trim()];
       setFormData((prev) => ({
         ...prev,
-        professional: { ...prev.professional, skills: newSkills },
+        [section]: {
+          ...prev[section],
+          [section === "professional" ? "skills" : "categories"]: newItems,
+        },
       }));
-      setSkillInput("");
-      validateField("professional", "skills", newSkills);
+      section === "professional" ? setSkillInput("") : setCategoryInput("");
+      validateField(section, section === "professional" ? "skills" : "categories", newItems);
     }
   };
 
-  const removeSkill = (skillToRemove) => {
-    const newSkills = formData.professional.skills.filter((skill) => skill !== skillToRemove);
+  const removeSkill = (itemToRemove, section = "professional") => {
+    const newItems = formData[section][section === "professional" ? "skills" : "categories"].filter(
+      (item) => item !== itemToRemove
+    );
     setFormData((prev) => ({
       ...prev,
-      professional: { ...prev.professional, skills: newSkills },
+      [section]: {
+        ...prev[section],
+        [section === "professional" ? "skills" : "categories"]: newItems,
+      },
     }));
-    validateField("professional", "skills", newSkills);
+    validateField(section, section === "professional" ? "skills" : "categories", newItems);
   };
 
   const addRole = (e) => {
@@ -520,42 +575,59 @@ function ProfileForm() {
     setTouched({});
   };
 
-  // Handle form submission
-  const handleSubmit = async () => {
-    if (step === 5 && validateStep(4)) {
+  const submitProfile = useCallback(
+    debounce(async (data, hasProfile) => {
+      if (isSubmitting) return;
       setIsSubmitting(true);
       try {
-        console.log("Submitting formData:", formData); // Debug payload
-        const response = await axios.put(API_URL, formData, {
+        console.log("Submitting formData:", data);
+        const method = hasProfile ? api.put : api.post;
+        const response = await method("/api/profile", data, {
           withCredentials: true,
           headers: { "Content-Type": "application/json" },
         });
-        console.log("Profile updated:", response.data);
-        setSuccessMessage(response.data.message || "Profile successfully updated!");
-        setTimeout(() => navigate("/profileComp"), 2000); // Navigate after showing success
+        console.log("Profile response:", response.data);
+        setSuccessMessage(response.data.message || "Profile successfully created!");
+        setTimeout(() => navigate("/profileComp"), 2000);
       } catch (error) {
-        console.error("Profile update failed:", {
+        console.error("Profile submission failed:", {
           message: error.message,
           code: error.code,
           response: error.response?.data,
           status: error.response?.status,
         });
-        setErrorMessage(error.response?.data?.message || "Profile update failed");
+        const validationErrors = error.response?.data?.errors;
+        if (validationErrors) {
+          const newErrors = {};
+          validationErrors.forEach((err) => {
+            newErrors[err.path] = err.message;
+          });
+          setErrors((prev) => ({ ...prev, ...newErrors }));
+          setErrorMessage("Validation failed. Please check the highlighted fields.");
+        } else {
+          setErrorMessage(error.response?.data?.message || "Profile submission failed");
+        }
       } finally {
         setIsSubmitting(false);
       }
+    }, 1000),
+    [isSubmitting, navigate]
+  );
+
+  const handleSubmit = () => {
+    if (step === 6 && validateStep(5)) {
+      submitProfile(formData, hasProfile);
     } else {
-      setStep(5);
+      setStep(6);
     }
   };
 
   const renderStep = () => {
     switch (step) {
-      case 0: // Personal Info
+      case 0:
         return (
           <div className="form-section">
             <h3 className="pre-title">Personal Information</h3>
-            {/* Success Popup */}
             {successMessage && (
               <div className="success-popup" onClick={() => setSuccessMessage(null)}>
                 <div className="success-popup-content" onClick={(e) => e.stopPropagation()}>
@@ -570,7 +642,6 @@ function ProfileForm() {
                 </div>
               </div>
             )}
-            {/* Error Popup */}
             {errorMessage && (
               <div className="success-popup" onClick={() => setErrorMessage(null)}>
                 <div className="success-popup-content error-popup-content" onClick={(e) => e.stopPropagation()}>
@@ -751,7 +822,7 @@ function ProfileForm() {
           </div>
         );
 
-      case 1: // Job History
+      case 1:
         return (
           <div className="form-section">
             <h3 className="pre-title">Job History</h3>
@@ -854,12 +925,13 @@ function ProfileForm() {
                 <button type="button" className="add-btn" onClick={() => addEntry("jobHistory")}>
                   Add Another Job
                 </button>
+                {errors.jobHistory && <span className="error-message">{errors.jobHistory}</span>}
               </div>
             )}
           </div>
         );
 
-      case 2: // Education History
+      case 2:
         return (
           <div className="form-section">
             <h3 className="pre-title">Education History</h3>
@@ -948,11 +1020,12 @@ function ProfileForm() {
               >
                 Add Another Education
               </button>
+              {errors.educationHistory && <span className="error-message">{errors.educationHistory}</span>}
             </div>
           </div>
         );
 
-      case 3: // Professional Details
+      case 3:
         return (
           <div className="form-section">
             <h3 className="pre-title">Professional Details</h3>
@@ -1002,7 +1075,7 @@ function ProfileForm() {
                     type="text"
                     value={skillInput}
                     onChange={(e) => setSkillInput(e.target.value)}
-                    onKeyDown={addSkill}
+                    onKeyDown={(e) => addSkill(e, "professional")}
                     placeholder="Type a skill and press Enter"
                     className={errors.skills ? "error" : ""}
                   />
@@ -1013,7 +1086,7 @@ function ProfileForm() {
                         <button
                           type="button"
                           className="remove-skill"
-                          onClick={() => removeSkill(skill)}
+                          onClick={() => removeSkill(skill, "professional")}
                         >
                           ×
                         </button>
@@ -1027,7 +1100,7 @@ function ProfileForm() {
           </div>
         );
 
-      case 4: // Job Preferences
+      case 4:
         return (
           <div className="form-section">
             <h3 className="pre-title">Job Preferences</h3>
@@ -1095,7 +1168,7 @@ function ProfileForm() {
                   value={formData.jobPrefs.salary}
                   onChange={(e) => handleChange("jobPrefs", "salary", e.target.value)}
                   onBlur={(e) => handleBlur("jobPrefs", "salary", e.target.value)}
-                  placeholder="e.g., $50,000 - $70,000"
+                  placeholder="e.g., ₹5,00,000 - ₹7,00,000"
                   className={errors.salary ? "error" : ""}
                 />
                 {errors.salary && <span className="error-message">{errors.salary}</span>}
@@ -1103,21 +1176,21 @@ function ProfileForm() {
               <div className="form-group">
                 <label>Employment Type:</label>
                 <div className="checkbox-group">
-                  {["Full-time", "Part-time", "Remote", "Freelance"].map((type) => (
+                  {["full-time", "part-time", "remote", "freelance"].map((type) => (
                     <label key={type} className="checkbox-label">
                       <input
                         type="checkbox"
-                        value={type.toLowerCase()}
-                        checked={formData.jobPrefs.employmentType.includes(type.toLowerCase())}
+                        value={type}
+                        checked={formData.jobPrefs.employmentType.includes(type)}
                         onChange={(e) => {
                           const selectedTypes = formData.jobPrefs.employmentType;
                           const newTypes = e.target.checked
-                            ? [...selectedTypes, type.toLowerCase()]
-                            : selectedTypes.filter((t) => t !== type.toLowerCase());
+                            ? [...selectedTypes, type]
+                            : selectedTypes.filter((t) => t !== type);
                           handleChange("jobPrefs", "employmentType", newTypes);
                         }}
                       />
-                      {type}
+                      {type.charAt(0).toUpperCase() + type.slice(1)}
                     </label>
                   ))}
                 </div>
@@ -1127,7 +1200,138 @@ function ProfileForm() {
           </div>
         );
 
-      case 5: // Summary
+      case 5:
+        return (
+          <div className="form-section">
+            <h3 className="pre-title">Auto Job Preferences</h3>
+            <div className="pre-form">
+              <div className="form-group">
+                <label className="checkbox-option">
+                  <input
+                    type="checkbox"
+                    checked={formData.autoJobPrefs.enabled}
+                    onChange={(e) => handleChange("autoJobPrefs", "enabled", e.target.checked)}
+                  />
+                  <span>Enable Auto Job Applications</span>
+                </label>
+              </div>
+              <div className="form-group">
+                <label>Minimum Salary (LPA):</label>
+                <input
+                  type="number"
+                  value={formData.autoJobPrefs.minSalary}
+                  onChange={(e) => handleChange("autoJobPrefs", "minSalary", Number(e.target.value))}
+                  onBlur={(e) => handleBlur("autoJobPrefs", "minSalary", Number(e.target.value))}
+                  placeholder="Enter minimum salary in LPA"
+                  min="0"
+                  step="0.1"
+                  className={errors.minSalary ? "error" : ""}
+                />
+                {errors.minSalary && <span className="error-message">{errors.minSalary}</span>}
+              </div>
+              <div className="form-group">
+                <label>Experience Level:</label>
+                <select
+                  value={formData.autoJobPrefs.experienceLevel}
+                  onChange={(e) => handleChange("autoJobPrefs", "experienceLevel", e.target.value)}
+                  onBlur={(e) => handleBlur("autoJobPrefs", "experienceLevel", e.target.value)}
+                  className={errors.experienceLevel ? "error" : ""}
+                >
+                  <option value="">Select Experience Level</option>
+                  {["Entry", "Mid", "Senior"].map((level) => (
+                    <option key={level} value={level}>
+                      {level}
+                    </option>
+                  ))}
+                </select>
+                {errors.experienceLevel && <span className="error-message">{errors.experienceLevel}</span>}
+              </div>
+              <div className="form-group">
+                <label>Job Categories:</label>
+                <div className="skills-container">
+                  <input
+                    type="text"
+                    value={categoryInput}
+                    onChange={(e) => setCategoryInput(e.target.value)}
+                    onKeyDown={(e) => addSkill(e, "autoJobPrefs")}
+                    placeholder="Type a category and press Enter"
+                    className={errors.categories ? "error" : ""}
+                  />
+                  <div className="skills-tags">
+                    {formData.autoJobPrefs.categories.map((category, index) => (
+                      <span key={index} className="skill-tag">
+                        {category}
+                        <button
+                          type="button"
+                          className="remove-skill"
+                          onClick={() => removeSkill(category, "autoJobPrefs")}
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                {errors.categories && <span className="error-message">{errors.categories}</span>}
+              </div>
+              <div className="form-group">
+                <label>Skills:</label>
+                <div className="skills-container">
+                  <input
+                    type="text"
+                    value={skillInput}
+                    onChange={(e) => setSkillInput(e.target.value)}
+                    onKeyDown={(e) => addSkill(e, "autoJobPrefs")}
+                    placeholder="Type a skill and press Enter"
+                    className={errors.skills ? "error" : ""}
+                  />
+                  <div className="skills-tags">
+                    {formData.autoJobPrefs.skills.map((skill, index) => (
+                      <span key={index} className="skill-tag">
+                        {skill}
+                        <button
+                          type="button"
+                          className="remove-skill"
+                          onClick={() => removeSkill(skill, "autoJobPrefs")}
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                {errors.skills && <span className="error-message">{errors.skills}</span>}
+              </div>
+              <div className="form-group">
+                <label className="checkbox-option">
+                  <input
+                    type="checkbox"
+                    checked={formData.autoJobPrefs.remoteOnly}
+                    onChange={(e) => handleChange("autoJobPrefs", "remoteOnly", e.target.checked)}
+                  />
+                  <span>Remote Jobs Only</span>
+                </label>
+              </div>
+              <div className="form-group">
+                <label>Minimum Company Rating (0-5):</label>
+                <input
+                  type="number"
+                  value={formData.autoJobPrefs.minCompanyRating}
+                  onChange={(e) => handleChange("autoJobPrefs", "minCompanyRating", Number(e.target.value))}
+                  onBlur={(e) => handleBlur("autoJobPrefs", "minCompanyRating", Number(e.target.value))}
+                  placeholder="Enter minimum company rating"
+                  min="0"
+                  max="5"
+                  step="0.1"
+                  className={errors.minCompanyRating ? "error" : ""}
+                />
+                {errors.minCompanyRating && <span className="error-message">{errors.minCompanyRating}</span>}
+              </div>
+            </div>
+          </div>
+        );
+
+      case 6:
         return (
           <div className="form-section summary-section">
             <h3 className="pre-title">Profile Summary</h3>
@@ -1190,16 +1394,16 @@ function ProfileForm() {
                   formData.jobHistory.map((job, index) => (
                     <div key={index} className="summary-entry">
                       <p>
-                        <strong>Company:</strong> {job.company}
+                        <strong>Company:</strong> {job.company || "Not provided"}
                       </p>
                       <p>
-                        <strong>Position:</strong> {job.position}
+                        <strong>Position:</strong> {job.position || "Not provided"}
                       </p>
                       <p>
-                        <strong>Period:</strong> {job.startDate} - {job.endDate || "Present"}
+                        <strong>Period:</strong> {job.startDate || "N/A"} - {job.endDate || "Present"}
                       </p>
                       <p>
-                        <strong>Description:</strong> {job.description}
+                        <strong>Description:</strong> {job.description || "Not provided"}
                       </p>
                     </div>
                   ))
@@ -1213,16 +1417,16 @@ function ProfileForm() {
                   formData.educationHistory.map((edu, index) => (
                     <div key={index} className="summary-entry">
                       <p>
-                        <strong>Degree:</strong> {edu.degree}
+                        <strong>Degree:</strong> {edu.degree || "Not provided"}
                       </p>
                       <p>
-                        <strong>Institution:</strong> {edu.institution}
+                        <strong>Institution:</strong> {edu.institution || "Not provided"}
                       </p>
                       <p>
-                        <strong>Field:</strong> {edu.field}
+                        <strong>Field:</strong> {edu.field || "Not provided"}
                       </p>
                       <p>
-                        <strong>Year:</strong> {edu.graduationYear}
+                        <strong>Year:</strong> {edu.graduationYear || "Not provided"}
                       </p>
                     </div>
                   ))
@@ -1272,6 +1476,36 @@ function ProfileForm() {
                     : "Not provided"}
                 </p>
               </SummarySection>
+
+              <SummarySection title="Auto Job Preferences" stepToEdit={5} setStep={setStep}>
+                <p>
+                  <strong>Auto Apply:</strong> {formData.autoJobPrefs.enabled ? "Enabled" : "Disabled"}
+                </p>
+                <p>
+                  <strong>Minimum Salary:</strong> {formData.autoJobPrefs.minSalary || "0"} LPA
+                </p>
+                <p>
+                  <strong>Experience Level:</strong> {formData.autoJobPrefs.experienceLevel || "Not specified"}
+                </p>
+                <p>
+                  <strong>Categories:</strong>
+                  {formData.autoJobPrefs.categories.length > 0
+                    ? formData.autoJobPrefs.categories.join(", ")
+                    : "Not specified"}
+                </p>
+                <p>
+                  <strong>Skills:</strong>
+                  {formData.autoJobPrefs.skills.length > 0
+                    ? formData.autoJobPrefs.skills.join(", ")
+                    : "Not specified"}
+                </p>
+                <p>
+                  <strong>Remote Only:</strong> {formData.autoJobPrefs.remoteOnly ? "Yes" : "No"}
+                </p>
+                <p>
+                  <strong>Minimum Company Rating:</strong> {formData.autoJobPrefs.minCompanyRating || "0"}
+                </p>
+              </SummarySection>
             </div>
           </div>
         );
@@ -1315,7 +1549,7 @@ function ProfileForm() {
           {isLoading && <div className="loading-overlay">Loading profile...</div>}
 
           <div className="progress-bar">
-            <div className="progress" style={{ width: `${(step / 5) * 100}%` }}></div>
+            <div className="progress" style={{ width: `${(step / 6) * 100}%` }}></div>
           </div>
 
           {renderStep()}
@@ -1330,7 +1564,7 @@ function ProfileForm() {
                 Back
               </button>
             )}
-            {step < 5 && (
+            {step < 6 && (
               <button
                 onClick={skipStep}
                 className="skip-btn"
@@ -1339,7 +1573,7 @@ function ProfileForm() {
                 Skip
               </button>
             )}
-            {step < 4 ? (
+            {step < 5 ? (
               <button
                 onClick={nextStep}
                 className="next-btn"
@@ -1355,7 +1589,7 @@ function ProfileForm() {
               >
                 {isSubmitting ? (
                   <span className="spinner"></span>
-                ) : step === 5 ? (
+                ) : step === 6 ? (
                   "Confirm & Submit"
                 ) : (
                   "Review"
@@ -1370,4 +1604,3 @@ function ProfileForm() {
 }
 
 export default ProfileForm;
-

@@ -18,6 +18,8 @@ import CompanyList from './Pages/CompanyList';
 import CompanyDetail from './Pages/CompanyDetail';
 import UserDashboard from './Pages/UserDashboard';
 import CompanyEditForm from './Pages/CompanyEditForm';
+import AutoJobPrefs from './Pages/AutoJobPrefs';
+import AutoAppliedJobs from './Pages/AutoAppliedJobs';
 
 function App() {
   return (
@@ -44,6 +46,8 @@ function App() {
           <Route path="/CompanyEdit/:id" element={<CompanyEditForm />} />
           <Route path="/postList" element={<PostList />} />
           <Route path="/profileComp" element={<CompProfile />} />
+          <Route path="/auto-job/prefs" element={<AutoJobPrefs />} /> 
+          <Route path="/auto-job/applications" element={<AutoAppliedJobs />} /> 
         </Route>
   
         {/* Fallback route */}

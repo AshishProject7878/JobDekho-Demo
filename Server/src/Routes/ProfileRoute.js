@@ -1,16 +1,30 @@
 import express from "express";
 import { protectRoute } from "../Middlewares/AuthMiddleware.js";
-import { createProfile, deleteProfile, getProfile, getProfileById, updateProfile } from "../Controllers/ProfileController.js";
+import { 
+  createProfile, 
+  deleteProfile, 
+  getProfile, 
+  getProfileById, 
+  updateProfile,
+  toggleAutoJob,
+  getAutoAppliedJobs,
+  autoApplyJobs 
+} from "../Controllers/ProfileController.js";
 
 const router = express.Router();
 
-// Routes for current user's profile (no :id needed)
-router.get('/', protectRoute, getProfile);         // GET /api/profile
-router.post('/', protectRoute, createProfile);     // POST /api/profile
-router.put('/', protectRoute, updateProfile);      // PUT /api/profile
-router.delete('/', protectRoute, deleteProfile);   // DELETE /api/profile
+// Routes for current user's profile
+router.get('/', protectRoute, getProfile);
+router.post('/', protectRoute, createProfile);
+router.put('/', protectRoute, updateProfile);
+router.delete('/', protectRoute, deleteProfile);
 
-// Optional route for getting profile by ID (e.g., for admin use)
-router.get('/:id', protectRoute, getProfileById);  // GET /api/profile/:id
+// Route for getting profile by ID
+router.get('/:id', protectRoute, getProfileById);
+
+// Auto job application routes
+router.patch('/auto-job/toggle', protectRoute, toggleAutoJob);
+router.get('/auto-job/applications', protectRoute, getAutoAppliedJobs);
+router.post('/auto-job/apply', protectRoute, autoApplyJobs);
 
 export default router;
