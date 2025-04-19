@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import "../styles/PublicPost.css";
+import "../styles/PublicPost.css"; 
 
 function PublicPost() {
   const navigate = useNavigate();

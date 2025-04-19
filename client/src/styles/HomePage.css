@@ -1,0 +1,847 @@
+/* -------------------- Hero Section -------------------- */
+.Home-Section-1 {
+    background-color: #fff;
+    border-radius: 10px;
+    position: relative;
+    margin-top: 200px;
+}
+
+.Home-Section-1 form {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+}
+
+.form-group {
+    margin-bottom: 10px;
+}
+
+.hero-search {
+    padding: 0px 30px;
+}
+
+.HS-right {
+    background-color: #6a11cb;
+    border: 0;
+    padding: 10px 20px;
+    margin-left: 20px;
+    color: #fff;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.5s ease-in-out;
+}
+
+.HS-right:hover {
+    background-color: #4c0dcd;
+}
+
+.Home-Section-1 input {
+    padding-left: 20px;
+    border-radius: 10px 0px 0px 10px;
+}
+
+.hero-title {
+    letter-spacing: 2px;
+    position: absolute;
+    top: -120px;
+    font-size: 34px;
+    font-weight: 600;
+}
+
+.Home-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+}
+
+.Home-Section-2 img {
+    width: 450px;
+    margin-top: 80px;
+}
+
+@media only screen and (max-width: 468px) {
+    .Home-header {
+        padding: 5px;
+        margin-top: 40px;
+    }
+
+    .Home-Section-1 {
+        padding: 10px;
+    }
+
+    .hero-title {
+        font-size: 25px;
+        margin-top: 20px;
+    }
+
+    .HS-right {
+        width: 100%;
+        margin-left: -0px;
+        text-align: center;
+    }
+
+    .Home-Section-1 form {
+        display: block;
+        font-size: 13px;
+        box-shadow: none;
+    }
+    
+    .Home-Section-1 form input {
+        width: 150px;
+        padding: 10px 20px;
+    }
+
+    .Home-Section-1 {
+        width: 100%;
+    }
+    
+    .hero-search {
+        font-size: 12px;
+        padding: 10px 5px;
+    }
+
+    .Home-Section-2 img {
+        display: none;
+    }
+}
+
+@media only screen and (max-width: 768px) {
+    .Home-header {
+        margin-top: 40px;
+    }
+
+    .Home-Section-2 img {
+        width: 250px;
+    }
+
+    .HS-right {
+        width: 100%;
+        margin-left: -0px;
+        text-align: center;
+    }
+
+    .Home-Section-1 form {
+        display: block;
+        font-size: 13px;
+        box-shadow: none;
+    }
+    
+    .Home-Section-1 form input {
+        width: 150px;
+        padding: 10px 20px;
+    }
+}
+
+/* -------------------- Mid Section -------------------- */
+.Mid-Section {
+    text-align: center;
+    padding: 15px 20px;
+    border-radius: 15px;
+}
+
+/* Title Styling */
+.carousel-title {
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #6a11cb;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Blur Effect Wrapper */
+.carousel-wrapper {
+    position: relative;
+    width: 100%;
+    margin: auto;
+    overflow: hidden;
+}
+
+/* The fading effect */
+.carousel-wrapper::before,
+.carousel-wrapper::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    width: 100px;
+    height: 100%;
+    z-index: 2;
+    pointer-events: none;
+}
+
+/* Left blur effect */
+.carousel-wrapper::before {
+    left: 0;
+    background: linear-gradient(to right, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
+}
+
+/* Right blur effect */
+.carousel-wrapper::after {
+    right: 0;
+    background: linear-gradient(to left, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
+}
+
+/* Carousel Container */
+.company-carousel {
+    width: 100%;
+    margin: auto;
+}
+
+/* Company Card */
+.company-card {
+    height: 120px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    border: 2px solid #e0e0e0;
+}
+
+/* Company Logo */
+.company-card img {
+    width: 50px;
+    height: 50px;
+    object-fit: contain;
+    margin-bottom: 10px;
+}
+
+/* Company Name */
+.company-card p {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    margin-top: 5px;
+}
+
+@media (max-width: 468px) {
+    .Mid-Section {
+        padding: 0px;
+        border-radius: 10px;
+        margin-top: 20px;
+    }
+
+    /* Title Styling */
+    .carousel-title {
+        font-size: 22px;
+        margin-bottom: 15px;
+        letter-spacing: 0.5px;
+    }
+
+    /* Blur Effect Wrapper */
+    .carousel-wrapper::before,
+    .carousel-wrapper::after {
+        width: 30px;
+    }
+
+    /* Carousel Container */
+    .company-carousel {
+        padding: 0px 0;
+    }
+
+    /* Company Card */
+    .company-card {
+        height: 90px;
+        padding: 10px;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+        border: 1px solid #ddd;
+    }
+
+    .company-card p {
+        display: none;
+    }
+
+    /* Company Logo */
+    .company-card img {
+        width: 80px;
+        height: 80px;
+        margin-bottom: 8px;
+    }
+
+    /* Company Name */
+    .company-card p {
+        font-size: 14px;
+        margin-top: 3px;
+    }
+}
+
+/* ----------------------- Trending Jobs Section --------------------- */
+.hp-trending-jobs-section {
+    text-align: center;
+    padding: 20px 20px;
+    margin-top: 30px;
+    background: linear-gradient(135deg, #f7f9fc, #e8ecef);
+    border-radius: 15px;
+}
+
+.hp-trending-jobs-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #6a11cb;
+    margin-top: 20px;
+    margin-bottom: 35px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+}
+
+/* Updated to grid layout */
+.hp-trending-jobs-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* Ensures 4 cards per row */
+    gap: 25px;
+    justify-content: center;
+}
+
+/* -------------------- Job Card -------------------- */
+.hp-job-card {
+    width: 100%;
+    max-width: 350px;
+    background: #fff;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    position: relative;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border 0.3s ease;
+    height: 300px; /* Maintained compact height */
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+
+.hp-job-card:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+    border: 2px solid linear-gradient(135deg, #6a11cb, #2575fc);
+}
+
+/* Diagonal Header Background */
+.hp-job-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 60px;
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    clip-path: polygon(0 0, 100% 0, 100% 60%, 0 100%);
+    transition: all 0.3s ease;
+    z-index: 1;
+}
+
+.hp-job-card:hover::before {
+    height: 100%;
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+}
+
+/* Sections */
+.hp-job-card-header, .hp-job-card-body, .hp-job-card-footer {
+    position: relative;
+    z-index: 2;
+}
+
+/* Header Section */
+.hp-job-card-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px;
+    color: #fff;
+}
+
+.hp-job-badge {
+    background: rgba(255, 255, 255, 0.25);
+    padding: 4px 10px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+    backdrop-filter: blur(5px);
+}
+
+/* Body Section */
+.hp-job-card-body {
+    padding: 8px 12px;
+    color: #333;
+    transition: color 0.3s ease;
+}
+
+.hp-company-info {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.hp-company-logo {
+    width: 50px;
+    height: 50px;
+    border: 3px solid #fff;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 12px;
+    box-shadow: 0 0 0 3px #6a11cb;
+    transition: transform 0.3s ease;
+}
+
+.hp-job-card:hover .hp-company-logo {
+    transform: scale(1.1);
+}
+
+.hp-company-details .hp-job-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    transition: all 0.3s ease;
+    font-family: 'Inter', sans-serif;
+}
+
+.hp-company-details .hp-company-name {
+    margin: 3px 0;
+    text-align: left;
+    font-size: 13px;
+    color: #6a11cb;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.hp-company-details .hp-company-name:hover {
+    color: #2575fc;
+}
+
+.hp-job-location {
+    font-size: 12px;
+    color: #888;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Description */
+.hp-job-description {
+    font-size: 13px;
+    line-height: 1.4;
+    margin-bottom: 12px;
+    color: #555;
+    transition: all 0.3s ease;
+    font-family: 'Inter', sans-serif;
+}
+
+/* Footer Section */
+.hp-job-card-footer {
+    padding: 12px;
+    border-top: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.hp-job-salary {
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+/* Apply Button */
+.hp-apply-button {
+    padding: 8px 16px;
+    background: linear-gradient(135deg, #2575fc, #6a11cb);
+    border: none;
+    border-radius: 25px;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.hp-apply-button:hover {
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    transform: scale(1.05);
+}
+
+.hp-apply-button::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.4s ease, height 0.4s ease;
+}
+
+.hp-apply-button:active::after {
+    width: 100px;
+    height: 100px;
+}
+
+.hp-job-card:hover .hp-apply-button {
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+}
+
+.hp-job-card:hover .hp-company-name {
+    color: #fff;
+}
+
+.hp-job-card:hover .hp-job-description {
+    color: #fff;
+}
+
+.hp-job-card:hover .hp-job-salary {
+    color: #fff;
+}
+
+.hp-job-card:hover .hp-job-title {
+    color: #fff;
+}
+
+/* Job Tags Container */
+.hp-job-tags {
+    display: flex;
+    overflow: hidden;
+    white-space: nowrap;
+    gap: 6px;
+    max-width: 100%;
+}
+
+/* Individual Job Tag */
+.hp-job-tag {
+    background: #f0f0f0;
+    padding: 4px 10px;
+    border-radius: 14px;
+    font-size: 11px;
+    color: #555;
+    font-weight: 600;
+    transition: background 0.3s ease, color 0.3s ease;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.hp-job-tag:hover {
+    background: #2575fc;
+    color: #fff;
+}
+
+/* Optional: Horizontal scroll for tags */
+.hp-job-tags-scroll {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    white-space: nowrap;
+    scrollbar-width: thin;
+    scrollbar-color: #ccc transparent;
+    max-width: 100%;
+    padding-bottom: 5px;
+}
+
+/* Hide scrollbar for Webkit browsers */
+.hp-job-tags-scroll::-webkit-scrollbar {
+    height: 5px;
+}
+
+.hp-job-tags-scroll::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 10px;
+}
+
+/* Loading and Error States */
+.hp-loading, .hp-error {
+    font-size: 18px;
+    text-align: center;
+    color: #6a11cb;
+    margin: 20px 0;
+}
+
+/* Responsive for smaller screens */
+@media (max-width: 1200px) {
+    .hp-trending-jobs-container {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .hp-job-card {
+        height: 280px;
+    }
+}
+
+@media (max-width: 900px) {
+    .hp-trending-jobs-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .hp-job-card {
+        height: 260px;
+    }
+}
+
+@media (max-width: 600px) {
+    .hp-trending-jobs-container {
+        grid-template-columns: repeat(1, 1fr);
+    }
+
+    .hp-job-card {
+        height: 240px;
+    }
+}
+
+/* -------------------- Why Us Section -------------------- */
+.why-us-section {
+    text-align: center;
+    padding: 60px 20px;
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    border-radius: 20px 20px 0px 0px;
+    color: #fff;
+    margin-top: 50px;
+}
+
+.why-us-title {
+    font-size: 30px;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+}
+
+.why-us-subtitle {
+    font-size: 16px;
+    margin-bottom: 30px;
+    opacity: 0.8;
+}
+
+.why-us-container {
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    flex-wrap: wrap;
+}
+
+.why-us-card {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    width: 320px;
+    transition: transform 0.3s ease-in-out, background 0.3s ease-in-out;
+    backdrop-filter: blur(10px);
+}
+
+.why-us-card:hover {
+    transform: translateY(-8px);
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.icon-wrapper {
+    width: 60px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    margin: 0 auto 15px;
+    transition: background 0.3s ease-in-out;
+}
+
+.why-us-card:hover .icon-wrapper {
+    background: rgba(255, 255, 255, 0.4);
+}
+
+.feature-icon {
+    font-size: 30px;
+    color: #fff;
+}
+
+.why-us-card h3 {
+    color: #fff;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.why-us-card p {
+    font-size: 14px;
+    color: #c5c4c4;
+    opacity: 0.9;
+    line-height: 1.6;
+}
+
+/* -------------------- Subscription Section -------------------- */
+.subscription-section {
+    text-align: center;
+    padding: 60px 20px;
+    border-radius: 0;
+    margin-top: 50px;
+    width: 100%;
+    color: white;
+}
+
+.subscription-title {
+    font-size: 32px;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+}
+
+.subscription-subtitle {
+    font-size: 18px;
+    color: #f0f0f0;
+    margin-bottom: 30px;
+}
+
+.subscription-form {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    max-width: 600px;
+    margin: auto;
+    flex-wrap: wrap;
+}
+
+.subscription-input {
+    flex: 1;
+    padding: 15px;
+    border-radius: 30px;
+    border: 2px solid #fff;
+    font-size: 16px;
+    outline: none;
+    transition: all 0.3s ease-in-out;
+    width: 100%;
+}
+
+.subscription-input:focus {
+    border-color: #f7f9fc;
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.5);
+}
+
+.subscription-button {
+    background: #6a11cb;
+    border: none;
+    padding: 15px 25px;
+    border-radius: 30px;
+    color: #eee;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    text-transform: uppercase;
+}
+
+.subscription-button:hover {
+    background: #5a00b8;
+    transform: scale(1.05);
+}
+
+/* Make it responsive */
+@media (max-width: 768px) {
+    .subscription-form {
+        flex-direction: column;
+        width: 90%;
+    }
+
+    .subscription-input {
+        width: 100%;
+        text-align: center;
+    }
+
+    .subscription-button {
+        width: 100%;
+    }
+}
+
+/* -------------------- New Footer Section -------------------- */
+.site-footer {
+    color: #f1f1f1;
+    width: 100%;
+    margin-bottom: -50px;
+}
+
+.footer-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    max-width: 1200px;
+    margin: auto;
+    gap: 20px;
+}
+
+/* Footer Columns */
+.footer-block {
+    flex: 1;
+    min-width: 250px;
+}
+
+.footer-heading {
+    font-size: 20px;
+    font-weight: bold;
+    color: #fff;
+}
+
+.footer-text {
+    font-size: 14px;
+    line-height: 1.5;
+    color: #bbb;
+}
+
+/* Footer Links */
+.footer-links {
+    list-style: none;
+}
+
+.footer-links li {
+    margin-bottom: 8px;
+}
+
+.footer-links a {
+    color: #bbb;
+    text-decoration: none;
+    transition: color 0.3s ease-in-out;
+    font-size: 14px;
+}
+
+.footer-links a:hover {
+    color: #5a00b8;
+}
+
+/* Social Media Icons */
+.footer-socials {
+    display: flex;
+    gap: 15px;
+}
+
+.footer-socials a {
+    font-size: 18px;
+    color: #bbb;
+    transition: color 0.3s ease-in-out;
+}
+
+.footer-socials a:hover {
+    color: #6a11cb;
+}
+
+/* Footer Bottom */
+.footer-bottom {
+    text-align: center;
+    font-size: 14px;
+    color: #aaa;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .footer-wrapper {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .footer-block {
+        min-width: 100%;
+    }
+}

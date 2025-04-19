@@ -20,13 +20,15 @@ import UserDashboard from './Pages/UserDashboard';
 import CompanyEditForm from './Pages/CompanyEditForm';
 import AutoJobPrefs from './Pages/AutoJobPrefs';
 import AutoAppliedJobs from './Pages/AutoAppliedJobs';
+import HomePage from './Pages/HomePage';
 
 function App() {
   return (
     <Router>
       <Navbar />
       <Routes>
-        <Route path="/" element={<PublicPost />} />
+        <Route path="/" element={<HomePage />} />
+        <Route path="/dummyProfile" element={<PublicPost />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/job/:id" element={<JobDetail />} />
