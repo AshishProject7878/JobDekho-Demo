@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "../styles/PublicPost.css";
-import CompLogo from "../Assests/CompLogo.png";
 
 function PublicPost() {
   const navigate = useNavigate();
@@ -168,13 +167,13 @@ function PublicPost() {
       }${categoryFilter && categoryFilter !== "All" ? `category=${categoryFilter}` : ""}`;
       const postsRes = await axios.get(postsUrl, { withCredentials: true });
       setFilteredPosts(postsRes.data || []);
-  
+
       const companiesUrl = `http://localhost:5000/api/companies${
         searchQuery ? `?search=${searchQuery}` : ""
       }`;
       const companiesRes = await axios.get(companiesUrl, { withCredentials: true });
       setCompanies(companiesRes.data.companies || []);
-  
+
       setLoading(false);
     } catch (err) {
       console.error("Error fetching data:", err);
@@ -310,17 +309,18 @@ function PublicPost() {
                   <div className="mid-section">
                     <div className="comp-img">
                       <img
-                        src={CompLogo}
-                        alt={`${post.company?.name || post.company} Logo`}
+                        src={post.company?.logoUrl}
+                        alt={`${post.company?.name || "Company"} Logo`}
+                        onError={(e) => {
+                          e.target.src =
+                            "https://www.creativefabrica.com/wp-content/uploads/2022/10/04/Architecture-building-company-icon-Graphics-40076545-1-1-580x386.jpg";
+                        }}
                       />
                       <div className="comp-dets">
                         <h3 className="public-title">{post.title}</h3>
                         <p className="comp-name">
                           {post.company?.name || post.company}
                         </p>
-                        {/* <p className="comp-gst">
-                          GST ID: {post.company?.gstId || "N/A"}
-                        </p> */}
                         <div className="location1">
                           <span>📍 {post.location}</span>
                         </div>
@@ -364,20 +364,50 @@ function PublicPost() {
                   </div>
                   <div className="mid-section">
                     <div className="comp-img">
-                      <img src={CompLogo} alt={`${company.name} Logo`} />
+                      <img
+                        src={company.logoUrl}
+                        alt={`${company.name} Logo`}
+                        onError={(e) => {
+                          e.target.src =
+                            "https://www.creativefabrica.com/wp-content/uploads/2022/10/04/Architecture-building-company-icon-Graphics40076545-1-1-580x386.jpg";
+                        }}
+                      />
                       <div className="comp-dets">
                         <h3 className="public-title">{company.name}</h3>
                         <p className="comp-gst">GST ID: {company.gstId}</p>
-                        <p className="comp-address">
-                          {company.address || "No address provided"}
-                        </p>
+                        <div className="company-rating">
+                          <span>
+                            Rating: {company.averageRating.toFixed(1)} / 5
+                            {company.ratings.length > 0 && (
+                              <span> ({company.ratings.length} ratings)</span>
+                            )}
+                          </span>
+                          <div className="star-display">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <span
+                                key={star}
+                                className={`star ${
+                                  star <= Math.round(company.averageRating)
+                                    ? "filled"
+                                    : ""
+                                }`}
+                              >
+                                ★
+                              </span>
+                            ))}
+                          </div>
+                        </div>
                       </div>
                     </div>
                     <p className="public-description">
-                      {company.contactEmail || company.phoneNumber || company.website
+                      {company.contactEmail ||
+                      company.phoneNumber ||
+                      company.website
                         ? [
-                            company.contactEmail && `Email: ${company.contactEmail}`,
-                            company.phoneNumber && `Phone: ${company.phoneNumber}`,
+                            company.contactEmail &&
+                              `Email: ${company.contactEmail}`,
+                            company.phoneNumber &&
+                              `Phone: ${company.phoneNumber}`,
                             company.website && `Website: ${company.website}`,
                           ]
                             .filter(Boolean)

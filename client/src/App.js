@@ -12,11 +12,12 @@ import PublicPost from './Pages/PublicPost';
 import JobDetail from './Pages/JobDetail';
 import JobPostingForm from './Pages/JobPostingForm';
 import ProfileForm from './Pages/ProfileForm';
-import CompProfile from './Pages/CompProfile';
+import CompProfile from './Pages/CompProfile'; 
 import CompanyForm from './Pages/CompanyForm';
 import CompanyList from './Pages/CompanyList';
 import CompanyDetail from './Pages/CompanyDetail';
 import UserDashboard from './Pages/UserDashboard';
+import CompanyEditForm from './Pages/CompanyEditForm';
 
 function App() {
   return (
@@ -40,6 +41,7 @@ function App() {
           <Route path="/profileForm" element={<ProfileForm />} />
           <Route path="/post" element={<PostForm />} />
           <Route path="/edit-post/:id" element={<EditPost />} />
+          <Route path="/CompanyEdit/:id" element={<CompanyEditForm />} />
           <Route path="/postList" element={<PostList />} />
           <Route path="/profileComp" element={<CompProfile />} />
         </Route>

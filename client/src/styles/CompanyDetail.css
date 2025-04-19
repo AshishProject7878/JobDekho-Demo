@@ -59,6 +59,78 @@
   text-decoration: underline;
 }
 
+.company-rating {
+  margin-bottom: 2rem;
+}
+
+.rating-display {
+  margin-bottom: 1rem;
+}
+
+.rating-display span {
+  font-size: 1.1rem;
+  color: #333;
+}
+
+.star-display {
+  margin-top: 0.5rem;
+}
+
+.star {
+  font-size: 1.5rem;
+  color: #ccc;
+  cursor: default;
+}
+
+.star.filled {
+  color: #f5c518;
+}
+
+.rating-input {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.rating-input p {
+  font-size: 1rem;
+  color: #333;
+  margin: 0;
+}
+
+.star-rating {
+  display: flex;
+  gap: 5px;
+}
+
+.star-rating .star {
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.submit-rating-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 20px;
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: linear-gradient(135deg, #2575fc, #6a11cb);
+  transition: background 0.3s ease;
+  align-self: flex-start;
+}
+
+.submit-rating-btn:hover {
+  background: linear-gradient(135deg, #6a11cb, #6a11cb);
+}
+
+.rating-error {
+  color: #d32f2f;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
 .company-jobs h3 {
   font-size: 1.5rem;
   color: #1f2937;
@@ -258,6 +330,31 @@
     font-size: 1rem;
   }
 
+  .company-rating h3 {
+    font-size: 1.2rem;
+  }
+
+  .rating-display span {
+    font-size: 1rem;
+  }
+
+  .star {
+    font-size: 1.2rem;
+  }
+
+  .rating-input p {
+    font-size: 0.9rem;
+  }
+
+  .submit-rating-btn {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+  }
+
+  .rating-error {
+    font-size: 0.8rem;
+  }
+
   .company-jobs h3 {
     font-size: 1.2rem;
   }
@@ -302,6 +399,30 @@
 
   .company-details p {
     font-size: 0.9rem;
+  }
+
+  .company-rating h3 {
+    font-size: 1.1rem;
+  }
+
+  .rating-display span {
+    font-size: 0.9rem;
+  }
+
+  .star {
+    font-size: 1rem;
+  }
+
+  .rating-input p {
+    font-size: 0.8rem;
+  }
+
+  .submit-rating-btn {
+    font-size: 0.75rem;
+  }
+
+  .rating-error {
+    font-size: 0.75rem;
   }
 
   .job-mid h4 {

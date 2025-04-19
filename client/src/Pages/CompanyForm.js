@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "../styles/CompanyForm.css";
 
-function CompanyForm({ companyId = null }) { // Pass companyId for updates
+function CompanyForm({ companyId = null }) {
   const [formData, setFormData] = useState({
     companyName: "",
     gstId: "",
@@ -10,19 +10,30 @@ function CompanyForm({ companyId = null }) { // Pass companyId for updates
     contactEmail: "",
     phoneNumber: "",
     website: "",
+    logoUrl: "",
   });
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [logoFile, setLogoFile] = useState(null);
+  const [logoPreview, setLogoPreview] = useState(null);
 
-  // Fetch company data for update
   useEffect(() => {
     if (companyId) {
       const fetchCompany = async () => {
         try {
           const response = await axios.get(`http://localhost:5000/api/companies/${companyId}`);
-          const { name, gstId, address, contactEmail, phoneNumber, website } = response.data.company;
-          setFormData({ companyName: name, gstId, address, contactEmail, phoneNumber, website });
+          const { name, gstId, address, contactEmail, phoneNumber, website, logoUrl } = response.data.company;
+          setFormData({
+            companyName: name,
+            gstId,
+            address,
+            contactEmail,
+            phoneNumber,
+            website,
+            logoUrl: logoUrl || "",
+          });
+          setLogoPreview(logoUrl || null);
         } catch (err) {
           setError("Failed to load company data");
         }
@@ -36,6 +47,24 @@ function CompanyForm({ companyId = null }) { // Pass companyId for updates
     setFormData((prev) => ({ ...prev, [name]: value }));
     setError(null);
     setSuccess(null);
+  };
+
+  const handleLogoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const filetypes = /jpeg|jpg|png/;
+      if (!filetypes.test(file.type)) {
+        setError("Only JPG and PNG files are allowed");
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        setError("File size must be less than 5MB");
+        return;
+      }
+      setLogoFile(file);
+      setLogoPreview(URL.createObjectURL(file));
+      setError(null);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -56,6 +85,26 @@ function CompanyForm({ companyId = null }) { // Pass companyId for updates
       return;
     }
 
+    let logoUrl = formData.logoUrl;
+    if (logoFile) {
+      const formDataUpload = new FormData();
+      formDataUpload.append("profilePicture", logoFile);
+      formDataUpload.append("isCompanyLogo", "true"); // Ensure this is sent as a string
+      try {
+        const uploadResponse = await axios.post("http://localhost:5000/api/upload", formDataUpload, {
+          withCredentials: true,
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+        logoUrl = uploadResponse.data.url;
+      } catch (err) {
+        setError("Failed to upload logo: " + (err.response?.data?.message || "Unknown error"));
+        setLoading(false);
+        return;
+      }
+    }
+
     const postData = {
       name: formData.companyName,
       gstId: formData.gstId,
@@ -63,11 +112,11 @@ function CompanyForm({ companyId = null }) { // Pass companyId for updates
       contactEmail: formData.contactEmail || undefined,
       phoneNumber: formData.phoneNumber || undefined,
       website: formData.website || undefined,
+      logoUrl: logoUrl || undefined,
     };
 
     try {
       if (companyId) {
-        // Update company
         const response = await axios.put(
           `http://localhost:5000/api/companies/${companyId}`,
           postData,
@@ -75,12 +124,9 @@ function CompanyForm({ companyId = null }) { // Pass companyId for updates
         );
         setSuccess("Company updated successfully!");
       } else {
-        // Register company
-        const response = await axios.post(
-          "http://localhost:5000/api/companies",
-          postData,
-          { withCredentials: true }
-        );
+        const response = await axios.post("http://localhost:5000/api/companies", postData, {
+          withCredentials: true,
+        });
         setSuccess("Company registered successfully!");
       }
       setFormData({
@@ -90,7 +136,10 @@ function CompanyForm({ companyId = null }) { // Pass companyId for updates
         contactEmail: "",
         phoneNumber: "",
         website: "",
+        logoUrl: "",
       });
+      setLogoFile(null);
+      setLogoPreview(null);
     } catch (err) {
       setError(err.response?.data?.message || "Operation failed.");
     } finally {
@@ -175,6 +224,22 @@ function CompanyForm({ companyId = null }) { // Pass companyId for updates
             onChange={handleChange}
             placeholder="e.g. https://www.wrogan.com"
           />
+        </div>
+        <div className="form-group">
+          <label htmlFor="logo">Company Logo</label>
+          <input
+            type="file"
+            id="logo"
+            name="logo"
+            accept="image/jpeg,image/png"
+            onChange={handleLogoChange}
+          />
+          <small>Upload JPG or PNG, max 5MB</small>
+          {logoPreview && (
+            <div className="logo-preview">
+              <img src={logoPreview} alt="Logo Preview" style={{ maxWidth: "100px", maxHeight: "100px" }} />
+            </div>
+          )}
         </div>
         <div className="form-navigation">
           <button type="submit" className="submit-btn" disabled={loading}>

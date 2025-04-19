@@ -14,18 +14,19 @@ import companyRoutes from "./Routes/CompanyRoute.js";
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5000; // Default to 5000 if PORT is not set
+const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(express.json()); // Parse JSON bodies
+app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies (for form data)
 app.use(cookieParser()); // Parse cookies
 app.use(cors({
     origin: "http://localhost:3000",
     credentials: true,
 }));
 app.use(fileUpload({
-    useTempFiles: true, // Store uploaded files temporarily on disk
-    tempFileDir: '/tmp/', // Specify temp directory (optional but recommended)
+    useTempFiles: true,
+    tempFileDir: '/tmp/',
 }));
 
 // Routes
@@ -35,7 +36,7 @@ app.use("/api/profile", profileRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/companies", companyRoutes);
 
-// Error handling middleware (optional, for better debugging)
+// Error handling middleware
 app.use((err, req, res, next) => {
     console.error('Server error:', err.stack);
     res.status(500).json({ message: 'Something went wrong on the server' });

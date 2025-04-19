@@ -3,7 +3,7 @@ import Company from "../Models/CompanyModel.js";
 // Register a new company
 const registerCompany = async (req, res) => {
   try {
-    const { name, gstId, address, contactEmail, phoneNumber, website } = req.body;
+    const { name, gstId, address, contactEmail, phoneNumber, website, logoUrl } = req.body;
 
     // Basic validation
     if (!name || !gstId) {
@@ -18,6 +18,7 @@ const registerCompany = async (req, res) => {
       contactEmail,
       phoneNumber,
       website,
+      logoUrl,
     });
 
     // Save to database
@@ -33,6 +34,7 @@ const registerCompany = async (req, res) => {
         contactEmail: savedCompany.contactEmail,
         phoneNumber: savedCompany.phoneNumber,
         website: savedCompany.website,
+        logoUrl: savedCompany.logoUrl,
         createdAt: savedCompany.createdAt,
       },
     });
@@ -98,7 +100,7 @@ const getCompanyById = async (req, res) => {
 const updateCompany = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, gstId, address, contactEmail, phoneNumber, website } = req.body;
+    const { name, gstId, address, contactEmail, phoneNumber, website, logoUrl } = req.body;
 
     // Validate ID
     if (!id.match(/^[0-9a-fA-F]{24}$/)) {
@@ -119,6 +121,7 @@ const updateCompany = async (req, res) => {
       contactEmail: contactEmail !== undefined ? contactEmail : company.contactEmail,
       phoneNumber: phoneNumber !== undefined ? phoneNumber : company.phoneNumber,
       website: website !== undefined ? website : company.website,
+      logoUrl: logoUrl !== undefined ? logoUrl : company.logoUrl,
     };
 
     // Update company
@@ -183,4 +186,70 @@ const deleteCompany = async (req, res) => {
   }
 };
 
-export { registerCompany, getAllCompanies, getCompanyById, updateCompany, deleteCompany };
+// Rate a company
+const rateCompany = async (req, res) => {
+  try {
+    const { rating } = req.body;
+    const { id } = req.params;
+    const userId = req.user._id;
+
+    // Validate rating
+    if (!rating || rating < 1 || rating > 5) {
+      return res.status(400).json({ message: "Rating must be between 1 and 5" });
+    }
+
+    // Validate company ID
+    if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(400).json({ message: "Invalid company ID" });
+    }
+
+    // Find company
+    const company = await Company.findById(id);
+    if (!company) {
+      return res.status(404).json({ message: "Company not found" });
+    }
+
+    // Check if user already rated
+    const existingRating = company.ratings.find(
+      (r) => r.user.toString() === userId.toString()
+    );
+    if (existingRating) {
+      return res.status(400).json({ message: "You have already rated this company" });
+    }
+
+    // Add new rating
+    company.ratings.push({ user: userId, rating });
+
+    // Calculate average rating
+    const totalRatings = company.ratings.length;
+    const sumRatings = company.ratings.reduce((sum, r) => sum + r.rating, 0);
+    company.averageRating = totalRatings > 0 ? sumRatings / totalRatings : 0;
+
+    // Save company
+    const updatedCompany = await company.save();
+
+    res.status(200).json({
+      message: "Rating submitted successfully",
+      company: {
+        id: updatedCompany._id,
+        averageRating: updatedCompany.averageRating,
+        ratingsCount: updatedCompany.ratings.length,
+      },
+    });
+  } catch (error) {
+    console.error("Error rating company:", error);
+    if (error.name === "CastError") {
+      return res.status(400).json({ message: "Invalid company ID" });
+    }
+    res.status(500).json({ message: "Server error during rating submission" });
+  }
+};
+
+export {
+  registerCompany,
+  getAllCompanies,
+  getCompanyById,
+  updateCompany,
+  deleteCompany,
+  rateCompany,
+};

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import "../styles/CompanyDetail.css";
-import CompLogo from "../Assests/CompLogo.png";
 
 function CompanyDetail() {
   const { id } = useParams();
@@ -11,6 +10,9 @@ function CompanyDetail() {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [userRating, setUserRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [ratingError, setRatingError] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -27,17 +29,15 @@ function CompanyDetail() {
           `http://localhost:5000/api/posts?companyId=${id}`,
           { withCredentials: true }
         );
-        console.log("Jobs response:", jobsResponse.data); // Debug raw response
+        console.log("Jobs response:", jobsResponse.data);
         const fetchedJobs = Array.isArray(jobsResponse.data) ? jobsResponse.data : [];
-        // Log each job's company field to debug
         fetchedJobs.forEach((job, index) =>
           console.log(`Job ${index} company:`, job.company)
         );
-        // Temporary client-side filter
         const filteredJobs = fetchedJobs.filter(
           (job) => job.company?._id === id || job.company === id
         );
-        console.log("Filtered jobs:", filteredJobs); // Debug filtered jobs
+        console.log("Filtered jobs:", filteredJobs);
         setJobs(filteredJobs);
 
         setLoading(false);
@@ -50,6 +50,32 @@ function CompanyDetail() {
     fetchData();
   }, [id]);
 
+  const handleRatingSubmit = async () => {
+    if (userRating < 1 || userRating > 5) {
+      setRatingError("Please select a rating between 1 and 5 stars");
+      return;
+    }
+    try {
+      const response = await axios.post(
+        `http://localhost:5000/api/companies/${id}/rate`,
+        { rating: userRating },
+        { withCredentials: true }
+      );
+      setCompany({
+        ...company,
+        averageRating: response.data.company.averageRating,
+        ratings: [
+          ...company.ratings,
+          { user: "currentUser", rating: userRating },
+        ],
+      });
+      setRatingError(null);
+      setUserRating(0);
+    } catch (err) {
+      setRatingError(err.response?.data?.message || "Failed to submit rating");
+    }
+  };
+
   const truncate = (str, max = 45) =>
     str?.length > max ? str.substring(0, max) + "..." : str;
 
@@ -60,16 +86,30 @@ function CompanyDetail() {
   return (
     <div className="company-detail-container">
       <div className="company-header">
-        <img src={CompLogo} alt={`${company.name} Logo`} className="company-logo" />
+        <img
+          src={company.logoUrl}
+          alt={`${company.name} Logo`}
+          className="company-logo"
+          onError={(e) => {
+            e.target.src =
+              "https://www.creativefabrica.com/wp-content/uploads/2022/10/04/Architecture-building-company-icon-Graphics-40076545-1-1-580x386.jpg";
+          }}
+        />
         <div className="company-title">
           <h2>{company.name}</h2>
           <p className="company-gst">GST ID: {company.gstId}</p>
         </div>
       </div>
       <div className="company-details">
-        <p><strong>Address:</strong> {company.address || "N/A"}</p>
-        <p><strong>Email:</strong> {company.contactEmail || "N/A"}</p>
-        <p><strong>Phone:</strong> {company.phoneNumber || "N/A"}</p>
+        <p>
+          <strong>Address:</strong> {company.address || "N/A"}
+        </p>
+        <p>
+          <strong>Email:</strong> {company.contactEmail || "N/A"}
+        </p>
+        <p>
+          <strong>Phone:</strong> {company.phoneNumber || "N/A"}
+        </p>
         <p>
           <strong>Website:</strong>{" "}
           {company.website ? (
@@ -80,6 +120,51 @@ function CompanyDetail() {
             "N/A"
           )}
         </p>
+      </div>
+      <div className="company-rating">
+        <h3>Company Rating</h3>
+        <div className="rating-display">
+          <span>
+            Average Rating: {company.averageRating.toFixed(1)} / 5
+            {company.ratings.length > 0 && (
+              <span> ({company.ratings.length} ratings)</span>
+            )}
+          </span>
+          <div className="star-display">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <span
+                key={star}
+                className={`star ${
+                  star <= Math.round(company.averageRating) ? "filled" : ""
+                }`}
+              >
+                ★
+              </span>
+            ))}
+          </div>
+        </div>
+        <div className="rating-input">
+          <p>Rate this company:</p>
+          <div className="star-rating">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <span
+                key={star}
+                className={`star ${
+                  star <= (hoverRating || userRating) ? "filled" : ""
+                }`}
+                onClick={() => setUserRating(star)}
+                onMouseEnter={() => setHoverRating(star)}
+                onMouseLeave={() => setHoverRating(0)}
+              >
+                ★
+              </span>
+            ))}
+          </div>
+          <button onClick={handleRatingSubmit} className="submit-rating-btn">
+            Submit Rating
+          </button>
+          {ratingError && <p className="rating-error">{ratingError}</p>}
+        </div>
       </div>
       <div className="company-jobs">
         <h3>Job Openings</h3>
@@ -95,7 +180,9 @@ function CompanyDetail() {
                   <p className="job-location">📍 {job.location}</p>
                   <p className="job-description">{truncate(job.description)}</p>
                   <div className="job-skills">
-                    {job.skills && Array.isArray(job.skills) && job.skills.length > 0 ? (
+                    {job.skills &&
+                    Array.isArray(job.skills) &&
+                    job.skills.length > 0 ? (
                       job.skills.slice(0, 3).map((skill, index) => (
                         <span key={index} className="skill-tag">
                           {skill}
@@ -109,7 +196,9 @@ function CompanyDetail() {
                 <div className="job-bottom">
                   <span className="job-salary">
                     {job.salary && job.salary.min && job.salary.max
-                      ? `${job.salary.currency || ""} ${job.salary.min} - ${job.salary.max}`
+                      ? `${job.salary.currency || ""} ${job.salary.min} - ${
+                          job.salary.max
+                        }`
                       : "Not Disclosed"}
                   </span>
                   <button

@@ -17,7 +17,7 @@ cloudinary.config({
   api_secret: process.env.CLOUD_SECRET,
 });
 
-// Route for uploading profile picture
+// Route for uploading profile picture or company logo
 router.post("/", protectRoute, async (req, res) => {
   try {
     if (!req.files || !req.files.profilePicture) {
@@ -43,8 +43,11 @@ router.post("/", protectRoute, async (req, res) => {
       return res.status(400).json({ message: "File size must be less than 5MB" });
     }
 
+    // Safely check if isCompanyLogo is provided
+    const isCompanyLogo = req.body.isCompanyLogo === "true" || req.body.isCompanyLogo === true;
+
     const result = await cloudinary.uploader.upload(file.tempFilePath || file.data, {
-      folder: "profiles",
+      folder: isCompanyLogo ? "company_logos" : "profiles",
       resource_type: "image",
       transformation: [
         { width: 200, height: 200, crop: "fill" },
@@ -58,15 +61,18 @@ router.post("/", protectRoute, async (req, res) => {
       bytes: result.bytes,
     });
 
-    const userId = req.user._id;
-    const updatedProfile = await Profile.findOneAndUpdate(
-      { user: userId },
-      { $set: { "personal.profilePicture": result.secure_url } },
-      { new: true, upsert: true }
-    );
+    // Update profile only if not a company logo
+    if (!isCompanyLogo) {
+      const userId = req.user._id;
+      const updatedProfile = await Profile.findOneAndUpdate(
+        { user: userId },
+        { $set: { "personal.profilePicture": result.secure_url } },
+        { new: true, upsert: true }
+      );
 
-    if (!updatedProfile) {
-      return res.status(500).json({ message: "Failed to update profile with profile picture URL" });
+      if (!updatedProfile) {
+        return res.status(500).json({ message: "Failed to update profile with profile picture URL" });
+      }
     }
 
     res.json({ url: result.secure_url });
@@ -155,15 +161,13 @@ router.post("/resume", protectRoute, async (req, res) => {
 
 // Route for uploading video resume
 router.post("/video-resume", protectRoute, async (req, res) => {
-  let file; // Declare file variable for cleanup in catch block
+  let file;
   try {
-    // Log request details
     console.log("Received video upload request:", {
       userId: req.user?._id,
       files: req.files,
     });
 
-    // Check if file is uploaded
     if (!req.files || !req.files.videoResume) {
       console.error("No video file uploaded");
       return res.status(400).json({ message: "No video uploaded" });
@@ -177,26 +181,22 @@ router.post("/video-resume", protectRoute, async (req, res) => {
       tempFilePath: file.tempFilePath,
     });
 
-    // Validate file type (MP4, WebM)
     const filetypes = /mp4|webm/;
     if (!filetypes.test(file.mimetype)) {
       console.error("Invalid file type:", file.mimetype);
       return res.status(400).json({ message: "Only MP4 and WebM videos are allowed" });
     }
 
-    // Validate file size (50MB limit)
     if (file.size > 50 * 1024 * 1024) {
       console.error("File size too large:", file.size);
       return res.status(400).json({ message: "File size must be less than 50MB" });
     }
 
-    // Validate temporary file exists
     if (!file.tempFilePath || !fs.existsSync(file.tempFilePath)) {
       console.error("Temporary file not found:", file.tempFilePath);
       return res.status(400).json({ message: "Temporary file not found" });
     }
 
-    // Validate video duration (<= 30 seconds)
     const duration = await getVideoDurationInSeconds(file.tempFilePath);
     console.log("Video Duration:", duration, "seconds");
     if (duration > 30) {
@@ -204,10 +204,8 @@ router.post("/video-resume", protectRoute, async (req, res) => {
       return res.status(400).json({ message: "Video must be 30 seconds or shorter" });
     }
 
-    // Generate unique public_id
     const publicId = `video-resumes/${req.user._id}_${Date.now()}`;
 
-    // Upload to Cloudinary
     const result = await cloudinary.uploader.upload(file.tempFilePath, {
       folder: "video-resumes",
       resource_type: "video",
@@ -221,7 +219,6 @@ router.post("/video-resume", protectRoute, async (req, res) => {
       bytes: result.bytes,
     });
 
-    // Delete old video from Cloudinary if it exists
     const userId = req.user._id;
     const profile = await Profile.findOne({ user: userId });
     console.log("Profile Found:", profile ? profile._id : "No profile");
@@ -232,7 +229,6 @@ router.post("/video-resume", protectRoute, async (req, res) => {
       });
     }
 
-    // Update profile with new video URL and public_id
     const updatedProfile = await Profile.findOneAndUpdate(
       { user: userId },
       {
@@ -251,7 +247,6 @@ router.post("/video-resume", protectRoute, async (req, res) => {
       return res.status(500).json({ message: "Failed to update profile with video resume URL" });
     }
 
-    // Clean up temporary file
     if (file.tempFilePath && fs.existsSync(file.tempFilePath)) {
       console.log("Cleaning up temporary file:", file.tempFilePath);
       fs.unlinkSync(file.tempFilePath);
@@ -259,7 +254,6 @@ router.post("/video-resume", protectRoute, async (req, res) => {
 
     res.json({ url: result.secure_url });
   } catch (error) {
-    // Detailed error logging
     console.error("Video Resume Upload Error:", {
       message: error.message,
       stack: error.stack,
@@ -269,13 +263,11 @@ router.post("/video-resume", protectRoute, async (req, res) => {
         : undefined,
     });
 
-    // Clean up temporary file on error
     if (file?.tempFilePath && fs.existsSync(file.tempFilePath)) {
       console.log("Cleaning up temporary file on error:", file.tempFilePath);
       fs.unlinkSync(file.tempFilePath);
     }
 
-    // Handle specific errors
     if (error.message.includes("30 seconds")) {
       return res.status(400).json({ message: error.message });
     }
