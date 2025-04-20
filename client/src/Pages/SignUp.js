@@ -1,17 +1,28 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import SignUpImg from "../Assests/SignUp.svg";
 import "../styles/Signup.css";
 import axios from "axios";
 import { FaAt, FaEye, FaEyeSlash } from "react-icons/fa";
-import { Link, useNavigate } from "react-router-dom"; // Added useNavigate
+import { Link, useNavigate } from "react-router-dom";
 
 function Signup() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const navigate = useNavigate(); // Initialize navigate hook
+  const navigate = useNavigate();
+
+  // Check if user is logged in
+  useEffect(() => {
+    const user = localStorage.getItem("user");
+    if (user) {
+      // Redirect to user dashboard if logged in
+      navigate("/profileComp");
+    }
+  }, [navigate]);
 
   const handleSignUp = async (e) => {
     e.preventDefault();
@@ -27,75 +38,92 @@ function Signup() {
       );
       localStorage.setItem("user", JSON.stringify(res.data));
       alert("Signup successful! Let’s complete your profile.");
-      navigate("/profileForm"); // Redirect to ProfileForm
+      navigate("/profileForm");
     } catch (error) {
       alert(error.response?.data?.message || "Signup failed.");
     }
   };
 
   return (
-    <div className="main-container">
-      <div className="login-container">
-        <div className="img-container">
+    <div className="signup-main-container">
+      <div className="signup-container">
+        <div className="signup-img-container">
           <img src={SignUpImg} alt="Signup Illustration" />
         </div>
 
-        <form className="loginForm" onSubmit={handleSignUp}>
-          <p className="login-txt">SignUp</p>
+        <form className="signup-form" onSubmit={handleSignUp}>
+          <h1 className="signup-title">Create Your Account</h1>
 
-          <span className="email-field">
-            {/* <FaAt /> */}
+          <div className="signup-field">
+            <FaAt className="signup-icon" />
             <input
               type="text"
-              name="Name"
+              name="signup-name"
               onChange={(e) => setName(e.target.value)}
-              placeholder="Enter your Name"
-              className="login-input"
+              placeholder="Full Name"
+              className="signup-input signup-name-input"
               required
             />
-          </span>
-          <span className="email-field">
-            <FaAt />
+          </div>
+
+          <div className="signup-field">
+            <FaAt className="signup-icon" />
             <input
-              type="text"
-              name="email"
+              type="email"
+              name="signup-email"
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email"
-              className="login-input"
+              placeholder="Email Address"
+              className="signup-input signup-email-input"
               required
             />
-          </span>
+          </div>
 
-          <span className="email-field">
-            <FaEye />
+          <div className="signup-field">
+            <span
+              className="signup-icon"
+              onClick={() => setShowPassword(!showPassword)}
+              style={{ cursor: "pointer" }}
+            >
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
+            </span>
             <input
-              type="password"
-              name="password"
-              placeholder="Enter your password"
-              required
+              type={showPassword ? "text" : "password"}
+              name="signup-password"
+              placeholder="Password"
               onChange={(e) => setPassword(e.target.value)}
-              className="login-input"
-            />
-          </span>
-
-          <span className="email-field">
-            <FaEyeSlash />
-            <input
-              type="password"
-              name="confirmPassword"
-              placeholder="Confirm your password"
-              onChange={(e) => setConfirmPassword(e.target.value)}
+              className="signup-input signup-password-input"
               required
-              className="login-input"
             />
-          </span>
+          </div>
 
-          <button type="submit" className="btn">
-            SignUp
+          <div className="signup-field">
+            <span
+              className="signup-icon"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              style={{ cursor: "pointer" }}
+            >
+              {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+            </span>
+            <input
+              type={showConfirmPassword ? "text" : "password"}
+              name="signup-confirm-password"
+              placeholder="Confirm Password"
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className="signup-input signup-confirm-password-input"
+              required
+            />
+          </div>
+
+          <button type="submit" className="signup-btn">
+            Sign Up
           </button>
-          <p className="g-btn">Google</p>
-          <p className="acc">
-            Have an account? <Link to="/login">Login</Link>
+
+          <button type="button" className="signup-google-btn">
+            Sign Up with Google
+          </button>
+
+          <p className="signup-login-link">
+            Already have an account? <Link to="/login">Login</Link>
           </p>
         </form>
       </div>

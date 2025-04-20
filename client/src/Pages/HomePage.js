@@ -13,7 +13,7 @@ import NetflixLogo from "../Assests/Netflix.png";
 import CompLogo from "../Assests/CompLogo.png"; 
 import api from '../api'; 
 
-// Company logos 
+// Company logos  
 const companies = [
     { id: 1, name: "Google", logo: GoogleLogo },
     { id: 2, name: "Amazon", logo: AmazonLogo },

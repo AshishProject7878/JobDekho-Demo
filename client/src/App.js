@@ -1,6 +1,6 @@
 import './App.css';
 import Navbar from './Pages/Navbar';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Login from './Pages/Login';
 import Signup from './Pages/SignUp';
 import ProtectedRoute from './Components/ProtectedRoute';
@@ -23,22 +23,27 @@ import AutoAppliedJobs from './Pages/AutoAppliedJobs';
 import HomePage from './Pages/HomePage';
 import Footer from './Pages/Footer';
 
-function App() {
+// Create a wrapper component to handle conditional Footer rendering
+function AppContent() {
+  const location = useLocation();
+
+  // Hide Footer on the Signup and Login pages
+  const hideFooter = ['/signup', '/login'].includes(location.pathname);
+
   return (
-    <Router>
+    <>
       <Navbar />
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/dummyProfile" element={<PublicPost />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        {/* <Route path="/public-posts" element={<PublicPost />} /> */}
         
         {/* Protected routes */}
         <Route element={<ProtectedRoute />}>
-        <Route path="/companies/:id" element={<CompanyDetail />} />
-        <Route path="/job/:id" element={<JobDetail />} />
-        <Route path="/jobPostingForm" element={<JobPostingForm />}/>
+          <Route path="/companies/:id" element={<CompanyDetail />} />
+          <Route path="/job/:id" element={<JobDetail />} />
+          <Route path="/jobPostingForm" element={<JobPostingForm />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/userDashboard" element={<UserDashboard />} />
           <Route path="/companyForm" element={<CompanyForm />} />
@@ -52,11 +57,16 @@ function App() {
           <Route path="/auto-job/prefs" element={<AutoJobPrefs />} /> 
           <Route path="/auto-job/applications" element={<AutoAppliedJobs />} /> 
         </Route>
-  
-        {/* Fallback route */}
-        {/* <Route path="*" element={<Login />} /> */}
       </Routes>
-      <Footer />
+      {!hideFooter && <Footer />}
+    </>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <AppContent />
     </Router>
   );
 }
