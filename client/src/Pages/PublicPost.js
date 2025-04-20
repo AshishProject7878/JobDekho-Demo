@@ -1,7 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import "../styles/PublicPost.css"; 
+import "../styles/PublicPost.css";
+import Img1 from "../Assests/Enthusiastic-bro.svg";
+import Img2 from "../Assests/Learning-rafiki.svg";
+import Comp from "../Assests/CompLogo.png";
 
 function PublicPost() {
   const navigate = useNavigate();
@@ -13,6 +16,8 @@ function PublicPost() {
   const [categoryFilter, setCategoryFilter] = useState("");
   const [viewMode, setViewMode] = useState("Jobs");
   const [currentPage, setCurrentPage] = useState(1);
+  const [showFilterModal, setShowFilterModal] = useState(false);
+  const modalRef = useRef(null);
 
   const postsPerPage = 8;
   const categories = [
@@ -152,28 +157,46 @@ function PublicPost() {
     "Others",
   ];
 
+  // Close modal on outside click
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (modalRef.current && !modalRef.current.contains(event.target)) {
+        setShowFilterModal(false);
+      }
+    };
+
+    if (showFilterModal) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showFilterModal]);
+
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [searchQuery, categoryFilter, viewMode]);
 
   const fetchData = async () => {
     setLoading(true);
     setError(null);
     try {
-      const postsUrl = `http://localhost:5000/api/posts${
-        searchQuery || categoryFilter ? "?" : ""
-      }${searchQuery ? `search=${searchQuery}` : ""}${
-        searchQuery && categoryFilter ? "&" : ""
-      }${categoryFilter && categoryFilter !== "All" ? `category=${categoryFilter}` : ""}`;
-      const postsRes = await axios.get(postsUrl, { withCredentials: true });
-      setFilteredPosts(postsRes.data || []);
-
-      const companiesUrl = `http://localhost:5000/api/companies${
-        searchQuery ? `?search=${searchQuery}` : ""
-      }`;
-      const companiesRes = await axios.get(companiesUrl, { withCredentials: true });
-      setCompanies(companiesRes.data.companies || []);
-
+      if (viewMode === "Jobs") {
+        const postsUrl = `http://localhost:5000/api/posts${
+          searchQuery || categoryFilter ? "?" : ""
+        }${searchQuery ? `search=${searchQuery}` : ""}${
+          searchQuery && categoryFilter ? "&" : ""
+        }${categoryFilter && categoryFilter !== "All" ? `category=${categoryFilter}` : ""}`;
+        const postsRes = await axios.get(postsUrl, { withCredentials: true });
+        setFilteredPosts(postsRes.data || []);
+      } else {
+        const companiesUrl = `http://localhost:5000/api/companies${
+          searchQuery ? `?search=${searchQuery}` : ""
+        }`;
+        const companiesRes = await axios.get(companiesUrl, { withCredentials: true });
+        setCompanies(companiesRes.data.companies || []);
+      }
       setLoading(false);
     } catch (err) {
       console.error("Error fetching data:", err);
@@ -186,7 +209,6 @@ function PublicPost() {
     if (viewMode === "Jobs") {
       fetchData();
     } else {
-      // Filter companies client-side
       const filtered = companies.filter(
         (company) =>
           company.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -198,20 +220,17 @@ function PublicPost() {
   };
 
   const handleCategoryChange = (e) => {
-    const selectedCategory = e.target.value;
-    setCategoryFilter(selectedCategory);
-    if (viewMode === "Jobs") {
-      fetchData();
-    }
+    setCategoryFilter(e.target.value);
     setCurrentPage(1);
   };
 
   const handleViewModeChange = (e) => {
-    setViewMode(e.target.value);
+    const newViewMode = e.target.value;
+    setViewMode(newViewMode);
     setSearchQuery("");
     setCategoryFilter("");
     setCurrentPage(1);
-    if (e.target.value === "Companies") {
+    if (newViewMode === "Companies") {
       fetchData();
     }
   };
@@ -220,6 +239,10 @@ function PublicPost() {
     if (e.key === "Enter") {
       handleSearch();
     }
+  };
+
+  const toggleFilterModal = () => {
+    setShowFilterModal(!showFilterModal);
   };
 
   const truncate = (str, max = 45) =>
@@ -235,217 +258,252 @@ function PublicPost() {
       : companies.slice(indexOfFirstItem, indexOfLastItem);
 
   const changePage = (pageNumber) => {
-    setCurrentPage(pageNumber);
-    window.scrollTo(0, 0);
+    if (pageNumber >= 1 && pageNumber <= totalPages) {
+      setCurrentPage(pageNumber);
+      window.scrollTo(0, 0);
+    }
   };
 
-  if (loading) {
-    return <p className="public-info">Loading {viewMode.toLowerCase()}...</p>;
-  }
-
-  if (error) {
-    return <p className="public-info">{error}</p>;
-  }
-
   return (
-    <div className="public-container">
-      <h2 className="public-header">
-        {viewMode === "Jobs" ? "All Job Posts" : "All Companies"}
-      </h2>
-
-      <div className="search-filter-bar">
-        <div className="view-mode-dropdown">
-          <label htmlFor="view-mode">View:</label>
-          <select
-            id="view-mode"
-            value={viewMode}
-            onChange={handleViewModeChange}
-          >
-            <option value="Jobs">Jobs</option>
-            <option value="Companies">Companies</option>
-          </select>
-        </div>
-        <div className="search-input">
-          <input
-            type="text"
-            placeholder={
-              viewMode === "Jobs"
-                ? "Search jobs by title, company, or location..."
-                : "Search companies by name or GST ID..."
-            }
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onKeyPress={handleKeyPress}
-          />
-          <button onClick={handleSearch}>Search</button>
-        </div>
-        {viewMode === "Jobs" && (
-          <div className="filter-dropdown">
-            <label htmlFor="category-filter">Filter by Category:</label>
-            <select
-              id="category-filter"
-              value={categoryFilter}
-              onChange={handleCategoryChange}
-            >
-              {categories.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
-                </option>
-              ))}
-            </select>
+    <div>
+      <div className="main">
+        <div className="hero-holder">
+          <div className="img-container">
+            <img src={Img2} alt="Learning Illustration" />
           </div>
-        )}
-      </div>
+          <div className="search-container">
+            <h1>{viewMode === "Jobs" ? "Available Jobs" : "Explore Companies"}</h1>
+            <p>
+              {viewMode === "Jobs"
+                ? "Discover thousands of job opportunities with top companies worldwide."
+                : "Find the best companies to work with, tailored to your career goals."}
+            </p>
+            <div className="Search-form-container">
+              {viewMode === "Jobs" && (
+                <select
+                  className="Industry"
+                  value={categoryFilter}
+                  onChange={handleCategoryChange}
+                >
+                  {categories.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat}
+                    </option>
+                  ))}
+                </select>
+              )}
+              <input
+                type="text"
+                placeholder={
+                  viewMode === "Jobs"
+                    ? "Search jobs by title, company, or location..."
+                    : "Search companies by name or GST ID..."
+                }
+                className="Keywords"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyPress={handleKeyPress}
+              />
+              <button className="search-btn" onClick={handleSearch}>
+                Search
+              </button>
+            </div>
+          </div>
+          <div className="img-container">
+            <img src={Img1} alt="Enthusiastic Illustration" />
+          </div>
+        </div>
 
-      {currentItems.length > 0 ? (
-        <>
-          <div className="public-grid">
-            {viewMode === "Jobs" ? (
-              currentItems.map((post) => (
-                <div className="public-card" key={post._id}>
-                  <div className="top-section">
-                    <span>{post.type || "Job"}</span>
-                  </div>
-                  <div className="mid-section">
-                    <div className="comp-img">
-                      <img
-                        src={post.company?.logoUrl}
-                        alt={`${post.company?.name || "Company"} Logo`}
-                        onError={(e) => {
-                          e.target.src =
-                            "https://www.creativefabrica.com/wp-content/uploads/2022/10/04/Architecture-building-company-icon-Graphics-40076545-1-1-580x386.jpg";
-                        }}
-                      />
-                      <div className="comp-dets">
-                        <h3 className="public-title">{post.title}</h3>
-                        <p className="comp-name">
-                          {post.company?.name || post.company}
-                        </p>
-                        <div className="location1">
-                          <span>📍 {post.location}</span>
+        {loading ? (
+          <div className="public-loader-container">
+            <div className="public-loader"></div>
+          </div>
+        ) : error ? (
+          <p className="public-info">{error}</p>
+        ) : currentItems.length > 0 ? (
+          <>
+            <div className="card-holder">
+              {viewMode === "Jobs" ? (
+                currentItems.map((post) => (
+                  <div className="public-card" key={post._id}>
+                    <div className="top-section">
+                      <span>{post.type || "Job"}</span>
+                      <i className="fa-solid fa-bookmark"></i>
+                    </div>
+                    <div className="mid-section">
+                      <div className="comp-img">
+                        <img
+                          src={post.company?.logoUrl || Comp}
+                          alt={`${post.company?.name || "Company"} Logo`}
+                          onError={(e) => {
+                            e.target.src = Comp;
+                          }}
+                        />
+                        <div className="comp-dets">
+                          <h3 className="public-title">{post.title}</h3>
+                          <p className="comp-name">
+                            {post.company?.name || post.company}
+                          </p>
+                          <div className="location1">
+                            <i className="fa-solid fa-location-dot"></i>{" "}
+                            {post.location}
+                          </div>
                         </div>
                       </div>
+                      <p className="public-description">
+                        {truncate(post.description)}
+                      </p>
+                      <div className="skills">
+                        {post.skills && post.skills.length > 0 ? (
+                          post.skills.slice(0, 3).map((skill, index) => (
+                            <span key={index} className="skill-tag">
+                              {skill}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="skill-tag">No skills listed</span>
+                        )}
+                      </div>
                     </div>
-                    <p className="public-description">
-                      {truncate(post.description)}
-                    </p>
-                    <div className="skills">
-                      {post.skills && post.skills.length > 0 ? (
-                        post.skills.slice(0, 3).map((skill, index) => (
-                          <span key={index} className="skill-tag">
-                            {skill}
-                          </span>
-                        ))
-                      ) : (
-                        <span className="skill-tag">No skills listed</span>
-                      )}
+                    <div className="bottom-section">
+                      <span className="salary">
+                        {post.salary && post.salary.min && post.salary.max
+                          ? `${post.salary.currency} ${post.salary.min} - ${post.salary.max}`
+                          : "Not Disclosed"}
+                      </span>
+                      <button
+                        className="view-btn"
+                        onClick={() => navigate(`/job/${post._id}`)}
+                      >
+                        View Job
+                      </button>
                     </div>
                   </div>
-                  <div className="bottom-section">
-                    <span className="salary">
-                      {post.salary && post.salary.min && post.salary.max
-                        ? `${post.salary.currency} ${post.salary.min} - ${post.salary.max}`
-                        : "Not Disclosed"}
-                    </span>
-                    <button
-                      className="view-btn"
-                      onClick={() => navigate(`/job/${post._id}`)}
-                    >
-                      View Job
-                    </button>
-                  </div>
-                </div>
-              ))
-            ) : (
-              currentItems.map((company) => (
-                <div className="public-card company-card" key={company._id}>
-                  <div className="top-section">
-                    <span>Company</span>
-                  </div>
-                  <div className="mid-section">
-                    <div className="comp-img">
-                      <img
-                        src={company.logoUrl}
-                        alt={`${company.name} Logo`}
-                        onError={(e) => {
-                          e.target.src =
-                            "https://www.creativefabrica.com/wp-content/uploads/2022/10/04/Architecture-building-company-icon-Graphics40076545-1-1-580x386.jpg";
-                        }}
-                      />
-                      <div className="comp-dets">
-                        <h3 className="public-title">{company.name}</h3>
-                        <p className="comp-gst">GST ID: {company.gstId}</p>
-                        <div className="company-rating">
-                          <span>
+                ))
+              ) : (
+                currentItems.map((company) => (
+                  <div className="public-card" key={company._id}>
+                    <div className="top-section">
+                      <span>Company</span>
+                      <i className="fa-solid fa-bookmark"></i>
+                    </div>
+                    <div className="mid-section">
+                      <div className="comp-img">
+                        <img
+                          src={company.logoUrl || Comp}
+                          alt={`${company.name} Logo`}
+                          onError={(e) => {
+                            e.target.src = Comp;
+                          }}
+                        />
+                        <div className="comp-dets">
+                          <h3 className="public-title">{company.name}</h3>
+                          <p className="comp-name">GST ID: {company.gstId}</p>
+                          <div className="location1">
+                            <i className="fa-solid fa-star"></i>{" "}
                             Rating: {company.averageRating.toFixed(1)} / 5
                             {company.ratings.length > 0 && (
                               <span> ({company.ratings.length} ratings)</span>
                             )}
-                          </span>
-                          <div className="star-display">
-                            {[1, 2, 3, 4, 5].map((star) => (
-                              <span
-                                key={star}
-                                className={`star ${
-                                  star <= Math.round(company.averageRating)
-                                    ? "filled"
-                                    : ""
-                                }`}
-                              >
-                                ★
-                              </span>
-                            ))}
                           </div>
                         </div>
                       </div>
+                      <p className="public-description">
+                        {truncate(
+                          company.contactEmail ||
+                            company.phoneNumber ||
+                            company.website
+                            ? [
+                                company.contactEmail &&
+                                  `Email: ${company.contactEmail}`,
+                                company.phoneNumber &&
+                                  `Phone: ${company.phoneNumber}`,
+                                company.website && `Website: ${company.website}`,
+                              ]
+                                .filter(Boolean)
+                                .join(" | ")
+                            : "No contact details provided"
+                        )}
+                      </p>
+                      <div className="skills">
+                        <span className="skill-tag">Registered Company</span>
+                      </div>
                     </div>
-                    <p className="public-description">
-                      {company.contactEmail ||
-                      company.phoneNumber ||
-                      company.website
-                        ? [
-                            company.contactEmail &&
-                              `Email: ${company.contactEmail}`,
-                            company.phoneNumber &&
-                              `Phone: ${company.phoneNumber}`,
-                            company.website && `Website: ${company.website}`,
-                          ]
-                            .filter(Boolean)
-                            .join(" | ")
-                        : "No contact details provided"}
-                    </p>
+                    <div className="bottom-section">
+                      <span className="salary">Contact Details</span>
+                      <button
+                        className="view-btn"
+                        onClick={() => navigate(`/companies/${company._id}`)}
+                      >
+                        View Details
+                      </button>
+                    </div>
                   </div>
-                  <div className="bottom-section">
-                    <span className="company-info">Registered Company</span>
-                    <button
-                      className="view-btn"
-                      onClick={() => navigate(`/companies/${company._id}`)}
-                    >
-                      View Details
-                    </button>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
+                ))
+              )}
+            </div>
 
-          <div className="pagination">
-            {[...Array(totalPages).keys()].map((num) => (
+            <div className="pagination-holder">
               <button
-                key={num + 1}
-                className={`page-btn ${currentPage === num + 1 ? "active" : ""}`}
-                onClick={() => changePage(num + 1)}
+                className="prev-btn"
+                onClick={() => changePage(currentPage - 1)}
+                disabled={currentPage === 1}
               >
-                {num + 1}
+                Prev
               </button>
-            ))}
+              <p className="page-number">
+                {[...Array(totalPages).keys()].map((num) => (
+                  <span
+                    key={num + 1}
+                    className={`no ${currentPage === num + 1 ? "active" : ""}`}
+                    onClick={() => changePage(num + 1)}
+                  >
+                    {num + 1}
+                  </span>
+                ))}
+              </p>
+              <button
+                className="next-btn"
+                onClick={() => changePage(currentPage + 1)}
+                disabled={currentPage === totalPages}
+              >
+                Next
+              </button>
+            </div>
+          </>
+        ) : (
+          <p className="public-info">
+            No {viewMode.toLowerCase()} found.
+          </p>
+        )}
+
+        <button className="filter-btn" onClick={toggleFilterModal}>
+          <i className="fa-solid fa-filter"></i>
+        </button>
+
+        {showFilterModal && (
+          <div className="filter-modal" ref={modalRef}>
+            <p className="close-btn" onClick={toggleFilterModal}>
+              ×
+            </p>
+            <h3>Filters</h3>
+            <select value={viewMode} onChange={handleViewModeChange}>
+              <option value="Jobs">Jobs</option>
+              <option value="Companies">Companies</option>
+            </select>
+            {viewMode === "Jobs" && (
+              <select value={categoryFilter} onChange={handleCategoryChange}>
+                {categories.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
+                ))}
+              </select>
+            )}
+            <button onClick={toggleFilterModal}>Apply Filters</button>
           </div>
-        </>
-      ) : (
-        <p className="public-info">
-          No {viewMode.toLowerCase()} found.
-        </p>
-      )}
+        )}
+      </div>
     </div>
   );
 }

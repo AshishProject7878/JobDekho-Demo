@@ -1,25 +1,135 @@
-.public-container {
-  padding: 40px 20px;
-  margin: auto;
-  font-family: "Segoe UI", sans-serif;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-.public-header {
+.main {
+  padding: 10px 50px;
+  background-color: #ccc;
+  font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
+}
+
+img {
+  width: 250px;
+}
+
+input,
+select {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 3px;
+  outline: none;
+}
+
+.hero-holder {
+  display: flex;
+  background: linear-gradient(135deg, #6a11cb, #2575fc);
+  border-radius: 8px;
+  margin-bottom: 18px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px;
+  gap: 20px;
+}
+
+.search-container {
+  width: 50%;
   text-align: center;
-  font-size: 28px;
-  font-weight: bold;
-  color: #1f2937;
-  margin-bottom: 30px;
+  line-height: 1.5;
+  color: white;
+  padding: 20px;
 }
 
-.public-grid {
+.search-container h1 {
+  font-size: 36px;
+  margin-top: 20px;
+  color: #fff;
+}
+
+.search-container p {
+  margin-bottom: 20px;
+  color: #e6e6e6;
+  font-size: 16px;
+}
+
+.search-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 3px;
+  color: white;
+  background-color: #6a11cb;
+  cursor: pointer;
+  transition: all 0.5s ease-in-out;
+  flex: 1;
+  max-width: 150px;
+}
+
+.search-btn:hover {
+  opacity: 0.9;
+}
+
+.Search-form-container {
+  display: flex;
+  background-color: #fff;
+  width: 100%;
+  border-radius: 5px;
+  padding: 10px;
+  gap: 10px;
+}
+
+.Industry,
+.Keywords {
+  width: 30%;
+  padding: 10px;
+  border: none;
+  border-radius: 3px;
+  outline: none;
+  flex: 1;
+}
+
+.img-container img {
+  width: 100%;
+  max-width: 250px;
+  height: auto;
+}
+
+.public-loader-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px 0;
+}
+
+.public-loader {
+  width: 40px;
+  height: 40px;
+  border: 4px solid transparent;
+  border-top: 4px solid #6a11cb;
+  border-right: 4px solid #2575fc;
+  border-radius: 50%;
+  animation: public-spin 1s linear infinite;
+}
+
+@keyframes public-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.card-holder {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
+  justify-content: center;
 }
 
 .public-card {
   width: 100%;
+  max-width: 350px;
   background: #fff;
   border-radius: 20px;
   overflow: hidden;
@@ -72,6 +182,17 @@
   font-weight: 600;
 }
 
+.top-section i {
+  font-size: 25px;
+  opacity: 0;
+  cursor: pointer;
+  transition: all 0.9s ease;
+}
+
+.public-card:hover .top-section i {
+  opacity: 1;
+}
+
 .mid-section {
   padding: 10px 16px 16px;
   color: #333;
@@ -114,32 +235,6 @@
   color: #2575fc;
 }
 
-.company-rating {
-  margin-top: 8px;
-}
-
-.company-rating span {
-  font-size: 13px;
-  color: #555;
-  transition: color 0.8s ease;
-}
-
-.star-display {
-  display: flex;
-  gap: 2px;
-  margin-top: 4px;
-}
-
-.star {
-  font-size: 12px;
-  color: #ccc;
-  transition: color 0.8s ease;
-}
-
-.star.filled {
-  color: #f5c518;
-}
-
 .location1 {
   font-size: 13px;
   color: #888;
@@ -154,6 +249,27 @@
   margin-bottom: 16px;
   color: #555;
   transition: all 0.8s ease;
+}
+
+.skills {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.skill-tag {
+  background: #f0f0f0;
+  padding: 4px 10px;
+  border-radius: 16px;
+  font-size: 12px;
+  color: #555;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+.public-card:hover .skill-tag {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
 }
 
 .bottom-section {
@@ -204,18 +320,6 @@
   color: #fff;
 }
 
-.public-card:hover .company-rating span {
-  color: #fff;
-}
-
-.public-card:hover .star {
-  color: rgba(255, 255, 255, 0.5);
-}
-
-.public-card:hover .star.filled {
-  color: #f5c518;
-}
-
 .public-info {
   text-align: center;
   color: #6b7280;
@@ -223,194 +327,233 @@
   padding: 40px 0;
 }
 
-.search-filter-bar {
+.pagination-holder {
   display: flex;
-  justify-content: center;
+  margin-top: 20px;
   align-items: center;
-  gap: 15px;
-  margin-bottom: 30px;
-  flex-wrap: wrap;
+  justify-content: space-between;
 }
 
-.search-input {
+.prev-btn,
+.next-btn {
+  background-color: #6a11cb;
+  color: #fff;
+  padding: 10px 40px;
+  border: none;
+  border-radius: 8px;
+  transition: all 0.5s ease-in-out;
+  cursor: pointer;
+}
+
+.prev-btn:hover,
+.next-btn:hover {
+  background-color: #4c03d5;
+}
+
+.prev-btn:disabled,
+.next-btn:disabled {
+  background-color: #999;
+  cursor: not-allowed;
+}
+
+.page-number {
   display: flex;
   gap: 10px;
-  flex: 1;
-  min-width: 250px;
 }
 
-.search-input input {
-  padding: 10px 12px;
-  font-size: 14px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  width: 100%;
-  outline: none;
-  transition: border-color 0.3s ease;
+.no {
+  cursor: pointer;
+  border: 1px solid #6a11cb;
+  color: #040404;
+  padding: 5px 20px;
+  transition: all 0.5s ease-in-out;
 }
 
-.search-input input:focus {
-  border-color: #007bff;
-}
-
-.search-input button {
-  padding: 10px 16px;
-  background-color: #007bff;
+.no:hover,
+.no.active {
+  background-color: #6a11cb;
   color: white;
+}
+
+.filter-btn {
+  z-index: 1000;
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  width: 50px;
+  height: 50px;
+  background: linear-gradient(135deg, #6a11cb, #2575fc);
+  color: white;
+  border-radius: 50%;
   border: none;
-  font-weight: 500;
-  border-radius: 6px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.search-input button:hover {
-  background-color: #0056b3;
-}
-
-.filter-dropdown {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.filter-dropdown label {
-  font-size: 14px;
-  color: #1f2937;
-  font-weight: 500;
-}
-
-.filter-dropdown select {
-  padding: 10px 12px;
-  font-size: 14px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  background-color: white;
-  cursor: pointer;
-  outline: none;
-  min-width: 150px;
-  transition: border-color 0.3s ease;
-}
-
-.filter-dropdown select:focus {
-  border-color: #007bff;
-}
-
-.pagination {
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+  font-size: 18px;
   display: flex;
   justify-content: center;
-  margin-top: 1rem;
-  gap: 0.5rem;
+  align-items: center;
+  transition: all 0.5s ease-in-out;
 }
 
-.page-btn {
-  padding: 6px 12px;
-  border: 1px solid #aaa;
-  background-color: white;
-  cursor: pointer;
+.filter-btn:hover {
+  background: linear-gradient(135deg, #4c03d5, #6a11cb);
+}
+
+.filter-modal {
+  position: fixed;
+  bottom: 80px;
+  left: 20px;
+  width: 250px;
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+}
+
+.filter-modal h3 {
+  margin-bottom: 10px;
+  font-size: 16px;
+  color: #333;
+}
+
+.filter-modal select,
+.filter-modal button {
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 8px;
+  border: 1px solid #ccc;
   border-radius: 4px;
-  transition: background 0.2s;
+  outline: none;
 }
 
-.page-btn:hover {
-  background-color: #f0f0f0;
-}
-
-.page-btn.active {
-  background-color: #007bff;
+.filter-modal button {
+  background-color: #6a11cb;
   color: white;
-  border-color: #007bff;
+  border: none;
+  cursor: pointer;
+  transition: all 0.5s ease-in-out;
 }
 
-.skills {
-  display: flex;
-  flex-wrap: nowrap;
-  gap: 8px;
-  margin-top: 10px;
+.filter-modal button:hover {
+  background-color: #4c03d5;
 }
 
-.skill-tag {
-  background: #f0f0f0;
-  padding: 4px 10px;
-  border-radius: 16px;
-  font-size: 12px;
-  color: #555;
-  transition: background 0.3s ease, color 0.3s ease;
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 18px;
+  float: right;
+  cursor: pointer;
 }
 
-.public-card:hover .skill-tag {
-  background: rgba(255, 255, 255, 0.2);
-  color: #fff;
-}
-
-.company-card .public-title {
-  font-size: 20px;
-  margin-bottom: 8px;
-}
-
-.company-card .comp-gst {
-  font-size: 13px;
-  color: #888;
-  margin: 4px 0;
-}
-
-.company-card .comp-address {
-  font-size: 13px;
-  color: #555;
-  margin: 4px 0;
-}
-
-.company-card .public-description {
-  font-size: 13px;
-  color: #666;
-}
-
-.company-card .company-info {
-  font-size: 14px;
-  font-weight: 600;
-  color: #666;
-}
-
-/* Responsive adjustments */
-@media (max-width: 600px) {
-  .public-container {
-    padding: 20px 15px;
+/* Responsive Design */
+@media only screen and (max-width: 1024px) {
+  .hero-holder {
+    flex-direction: row;
+    text-align: center;
+    padding: 30px;
   }
 
-  .public-header {
+  .img-container img {
+    max-width: 200px;
+  }
+
+  .search-container {
+    width: 100%;
+  }
+
+  .Search-form-container {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .Industry,
+  .Keywords,
+  .search-btn {
+    width: 100%;
+  }
+
+  .card-holder {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media only screen and (max-width: 768px) {
+  .hero-holder {
+    padding: 20px;
+  }
+
+  .search-container h1 {
+    font-size: 30px;
+  }
+
+  .search-container p {
+    font-size: 14px;
+  }
+
+  .card-holder {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .public-card {
+    max-width: 100%;
+  }
+
+  .comp-img img {
+    width: 50px;
+    height: 50px;
+  }
+
+  .public-title {
+    font-size: 16px;
+  }
+
+  .public-description {
+    display: none;
+  }
+}
+
+@media only screen and (max-width: 480px) {
+  .hero-holder {
+    padding: 0px;
+  }
+
+  .search-container h1 {
     font-size: 24px;
   }
 
-  .search-filter-bar {
-    flex-direction: column;
-    gap: 10px;
+  .search-container p {
+    font-size: 12px;
   }
 
-  .search-input {
-    width: 100%;
-    min-width: 0;
+  .img-container img {
+    max-width: 150px;
   }
 
-  .filter-dropdown {
-    width: 100%;
-    justify-content: space-between;
-  }
-
-  .filter-dropdown select {
-    width: 100%;
-  }
-
-  .view-mode-dropdown {
-    width: 100%;
-    justify-content: space-between;
-  }
-
-  .view-mode-dropdown select {
-    width: 100%;
-  }
-
-  .public-grid {
+  .card-holder {
     grid-template-columns: 1fr;
+  }
+
+  .public-card {
+    width: 90%;
+    margin: auto;
+  }
+
+  .comp-img {
+    gap: 20px;
+  }
+
+  .public-card::before {
+    height: 50px;
+  }
+
+  .public-title {
+    font-size: 15px;
+  }
+
+  .no {
+    display: none;
   }
 
   .comp-img {
@@ -425,30 +568,13 @@
     margin: 0 auto;
   }
 
-  .public-title {
-    font-size: 16px;
-  }
-
   .comp-dets .comp-name {
     font-size: 12px;
-  }
-
-  .company-rating span {
-    font-size: 11px;
-  }
-
-  .star {
-    font-size: 10px;
   }
 
   .location1 {
     font-size: 11px;
     justify-content: center;
-  }
-
-  .public-description {
-    font-size: 12px;
-    margin-bottom: 10px;
   }
 
   .salary {
@@ -460,10 +586,6 @@
     font-size: 11px;
   }
 
-  .public-card::before {
-    height: 60px;
-  }
-
   .skills {
     gap: 6px;
   }
@@ -471,20 +593,6 @@
   .skill-tag {
     font-size: 10px;
     padding: 3px 8px;
-  }
-
-  .company-card .public-title {
-    font-size: 16px;
-  }
-
-  .company-card .comp-gst,
-  .company-card .comp-address,
-  .company-card .public-description {
-    font-size: 11px;
-  }
-
-  .company-card .company-info {
-    font-size: 12px;
   }
 }
 
@@ -499,14 +607,6 @@
 
   .comp-dets .comp-name {
     font-size: 11px;
-  }
-
-  .company-rating span {
-    font-size: 10px;
-  }
-
-  .star {
-    font-size: 9px;
   }
 
   .location1 {
@@ -525,19 +625,5 @@
   .skill-tag {
     font-size: 9px;
     padding: 2px 6px;
-  }
-
-  .company-card .public-title {
-    font-size: 14px;
-  }
-
-  .company-card .comp-gst,
-  .company-card .comp-address,
-  .company-card .public-description {
-    font-size: 10px;
-  }
-
-  .company-card .company-info {
-    font-size: 11px;
   }
 }

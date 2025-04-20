@@ -170,7 +170,7 @@
     height: 100%;
     background: linear-gradient(135deg, rgba(106, 17, 203, 0.05), rgba(37, 117, 252, 0.05));
     opacity: 0;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.6s ease;
 }
 
 .company-card:hover::before {
@@ -187,7 +187,7 @@
     height: 70px;
     object-fit: contain;
     margin-bottom: 12px;
-    transition: transform 0.3s ease;
+    transition: transform 0.6s ease;
 }
 
 .company-card:hover img {
@@ -265,7 +265,7 @@
     overflow: hidden;
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
     position: relative;
-    transition: all 0.3s ease;
+    transition: all 0.6s ease;
     border: 1px solid #e9ecef;
     display: flex;
     flex-direction: column;
@@ -288,7 +288,7 @@
     background: linear-gradient(135deg, #6a11cb, #2575fc);
     clip-path: polygon(0 0, 100% 0, 100% 70%, 0 100%);
     z-index: 1;
-    transition: height 0.3s ease;
+    transition: height 0.6s ease;
 }
 
 .hp-job-card:hover::before {
@@ -321,7 +321,7 @@
 .hp-job-bookmark-icon {
     font-size: 16px;
     cursor: pointer;
-    transition: color 0.3s ease;
+    transition: color 0.6s ease;
 }
 
 .hp-job-bookmark-icon:hover {
@@ -351,11 +351,23 @@
     margin-right: 14px;
     border: 2px solid #fff;
     box-shadow: 0 0 0 2px #6a11cb;
-    transition: transform 0.3s ease;
+    transition: transform 0.6s ease;
 }
 
 .hp-job-card:hover .hp-company-logo {
     transform: scale(1.1);
+}
+
+.hp-job-card:hover .hp-company-name{
+    color: #fff;
+}
+
+.hp-job-card:hover .hp-job-location {
+    color: #d0d0d0;
+}
+
+.hp-job-card:hover .hp-job-description {
+    color: #fff;
 }
 
 .hp-company-details {
@@ -379,7 +391,7 @@
     font-size: 14px;
     color: #6a11cb;
     cursor: pointer;
-    transition: color 0.3s ease;
+    transition: color 0.6s ease;
     text-align: left;
 }
 
@@ -403,6 +415,7 @@
     flex-grow: 1;
     overflow: hidden;
     text-overflow: ellipsis;
+    text-align: left;
     font-weight: 300;
     display: -webkit-box;
     -webkit-line-clamp: 3;
@@ -423,7 +436,7 @@
     font-size: 12px;
     color: #333;
     font-weight: 600;
-    transition: all 0.3s ease;
+    transition: all 0.6s ease;
 }
 
 .hp-job-tag:hover {
@@ -455,7 +468,7 @@
     font-size: 12px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.6s ease;
 }
 
 .hp-apply-button:hover {
@@ -664,98 +677,6 @@
 
     .subscription-input, .subscription-button {
         width: 100%;
-    }
-}
-
-/* -------------------- Footer Section -------------------- */
-.site-footer {
-    background: linear-gradient(135deg, #1a1a1a, #2c2c2c);
-    color: #f1f1f1;
-    padding: 60px 20px 20px;
-}
-
-.footer-wrapper {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    max-width: 1400px;
-    margin: auto;
-    gap: 30px;
-}
-
-.footer-block {
-    flex: 1;
-    min-width: 220px;
-}
-
-.footer-heading {
-    font-size: 22px;
-    font-weight: 700;
-    color: #fff;
-    margin-bottom: 20px;
-}
-
-.footer-text {
-    font-size: 14px;
-    line-height: 1.6;
-    color: #ccc;
-}
-
-.footer-links {
-    list-style: none;
-    padding: 0;
-}
-
-.footer-links li {
-    margin-bottom: 10px;
-}
-
-.footer-links a {
-    color: #ccc;
-    text-decoration: none;
-    font-size: 14px;
-}
-
-.footer-links a:hover {
-    color: #6a11cb;
-}
-
-.footer-socials {
-    display: flex;
-    gap: 20px;
-    justify-content: center;
-    margin: 40px 0 20px;
-}
-
-.footer-socials a {
-    font-size: 20px;
-    color: #ccc;
-}
-
-.footer-socials a:hover {
-    color: #6a11cb;
-}
-
-.footer-bottom {
-    text-align: center;
-    font-size: 14px;
-    color: #999;
-    padding-top: 20px;
-    border-top: 1px solid #333;
-}
-
-@media (max-width: 768px) {
-    .footer-wrapper {
-        flex-direction: column;
-        text-align: center;
-    }
-
-    .footer-block {
-        min-width: 100%;
-    }
-
-    .footer-socials {
-        margin: 20px 0;
     }
 }
 

@@ -21,6 +21,7 @@ import CompanyEditForm from './Pages/CompanyEditForm';
 import AutoJobPrefs from './Pages/AutoJobPrefs';
 import AutoAppliedJobs from './Pages/AutoAppliedJobs';
 import HomePage from './Pages/HomePage';
+import Footer from './Pages/Footer';
 
 function App() {
   return (
@@ -55,6 +56,7 @@ function App() {
         {/* Fallback route */}
         {/* <Route path="*" element={<Login />} /> */}
       </Routes>
+      <Footer />
     </Router>
   );
 }
