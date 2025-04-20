@@ -34,7 +34,7 @@ function Navbar() {
           <li className='NVL-tags'><a href='#'>Trending-Jobs</a></li>
           <li className='NVL-tags'><a href='#'>Dashboard</a></li>
           <li className='Lg-profile'>
-            <Link to="/profile">P</Link> {/* Use Link directly */}
+            <Link to="/profileComp">P</Link> {/* Use Link directly */}
           </li>
         </ul>
       </div>

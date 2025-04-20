@@ -11,7 +11,7 @@ function CompProfile() {
   const [user, setUser] = useState({ name: '', email: '' });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [resumeFile, setResumeFile] = useState(null);
+  const [resumeFile, setResumeFile] = useState(null); 
   const [videoFile, setVideoFile] = useState(null);
   const [isUploadingResume, setIsUploadingResume] = useState(false);
   const [isUploadingVideo, setIsUploadingVideo] = useState(false);
@@ -194,7 +194,7 @@ function CompProfile() {
     if (!items || items.length === 0) return <p>Not provided</p>;
 
     return (
-      <div className="timeline">
+      <div className="timeline1">
         {items.map((item, index) => (
           <div key={index} className="timeline-item">
             <div className="content">
@@ -463,7 +463,7 @@ function CompProfile() {
         </div>
       </div>
 
-      <div className="section2">
+      <div className="Profile-section2">
         <div className="section-buttons" style={{ marginBottom: '20px' }}>
           {tabs.map((tab) => (
             <button

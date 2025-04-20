@@ -43,8 +43,8 @@ router.post("/", protectRoute, async (req, res) => {
       return res.status(400).json({ message: "File size must be less than 5MB" });
     }
 
-    // Safely check if isCompanyLogo is provided
-    const isCompanyLogo = req.body.isCompanyLogo === "true" || req.body.isCompanyLogo === true;
+    // Safely check if isCompanyLogo is provided, default to false
+    const isCompanyLogo = req.body?.isCompanyLogo === "true" || req.body?.isCompanyLogo === true;
 
     const result = await cloudinary.uploader.upload(file.tempFilePath || file.data, {
       folder: isCompanyLogo ? "company_logos" : "profiles",
@@ -75,6 +75,12 @@ router.post("/", protectRoute, async (req, res) => {
       }
     }
 
+    // Clean up temporary file if it exists
+    if (file.tempFilePath && fs.existsSync(file.tempFilePath)) {
+      console.log("Cleaning up temporary file:", file.tempFilePath);
+      fs.unlinkSync(file.tempFilePath);
+    }
+
     res.json({ url: result.secure_url });
   } catch (error) {
     console.error("Upload Error:", {
@@ -88,6 +94,12 @@ router.post("/", protectRoute, async (req, res) => {
           }
         : undefined,
     });
+
+    // Clean up temporary file on error
+    if (req.files?.profilePicture?.tempFilePath && fs.existsSync(req.files.profilePicture.tempFilePath)) {
+      console.log("Cleaning up temporary file on error:", req.files.profilePicture.tempFilePath);
+      fs.unlinkSync(req.files.profilePicture.tempFilePath);
+    }
 
     if (error.http_code === 400) {
       return res.status(400).json({ message: "Invalid file or upload parameters" });
@@ -152,9 +164,20 @@ router.post("/resume", protectRoute, async (req, res) => {
       return res.status(500).json({ message: "Failed to update profile with resume URL" });
     }
 
+    // Clean up temporary file
+    if (file.tempFilePath && fs.existsSync(file.tempFilePath)) {
+      fs.unlinkSync(file.tempFilePath);
+    }
+
     res.json({ url: result.secure_url });
   } catch (error) {
     console.error("Resume Upload Error:", error);
+
+    // Clean up temporary file on error
+    if (req.files?.resume?.tempFilePath && fs.existsSync(req.files.resume.tempFilePath)) {
+      fs.unlinkSync(req.files.resume.tempFilePath);
+    }
+
     res.status(500).json({ message: "Failed to upload resume", error: error.message });
   }
 });

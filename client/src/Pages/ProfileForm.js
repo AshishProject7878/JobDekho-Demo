@@ -370,6 +370,7 @@ function ProfileForm() {
 
     const formDataUpload = new FormData();
     formDataUpload.append("profilePicture", file);
+    formDataUpload.append("isCompanyLogo", "false"); // Added to indicate profile picture
 
     try {
       const response = await api.post("/api/upload", formDataUpload, {
