@@ -31,12 +31,12 @@ function App() {
         <Route path="/dummyProfile" element={<PublicPost />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/job/:id" element={<JobDetail />} />
-        <Route path="/companies/:id" element={<CompanyDetail />} />
         {/* <Route path="/public-posts" element={<PublicPost />} /> */}
         
         {/* Protected routes */}
         <Route element={<ProtectedRoute />}>
+        <Route path="/companies/:id" element={<CompanyDetail />} />
+        <Route path="/job/:id" element={<JobDetail />} />
         <Route path="/jobPostingForm" element={<JobPostingForm />}/>
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/userDashboard" element={<UserDashboard />} />

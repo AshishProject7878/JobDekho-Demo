@@ -25,9 +25,11 @@ function Navbar() {
         </div>
 
         <ul className={`Nv-links ${menuOpen ? "active" : ""}`}>
-          <li className='NVL-tags'><a href='#'>Home</a></li>
           <li className='NVL-tags'>
-            <Link to="/">Search</Link> {/* Use Link directly */}
+          <Link to="/">Home</Link>
+            </li>
+          <li className='NVL-tags'>
+            <Link to="/dummyProfile">Search</Link> {/* Use Link directly */}
           </li>
           <li className='NVL-tags'><a href='#'>Trending-Jobs</a></li>
           <li className='NVL-tags'><a href='#'>Dashboard</a></li>
