@@ -14,6 +14,7 @@ const AutoAppliedJobs = () => {
     skills: [],
     remoteOnly: false,
     minCompanyRating: null,
+    enabled: false,
   });
   const [resumeUrl, setResumeUrl] = useState(null);
 
@@ -24,7 +25,7 @@ const AutoAppliedJobs = () => {
 
   const fetchAutoJobPrefs = async () => {
     try {
-      const res = await api.get('/api/profile', { withCredentials: true });
+      const res = await api.get('/api/profileComp', { withCredentials: true });
       const autoJobPrefs = {
         minSalary: res.data.autoJobPrefs?.minSalary != null ? Number(res.data.autoJobPrefs.minSalary) : null,
         experienceLevel: res.data.autoJobPrefs?.experienceLevel || '',
@@ -32,6 +33,7 @@ const AutoAppliedJobs = () => {
         skills: Array.isArray(res.data.autoJobPrefs?.skills) ? res.data.autoJobPrefs.skills : [],
         remoteOnly: res.data.autoJobPrefs?.remoteOnly || false,
         minCompanyRating: res.data.autoJobPrefs?.minCompanyRating != null ? Number(res.data.autoJobPrefs.minCompanyRating) : null,
+        enabled: res.data.autoJobPrefs?.enabled || false,
       };
       setPrefs(autoJobPrefs);
       setResumeUrl(res.data.personal?.resumeUrl || null);
@@ -92,6 +94,11 @@ const AutoAppliedJobs = () => {
           Apply to Matching Jobs
         </button>
       </div>
+      {prefs.enabled && (
+        <div className="info-message">
+          <p>Auto-apply is enabled. Jobs will be applied automatically every 3 days based on your preferences.</p>
+        </div>
+      )}
       {!resumeUrl && (
         <div className="warning-message">
           <p>Please upload a resume to your profile to enable auto-apply.</p>
@@ -114,12 +121,12 @@ const AutoAppliedJobs = () => {
             <div key={application._id} className="job-card" style={{ animationDelay: `${index * 0.1}s` }}>
               <div className="top-section">
                 <span>{application.status || 'Pending'}</span>
-                <i className="fas fa-heart"></i>
+                {/* <i className="fas fa-heart"></i> */}
               </div>
               <div className="mid-section">
                 <div className="comp-img">
                   <img
-                    src={application.jobId?.company?.logo || 'https://via.placeholder.com/60'}
+                    src={application.jobId?.company?.logo || 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y'}
                     alt={application.jobId?.company?.name || 'Company'}
                   />
                   <div className="comp-dets">

@@ -11,7 +11,7 @@ class ErrorBoundary extends React.Component {
   static getDerivedStateFromError(error) {
     return { hasError: true, error };
   }
- 
+
   render() {
     if (this.state.hasError) {
       return (
@@ -47,11 +47,13 @@ function JobDetail() {
   const [shareEmail, setShareEmail] = useState("");
   const [shareStatus, setShareStatus] = useState(null);
   const [videoError, setVideoError] = useState(null);
+  const [isApplied, setIsApplied] = useState(false); // New state for applied status
 
   const BASE_URL = "http://localhost:5000";
   const PROFILE_API_URL = `${BASE_URL}/api/profile`;
   const UPLOAD_RESUME_URL = `${BASE_URL}/api/upload/resume`;
   const UPLOAD_VIDEO_URL = `${BASE_URL}/api/upload/video-resume`;
+  const AUTO_APPLY_URL = `${BASE_URL}/api/profile/auto-job/applications`;
   const JOB_URL = `${window.location.origin}/job/${id}`;
 
   useEffect(() => {
@@ -72,6 +74,15 @@ function JobDetail() {
         setProfileResume(profileResponse.data.personal?.resumeUrl || null);
         setProfileVideoResume(profileResponse.data.personal?.videoResumeUrl || null);
         setApplicantEmail(profileResponse.data.user?.email || null);
+
+        // Check if job is in auto-applied jobs
+        const autoApplyResponse = await axios.get(AUTO_APPLY_URL, {
+          withCredentials: true,
+        });
+        const isJobApplied = autoApplyResponse.data.some(
+          (application) => application.jobId?._id === id
+        );
+        setIsApplied(isJobApplied);
 
         setLoading(false);
       } catch (err) {
@@ -268,6 +279,7 @@ function JobDetail() {
     try {
       await emailjs.send("service_bqzf4o6", "template_bbsvz9h", templateParams);
       setEmailStatus("Application sent successfully!");
+      setIsApplied(true); // Set applied status
       setShowApplyModal(false);
     } catch (err) {
       console.error("Failed to send email:", err);
@@ -371,8 +383,13 @@ function JobDetail() {
             </div>
           </div>
           <div className="editJobDetail">
-            <button className="Jobbtn1" onClick={handleApplyClick}>
-              Apply
+            <button
+              className={`Jobbtn1 ${isApplied ? "applied-btn" : ""}`}
+              onClick={handleApplyClick}
+              disabled={isApplied}
+              data-testid="apply-button"
+            >
+              {isApplied ? "Applied" : "Apply"}
             </button>
             <button className="Jobbtn1 btn-cv" onClick={handleShareClick}>
               Share
@@ -504,7 +521,7 @@ function JobDetail() {
                         type="application/pdf"
                         width="100%"
                         height="200px"
-                        data-testid="resume-embed"
+                        data-testid="resize-embed"
                       />
                     </div>
                   ) : (

@@ -177,9 +177,19 @@ const AutoJobPrefsSchema = new mongoose.Schema({
   },
   minCompanyRating: {
     type: Number,
-    min: 0, // Changed to allow 0
+    min: 0,
     max: 5,
     default: 0,
+  },
+}, {
+  validate: {
+    validator: function () {
+      if (this.enabled && (!this.skills || this.skills.length === 0)) {
+        return false;
+      }
+      return true;
+    },
+    message: 'At least one skill is required when auto-apply is enabled',
   },
 });
 
@@ -192,6 +202,11 @@ const AutoJobApplicationSchema = new mongoose.Schema({
   appliedAt: {
     type: Date,
     default: Date.now,
+  },
+  resumeUrl: {
+    type: String,
+    trim: true,
+    default: '',
   },
 });
 
@@ -236,6 +251,9 @@ ProfileSchema.pre('save', function (next) {
   }
   next();
 });
+
+// Index for efficient querying of enabled auto-apply profiles
+ProfileSchema.index({ 'autoJobPrefs.enabled': 1 });
 
 const Profile = mongoose.model('Profile', ProfileSchema);
 
