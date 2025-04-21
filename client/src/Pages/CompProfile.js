@@ -464,6 +464,7 @@ function CompProfile() {
           <Link to="/profileForm" className="profile-btn">
             Edit Profile
           </Link>
+          <Link to="/auto-job/applications" className='profile-btn'>Auto Applied Applications</Link>
           {/* <button className="profile-btn btn-share">Share</button> */}
           <button className="btn-logout" onClick={handleLogout}>
             Logout
