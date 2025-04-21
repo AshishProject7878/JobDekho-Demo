@@ -324,11 +324,10 @@ function PublicPost() {
           <>
             <div className="card-holder">
               {viewMode === "Jobs" ? (
-                currentItems.map((post) => (
-                  <div className="public-card" key={post._id}>
+                currentItems.map((post, index) => (
+                  <div className="public-card" key={post._id} style={{ animationDelay: `${index * 0.1}s` }}>
                     <div className="top-section">
                       <span>{post.type || "Job"}</span>
-                      <i className="fa-solid fa-bookmark"></i>
                     </div>
                     <div className="mid-section">
                       <div className="comp-img">
@@ -381,11 +380,10 @@ function PublicPost() {
                   </div>
                 ))
               ) : (
-                currentItems.map((company) => (
-                  <div className="public-card" key={company._id}>
+                currentItems.map((company, index) => (
+                  <div className="public-card" key={company._id} style={{ animationDelay: `${index * 0.1}s` }}>
                     <div className="top-section">
                       <span>Company</span>
-                      <i className="fa-solid fa-bookmark"></i>
                     </div>
                     <div className="mid-section">
                       <div className="comp-img">

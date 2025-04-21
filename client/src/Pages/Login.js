@@ -80,9 +80,9 @@ function Login() {
             Log In
           </button>
 
-          <button type="button" className="login-google-btn">
+          {/* <button type="button" className="login-google-btn">
             Log In with Google
-          </button>
+          </button> */}
 
           <p className="login-signup-link">
             Don't have an account? <Link to="/signup">Sign Up</Link>

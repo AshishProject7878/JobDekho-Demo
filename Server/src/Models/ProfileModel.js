@@ -161,7 +161,6 @@ const AutoJobPrefsSchema = new mongoose.Schema({
   },
   experienceLevel: {
     type: String,
-    enum: ['Entry', 'Mid', 'Senior', ''],
     default: '',
   },
   categories: [{

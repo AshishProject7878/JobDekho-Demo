@@ -82,6 +82,11 @@ function CompProfile() {
     }
   }, [showErrorPopup]);
 
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    navigate('/login');
+  };
+
   const handleTabClick = (tab) => {
     setSectionOrder((prevOrder) => {
       const newOrder = [...prevOrder];
@@ -459,7 +464,10 @@ function CompProfile() {
           <Link to="/profileForm" className="profile-btn">
             Edit Profile
           </Link>
-          <button className="profile-btn btn-share">Share</button>
+          {/* <button className="profile-btn btn-share">Share</button> */}
+          <button className="btn-logout" onClick={handleLogout}>
+            Logout
+          </button>
         </div>
       </div>
 

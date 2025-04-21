@@ -30,7 +30,7 @@ function ProfilePage() {
 
       <div className="profile-actions">
         <button className="btn logout" onClick={handleLogout}>
-          Logout
+          Logout 
         </button>
         <Link to="/jobPostingForm">
           <button className='btn'>Post Job</button>

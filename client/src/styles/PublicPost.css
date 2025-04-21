@@ -31,6 +31,7 @@ select {
   justify-content: space-between;
   padding: 20px;
   gap: 20px;
+  animation: fadeInUp 0.8s ease-out forwards;
 }
 
 .search-container {
@@ -39,6 +40,9 @@ select {
   line-height: 1.5;
   color: white;
   padding: 20px;
+  opacity: 0;
+  animation: fadeIn 1s ease-out forwards;
+  animation-delay: 0.2s;
 }
 
 .search-container h1 {
@@ -63,10 +67,12 @@ select {
   transition: all 0.5s ease-in-out;
   flex: 1;
   max-width: 150px;
+  animation: pulse 2s infinite ease-in-out;
 }
 
 .search-btn:hover {
   opacity: 0.9;
+  animation: none;
 }
 
 .Search-form-container {
@@ -76,6 +82,9 @@ select {
   border-radius: 5px;
   padding: 10px;
   gap: 10px;
+  opacity: 0;
+  animation: fadeIn 1s ease-out forwards;
+  animation-delay: 0.4s;
 }
 
 .Industry,
@@ -88,10 +97,32 @@ select {
   flex: 1;
 }
 
+.img-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .img-container img {
   width: 100%;
   max-width: 250px;
   height: auto;
+  transform: scale(1);
+  transition: transform 0.3s ease;
+  opacity: 0;
+  animation: fadeIn 1s ease-out forwards;
+}
+
+.img-container:nth-child(1) img {
+  animation-delay: 0.3s;
+}
+
+.img-container:nth-child(3) img {
+  animation-delay: 0.5s;
+}
+
+.img-container img:hover {
+  transform: scale(1.05);
 }
 
 .public-loader-container {
@@ -125,6 +156,9 @@ select {
   grid-template-columns: repeat(4, 1fr);
   gap: 15px;
   justify-content: center;
+  opacity: 0;
+  animation: fadeIn 1s ease-out forwards;
+  animation-delay: 0.6s;
 }
 
 .public-card {
@@ -135,6 +169,9 @@ select {
   overflow: hidden;
   position: relative;
   transition: transform 0.8s ease, box-shadow 0.3s ease-in-out;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: cardFadeIn 0.6s ease-out forwards;
 }
 
 .public-card:hover {
@@ -409,6 +446,9 @@ select {
   border-radius: 8px;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
   z-index: 1000;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: slideIn 0.4s ease-out forwards;
 }
 
 .filter-modal h3 {
@@ -447,6 +487,64 @@ select {
   cursor: pointer;
 }
 
+/* Keyframe Animations */
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(106, 17, 203, 0.4);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 10px 5px rgba(106, 17, 203, 0.2);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(106, 17, 203, 0.4);
+  }
+}
+
+@keyframes cardFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Responsive Design */
 @media only screen and (max-width: 1024px) {
   .hero-holder {
@@ -475,13 +573,19 @@ select {
   }
 
   .card-holder {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
 @media only screen and (max-width: 768px) {
+  .main {
+    padding: 10px 20px;
+  }
+
   .hero-holder {
+    flex-direction: column;
     padding: 20px;
+    gap: 10px;
   }
 
   .search-container h1 {
@@ -492,12 +596,28 @@ select {
     font-size: 14px;
   }
 
+  .Search-form-container {
+    flex-direction: column;
+  }
+
+  .Industry,
+  .Keywords,
+  .search-btn {
+    width: 100%;
+    max-width: none;
+  }
+
+  .img-container img {
+    max-width: 150px;
+  }
+
   .card-holder {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
   }
 
   .public-card {
     max-width: 100%;
+    margin: 0 auto;
   }
 
   .comp-img img {
@@ -515,8 +635,12 @@ select {
 }
 
 @media only screen and (max-width: 480px) {
+  .main {
+    padding: 10px 15px;
+  }
+
   .hero-holder {
-    padding: 0px;
+    padding: 15px;
   }
 
   .search-container h1 {
@@ -527,17 +651,16 @@ select {
     font-size: 12px;
   }
 
-  .img-container img {
-    max-width: 150px;
+  .img-container {
+    margin: 10px 0;
   }
 
-  .card-holder {
-    grid-template-columns: 1fr;
+  .img-container img {
+    max-width: 120px;
   }
 
   .public-card {
-    width: 90%;
-    margin: auto;
+    width: 100%;
   }
 
   .comp-img {

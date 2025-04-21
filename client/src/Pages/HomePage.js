@@ -346,7 +346,6 @@ function HomePage() {
                             >
                                 <div className="hp-job-card-header">
                                     <span className="hp-job-badge">Featured</span>
-                                    <i className="fa-solid fa-bookmark hp-job-bookmark-icon"></i>
                                 </div>
                                 <div className="hp-job-card-body">
                                     <div className="hp-company-info">

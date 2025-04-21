@@ -1,5 +1,8 @@
 import Profile from '../Models/ProfileModel.js';
 import Post from '../Models/PostModel.js';
+import nodemailer from 'nodemailer';
+import dotenv from 'dotenv';
+dotenv.config();
 
 // @desc    Create a new user profile
 // @route   POST /api/profile
@@ -79,7 +82,7 @@ export const createProfile = async (req, res) => {
         categories: Array.isArray(autoJobPrefs.categories) ? autoJobPrefs.categories : [],
         skills: Array.isArray(autoJobPrefs.skills) ? autoJobPrefs.skills : [],
         remoteOnly: autoJobPrefs.remoteOnly ?? false,
-        minCompanyRating: autoJobPrefs.minCompanyRating ?? 0, // Respect provided value or default to 0
+        minCompanyRating: autoJobPrefs.minCompanyRating ?? 0,
       },
     });
 
@@ -365,8 +368,9 @@ export const getAutoAppliedJobs = async (req, res) => {
 export const autoApplyJobs = async (req, res) => {
   try {
     const userId = req.user._id;
-    const profile = await Profile.findOne({ user: userId });
+    const { skills, resumeUrl } = req.body;
 
+    const profile = await Profile.findOne({ user: userId }).populate('user', 'email');
     if (!profile) {
       return res.status(404).json({ message: 'Profile not found' });
     }
@@ -375,63 +379,113 @@ export const autoApplyJobs = async (req, res) => {
       return res.status(400).json({ message: 'Auto job application is disabled' });
     }
 
-    // Check for either resumeUrl or resume
-    if (!profile.personal.resumeUrl && !profile.personal.resume) {
+    // Use provided resumeUrl or profile resumeUrl
+    const effectiveResumeUrl = resumeUrl || profile.personal.resumeUrl;
+    if (!effectiveResumeUrl) {
       return res.status(400).json({ message: 'Resume is required for auto-applications' });
     }
 
-    // Build query based on autoJobPrefs
+    // Use provided skills or profile skills
+    const effectiveSkills = Array.isArray(skills) && skills.length > 0 
+      ? skills 
+      : profile.autoJobPrefs.skills;
+    if (!effectiveSkills || effectiveSkills.length === 0) {
+      return res.status(400).json({ message: 'At least one skill is required' });
+    }
+
+    // Normalize skills (trim, lowercase, remove duplicates)
+    const normalizedSkills = [...new Set(effectiveSkills.map(skill => skill.trim().toLowerCase()))];
+    console.log('Normalized skills:', normalizedSkills);
+
+    // Build query for skill-based matching
     const query = {
-      status: 'Published',
       applicationDeadline: { $gte: new Date() },
+      skills: { $in: normalizedSkills.map(skill => new RegExp(skill, 'i')) },
     };
-
-    if (profile.autoJobPrefs.categories?.length) {
-      query.category = { $in: profile.autoJobPrefs.categories };
-    }
-
-    if (profile.autoJobPrefs.skills?.length) {
-      query.skills = { $in: profile.autoJobPrefs.skills };
-    }
-
-    if (profile.autoJobPrefs.minSalary) {
-      query['salary.min'] = { $gte: profile.autoJobPrefs.minSalary };
-    }
-
-    if (profile.autoJobPrefs.experienceLevel) {
-      query.experience = profile.autoJobPrefs.experienceLevel;
-    }
-
-    if (profile.autoJobPrefs.remoteOnly) {
-      query.remote = true;
-    }
-
-    if (profile.autoJobPrefs.minCompanyRating) {
-      query['company.rating'] = { $gte: profile.autoJobPrefs.minCompanyRating };
-    }
-
     console.log('Auto-apply job query:', query);
 
+    // Find matching jobs
     const jobs = await Post.find(query).populate('company', 'name rating');
+    console.log('Matching jobs:', jobs);
+
+    if (!jobs || jobs.length === 0) {
+      return res.status(200).json({
+        message: 'No open jobs found matching your skills',
+        appliedJobs: []
+      });
+    }
+
+    // Set up Nodemailer transporter
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: 'ashishroy78782@gmail.com',
+        pass: 'nrle bjbn oeex qfqw',
+      },
+    });
+
+    // Apply to jobs
+    const appliedJobs = [];
     const appliedJobIds = profile.autoJobApplications.map(app => app.jobId.toString());
-    const newApplications = [];
 
     for (const job of jobs) {
-      if (!appliedJobIds.includes(job._id.toString())) {
-        profile.autoJobApplications.push({
-          jobId: job._id,
-          appliedAt: new Date(),
-          status: 'Applied',
-        });
-        newApplications.push(job._id);
+      if (appliedJobIds.includes(job._id.toString())) {
+        console.log(`Job ${job._id} already applied, skipping`);
+        continue;
       }
+
+      // Send email to job contact via Nodemailer
+      let emailSent = false;
+      if (job.contactEmail) {
+        const mailOptions = {
+          from: `"Job Applicant" <${process.env.EMAIL_USER}>`,
+          to: job.contactEmail,
+          replyTo: profile.user.email || 'no-reply@jobdekho.com',
+          subject: `Application for ${job.title} at ${job.company?.name || 'Unknown Company'}`,
+          html: `
+            <h2>Job Application</h2>
+            <p>Dear Hiring Manager,</p>
+            <p>I am applying for the <strong>${job.title}</strong> position at <strong>${job.company?.name || 'Unknown Company'}</strong>.</p>
+            <p>Please find my resume at: <a href="${effectiveResumeUrl}">${effectiveResumeUrl}</a></p>
+            ${profile.personal.videoResumeUrl ? `<p>Video Resume: <a href="${profile.personal.videoResumeUrl}">${profile.personal.videoResumeUrl}</a></p>` : ''}
+            <p>Thank you for considering my application. I look forward to the opportunity to discuss my qualifications further.</p>
+            <p>Best regards,<br>${profile.user.email ? profile.user.email.split('@')[0] : 'Job Applicant'}</p>
+          `,
+        };
+
+        try {
+          await transporter.sendMail(mailOptions);
+          console.log(`Email sent for job ${job._id} to ${job.contactEmail}`);
+          emailSent = true;
+        } catch (emailError) {
+          console.error(`Failed to send email for job ${job._id}:`, emailError);
+          // Continue to record application even if email fails
+        }
+      }
+
+      // Create application record
+      profile.autoJobApplications.push({
+        jobId: job._id,
+        appliedAt: new Date(),
+        status: 'Applied',
+        resumeUrl: effectiveResumeUrl,
+      });
+      appliedJobs.push({
+        _id: job._id,
+        title: job.title,
+        company: job.company,
+        location: job.location,
+        skills: job.skills,
+      });
     }
 
     await profile.save();
 
     res.status(200).json({
-      message: `Successfully applied to ${newApplications.length} new jobs`,
-      appliedJobs: newApplications,
+      message: appliedJobs.length > 0 
+        ? `Successfully applied to ${appliedJobs.length} new job(s)`
+        : 'No new applications created (possible duplicates)',
+      appliedJobs
     });
   } catch (error) {
     console.error('🔥 Error in autoApplyJobs:', error);

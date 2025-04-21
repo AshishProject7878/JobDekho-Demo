@@ -118,9 +118,9 @@ function Signup() {
             Sign Up
           </button>
 
-          <button type="button" className="signup-google-btn">
+          {/* <button type="button" className="signup-google-btn">
             Sign Up with Google
-          </button>
+          </button> */}
 
           <p className="signup-login-link">
             Already have an account? <Link to="/login">Login</Link>

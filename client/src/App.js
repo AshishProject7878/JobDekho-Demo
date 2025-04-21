@@ -52,7 +52,7 @@ function AppContent() {
           <Route path="/post" element={<PostForm />} />
           <Route path="/edit-post/:id" element={<EditPost />} />
           <Route path="/CompanyEdit/:id" element={<CompanyEditForm />} />
-          <Route path="/postList" element={<PostList />} />
+          <Route path="/postList" element={<PostList />} /> 
           <Route path="/profileComp" element={<CompProfile />} />
           <Route path="/auto-job/prefs" element={<AutoJobPrefs />} /> 
           <Route path="/auto-job/applications" element={<AutoAppliedJobs />} /> 
