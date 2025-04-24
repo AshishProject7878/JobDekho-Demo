@@ -11,6 +11,7 @@ import {
   autoApplyJobs,
   saveManualApplication,
   getManualAppliedJobs,
+  getAllProfiles,
 } from "../Controllers/ProfileController.js";
 
 const router = express.Router();
@@ -20,6 +21,9 @@ router.get('/', protectRoute, getProfile);
 router.post('/', protectRoute, createProfile);
 router.put('/', protectRoute, updateProfile);
 router.delete('/', protectRoute, deleteProfile);
+
+// Route to get all profiles
+router.get('/all', protectRoute, getAllProfiles);
 
 // Auto job application routes
 router.patch('/auto-job/toggle', protectRoute, toggleAutoJob);
@@ -32,5 +36,5 @@ router.get('/manual-applications', protectRoute, getManualAppliedJobs);
 
 // Route for getting profile by ID (must be after specific routes)
 router.get('/:id', protectRoute, getProfileById);
-
+router.get('/all', protectRoute, getAllProfiles);
 export default router;

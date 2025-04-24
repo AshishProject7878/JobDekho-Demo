@@ -312,15 +312,76 @@ export const deleteProfile = async (req, res) => {
 export const getProfileById = async (req, res) => {
   try {
     const profile = await Profile.findById(req.params.id).populate('user', 'email');
-
     if (!profile) {
       return res.status(404).json({ message: 'Profile not found' });
     }
-
     res.status(200).json(profile);
   } catch (error) {
     console.error('🔥 Error in getProfileById:', error);
     res.status(500).json({ message: 'Error fetching profile', error: error.message });
+  }
+};
+
+// @desc    Get all profiles
+// @route   GET /api/profile/all
+// @access  Private
+export const getAllProfiles = async (req, res) => {
+  try {
+    const { search, skills, position, page = 1, limit = 6 } = req.query;
+
+    // Build query
+    let query = {};
+
+    // Search across multiple fields
+    if (search) {
+      const searchRegex = new RegExp(search, 'i'); // Case-insensitive regex
+      query.$or = [
+        { 'personal.fullName': searchRegex },
+        { 'professional.jobTitle': searchRegex },
+        { 'professional.skills': searchRegex },
+        { 'jobHistory.description': searchRegex },
+        { 'jobHistory.position': searchRegex },
+        { 'jobHistory.company': searchRegex },
+      ];
+    }
+
+    // Filter by skills (array contains any of the selected skills)
+    if (skills) {
+      const skillsArray = skills.split(',').map((skill) => skill.trim());
+      query['professional.skills'] = { $in: skillsArray };
+    }
+
+    // Filter by position (job title)
+    if (position) {
+      query['professional.jobTitle'] = new RegExp(position, 'i');
+    }
+
+    // Pagination
+    const pageNum = parseInt(page, 10);
+    const limitNum = parseInt(limit, 10);
+    const skip = (pageNum - 1) * limitNum;
+
+    // Fetch profiles with pagination
+    const profiles = await Profile.find(query)
+      .populate('user', 'email')
+      .skip(skip)
+      .limit(limitNum)
+      .lean();
+
+    // Get total count for pagination
+    const totalProfiles = await Profile.countDocuments(query);
+
+    res.status(200).json({
+      profiles,
+      pagination: {
+        currentPage: pageNum,
+        totalPages: Math.ceil(totalProfiles / limitNum),
+        totalProfiles,
+      },
+    });
+  } catch (error) {
+    console.error('🔥 Error in getAllProfiles:', error);
+    res.status(500).json({ message: 'Error fetching profiles', error: error.message });
   }
 };
 

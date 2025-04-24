@@ -23,6 +23,8 @@ import AutoAppliedJobs from './Pages/AutoAppliedJobs';
 import HomePage from './Pages/HomePage';
 import Footer from './Pages/Footer';
 import Dashboard from './Pages/Dashboard';
+import ProfileList from './Pages/ProfileList';
+import PublicProfile from './Pages/PublicProfile';
 
 // Create a wrapper component to handle conditional Footer rendering
 function AppContent() {
@@ -39,10 +41,12 @@ function AppContent() {
         <Route path="/dummyProfile" element={<PublicPost />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/profileList" element={<ProfileList />} />
         
         {/* Protected routes */}
         <Route element={<ProtectedRoute />}>
           <Route path="/companies/:id" element={<CompanyDetail />} />
+          <Route path="/profiles/:id" element={<PublicProfile />} />
           <Route path="/job/:id" element={<JobDetail />} />
           <Route path="/jobPostingForm" element={<JobPostingForm />} />
           <Route path="/profile" element={<ProfilePage />} />

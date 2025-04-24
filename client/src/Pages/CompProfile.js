@@ -35,7 +35,7 @@ function CompProfile() {
     'Professional Details',
     'Job Preferences',
   ];
-
+ 
   const fetchProfileData = async () => {
     setIsLoading(true);
     try {
