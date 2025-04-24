@@ -25,7 +25,7 @@ const AutoAppliedJobs = () => {
 
   const fetchAutoJobPrefs = async () => {
     try {
-      const res = await api.get('/api/profileComp', { withCredentials: true });
+      const res = await api.get('/api/profile', { withCredentials: true });
       const autoJobPrefs = {
         minSalary: res.data.autoJobPrefs?.minSalary != null ? Number(res.data.autoJobPrefs.minSalary) : null,
         experienceLevel: res.data.autoJobPrefs?.experienceLevel || '',
@@ -102,7 +102,7 @@ const AutoAppliedJobs = () => {
       {!resumeUrl && (
         <div className="warning-message">
           <p>Please upload a resume to your profile to enable auto-apply.</p>
-          <button onClick={() => window.location.href = '/profile'} className="nav-button">
+          <button onClick={() => window.location.href = '/profileComp'} className="nav-button">
             Go to Profile
           </button>
         </div>

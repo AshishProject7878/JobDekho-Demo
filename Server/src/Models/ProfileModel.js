@@ -210,6 +210,28 @@ const AutoJobApplicationSchema = new mongoose.Schema({
   },
 });
 
+const ManualApplicationSchema = new mongoose.Schema({
+  jobId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Post',
+    required: true,
+  },
+  appliedAt: {
+    type: Date,
+    default: Date.now,
+  },
+  resumeUrl: {
+    type: String,
+    trim: true,
+    default: '',
+  },
+  status: {
+    type: String,
+    default: 'Applied',
+    enum: ['Applied', 'Under Review', 'Interview', 'Rejected', 'Accepted'],
+  },
+});
+
 const ProfileSchema = new mongoose.Schema({
   personal: {
     type: PersonalSchema,
@@ -234,6 +256,7 @@ const ProfileSchema = new mongoose.Schema({
     default: () => ({}),
   },
   autoJobApplications: [AutoJobApplicationSchema],
+  manualApplications: [ManualApplicationSchema],
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',

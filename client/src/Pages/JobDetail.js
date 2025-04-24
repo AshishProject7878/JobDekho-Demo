@@ -47,13 +47,14 @@ function JobDetail() {
   const [shareEmail, setShareEmail] = useState("");
   const [shareStatus, setShareStatus] = useState(null);
   const [videoError, setVideoError] = useState(null);
-  const [isApplied, setIsApplied] = useState(false); // New state for applied status
+  const [isApplied, setIsApplied] = useState(false);
 
   const BASE_URL = "http://localhost:5000";
   const PROFILE_API_URL = `${BASE_URL}/api/profile`;
   const UPLOAD_RESUME_URL = `${BASE_URL}/api/upload/resume`;
   const UPLOAD_VIDEO_URL = `${BASE_URL}/api/upload/video-resume`;
   const AUTO_APPLY_URL = `${BASE_URL}/api/profile/auto-job/applications`;
+  const MANUAL_APPLY_URL = `${BASE_URL}/api/profile/manual-apply`;
   const JOB_URL = `${window.location.origin}/job/${id}`;
 
   useEffect(() => {
@@ -75,13 +76,16 @@ function JobDetail() {
         setProfileVideoResume(profileResponse.data.personal?.videoResumeUrl || null);
         setApplicantEmail(profileResponse.data.user?.email || null);
 
-        // Check if job is in auto-applied jobs
+        // Check if job is in auto-applied or manually applied jobs
         const autoApplyResponse = await axios.get(AUTO_APPLY_URL, {
           withCredentials: true,
         });
-        const isJobApplied = autoApplyResponse.data.some(
-          (application) => application.jobId?._id === id
-        );
+        const manualApplyResponse = await axios.get(`${BASE_URL}/api/profile/manual-applications`, {
+          withCredentials: true,
+        });
+        const isJobApplied =
+          autoApplyResponse.data.some((application) => application.jobId?._id === id) ||
+          manualApplyResponse.data.some((application) => application.jobId?._id === id);
         setIsApplied(isJobApplied);
 
         setLoading(false);
@@ -197,7 +201,7 @@ function JobDetail() {
         withCredentials: true,
         headers: { "Content-Type": "multipart/form-data" },
       });
-      setProfileResume(response.data.url);
+      setProfileResume(response.data.resumeUrl); // Adjusted to match backend response
       setNewResume(null);
       setEmailStatus("Resume uploaded successfully!");
     } catch (err) {
@@ -238,7 +242,7 @@ function JobDetail() {
         headers: { "Content-Type": "multipart/form-data" },
         withCredentials: true,
       });
-      setProfileVideoResume(response.data.url);
+      setProfileVideoResume(response.data.videoResumeUrl); // Adjusted to match backend response
       setNewVideoResume(null);
       setVideoError(null);
       setEmailStatus("Video resume uploaded successfully!");
@@ -277,12 +281,24 @@ function JobDetail() {
     };
 
     try {
+      // Send email
       await emailjs.send("service_bqzf4o6", "template_bbsvz9h", templateParams);
+
+      // Save manual application
+      await axios.post(
+        MANUAL_APPLY_URL,
+        {
+          jobId: id,
+          resumeUrl: profileResume,
+        },
+        { withCredentials: true }
+      );
+
       setEmailStatus("Application sent successfully!");
-      setIsApplied(true); // Set applied status
+      setIsApplied(true);
       setShowApplyModal(false);
     } catch (err) {
-      console.error("Failed to send email:", err);
+      console.error("Failed to send email or save application:", err);
       setEmailStatus("Failed to send application. Please try again.");
     }
   };

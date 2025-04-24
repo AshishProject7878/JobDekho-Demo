@@ -22,6 +22,7 @@ import AutoJobPrefs from './Pages/AutoJobPrefs';
 import AutoAppliedJobs from './Pages/AutoAppliedJobs';
 import HomePage from './Pages/HomePage';
 import Footer from './Pages/Footer';
+import Dashboard from './Pages/Dashboard';
 
 // Create a wrapper component to handle conditional Footer rendering
 function AppContent() {
@@ -56,6 +57,7 @@ function AppContent() {
           <Route path="/profileComp" element={<CompProfile />} />
           <Route path="/auto-job/prefs" element={<AutoJobPrefs />} /> 
           <Route path="/auto-job/applications" element={<AutoAppliedJobs />} /> 
+          <Route path="/dashboard" element={<Dashboard />} /> 
         </Route>
       </Routes>
       {!hideFooter && <Footer />}
@@ -63,7 +65,7 @@ function AppContent() {
   );
 }
 
-function App() {
+function App() { 
   return (
     <Router>
       <AppContent />

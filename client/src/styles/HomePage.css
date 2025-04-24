@@ -370,6 +370,10 @@
     color: #fff;
 }
 
+.hp-job-card:hover .hp-job-title{
+    color: #fff;
+}
+
 .hp-company-details {
     text-align: left;
 }

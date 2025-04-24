@@ -255,7 +255,19 @@ export const updateProfile = async (req, res) => {
 export const getProfile = async (req, res) => {
   try {
     const userId = req.user._id;
-    const profile = await Profile.findOne({ user: userId }).populate('user', 'email');
+    const profile = await Profile.findOne({ user: userId }).populate('user', 'email').populate({
+      path: 'autoJobApplications.jobId',
+      populate: {
+        path: 'company',
+        select: 'name rating',
+      },
+    }).populate({
+      path: 'manualApplications.jobId',
+      populate: {
+        path: 'company',
+        select: 'name rating',
+      },
+    });
 
     if (!profile) {
       return res.status(404).json({ message: 'Profile not found' });
@@ -490,5 +502,71 @@ export const autoApplyJobs = async (req, res) => {
   } catch (error) {
     console.error('🔥 Error in autoApplyJobs:', error);
     res.status(500).json({ message: 'Error auto-applying to jobs', error: error.message });
+  }
+};
+
+// @desc    Save manual job application
+// @route   POST /api/profile/manual-apply
+// @access  Private
+export const saveManualApplication = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { jobId, resumeUrl } = req.body;
+
+    if (!jobId || !resumeUrl) {
+      return res.status(400).json({ message: 'jobId and resumeUrl are required' });
+    }
+
+    const profile = await Profile.findOne({ user: userId });
+    if (!profile) {
+      return res.status(404).json({ message: 'Profile not found' });
+    }
+
+    // Check if job is already applied manually
+    const existingApplication = profile.manualApplications.find(
+      app => app.jobId.toString() === jobId
+    );
+    if (existingApplication) {
+      return res.status(400).json({ message: 'You have already applied to this job manually' });
+    }
+
+    profile.manualApplications.push({
+      jobId,
+      resumeUrl,
+      appliedAt: new Date(),
+      status: 'Applied',
+    });
+
+    await profile.save();
+
+    res.status(200).json({ message: 'Manual application saved successfully' });
+  } catch (error) {
+    console.error('🔥 Error in saveManualApplication:', error);
+    res.status(500).json({ message: 'Error saving manual application', error: error.message });
+  }
+};
+
+// @desc    Get manually applied jobs
+// @route   GET /api/profile/manual-applications
+// @access  Private
+export const getManualAppliedJobs = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const profile = await Profile.findOne({ user: userId }).populate({
+      path: 'manualApplications.jobId',
+      populate: {
+        path: 'company',
+        select: 'name rating',
+      },
+    });
+
+    if (!profile) {
+      return res.status(404).json({ message: 'Profile not found' });
+    }
+
+    res.status(200).json(profile.manualApplications);
+  } catch (error) {
+    console.error('🔥 Error in getManualAppliedJobs:', error);
+    res.status(500).json({ message: 'Error fetching manually applied jobs', error: error.message });
   }
 };
