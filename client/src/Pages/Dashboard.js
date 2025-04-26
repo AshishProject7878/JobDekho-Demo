@@ -2,7 +2,11 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { Bar } from 'react-chartjs-2';
+import { Chart as ChartJS, BarElement, CategoryScale, LinearScale, Tooltip, Legend } from 'chart.js';
 import '../styles/Dashboard.css';
+
+ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 
 const BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
@@ -65,6 +69,65 @@ const Dashboard = () => {
     navigate('/login');
   };
 
+  // Process data for Bar Chart
+  const getApplicationsByMonth = (jobs) => {
+    const months = Array(6).fill(0).map((_, i) => {
+      const date = new Date();
+      date.setMonth(date.getMonth() - i);
+      return date.toLocaleString('default', { month: 'short', year: 'numeric' });
+    }).reverse();
+
+    const counts = months.map(() => 0);
+    jobs.forEach((job) => {
+      if (job.appliedAt) {
+        const date = new Date(job.appliedAt);
+        const monthYear = date.toLocaleString('default', { month: 'short', year: 'numeric' });
+        const index = months.indexOf(monthYear);
+        if (index !== -1) counts[index]++;
+      }
+    });
+
+    return {
+      labels: months,
+      datasets: [
+        {
+          label: 'Applications',
+          data: counts,
+          backgroundColor: '#3b82f6',
+          borderColor: '#2563eb',
+          borderWidth: 1,
+        },
+      ],
+    };
+  };
+
+  const barOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { 
+        position: 'top',
+        labels: { font: { size: 14 } }
+      },
+      tooltip: { 
+        enabled: true,
+        bodyFont: { size: 13 },
+        titleFont: { size: 14 }
+      },
+    },
+    scales: {
+      y: { 
+        beginAtZero: true, 
+        title: { display: true, text: 'Applications', font: { size: 14 } },
+        ticks: { font: { size: 13 } }
+      },
+      x: { 
+        title: { display: true, text: 'Month', font: { size: 14 } },
+        ticks: { font: { size: 13 } }
+      },
+    },
+  };
+
   console.log('Rendering Dashboard with autoAppliedJobs:', autoAppliedJobs);
   console.log('Rendering Dashboard with manualAppliedJobs:', manualAppliedJobs);
   const validAutoJobs = autoAppliedJobs.filter(app => app.jobId);
@@ -81,7 +144,7 @@ const Dashboard = () => {
         <div className="dashboard-comp-img">
           <img
             src={application.jobId?.company?.logo || 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y'}
-            alt={application.jobId?.company?.name || 'Company'}
+            alt={`${application.jobId?.company?.name || 'Company'} logo`}
           />
           <div className="dashboard-comp-dets">
             <h3 className="dashboard-job-title">{application.jobId?.title || 'Untitled Job'}</h3>
@@ -111,7 +174,9 @@ const Dashboard = () => {
   if (loading) {
     return (
       <div className="dashboard-container">
-        <p>Loading...</p>
+        <div className="dashboard-loading-container">
+          <div className="dashboard-spinner"></div>
+        </div>
       </div>
     );
   }
@@ -119,7 +184,7 @@ const Dashboard = () => {
   if (error) {
     return (
       <div className="dashboard-container">
-        <p>{error}</p>
+        <p className="dashboard-error-message">{error}</p>
       </div>
     );
   }
@@ -151,6 +216,22 @@ const Dashboard = () => {
           <Link to="/auto-applied-jobs" className="dashboard-nav-btn">
             View All Auto-Applied Jobs
           </Link>
+        </div>
+      </div>
+
+      <div className="dashboard-charts-section">
+        <h2>Application Insights</h2>
+        <div className="dashboard-charts-container">
+          <div className="dashboard-chart">
+            <h3>Applications Over Time</h3>
+            {validAutoJobs.length > 0 || validManualJobs.length > 0 ? (
+              <div className="dashboard-chart-wrapper">
+                <Bar data={getApplicationsByMonth([...validAutoJobs, ...validManualJobs])} options={barOptions} />
+              </div>
+            ) : (
+              <p className="dashboard-no-data">No applications to display.</p>
+            )}
+          </div>
         </div>
       </div>
 

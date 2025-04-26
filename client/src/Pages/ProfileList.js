@@ -16,6 +16,8 @@ const ProfileList = () => {
   const [availableSkills, setAvailableSkills] = useState([]);
   const [availablePositions, setAvailablePositions] = useState([]);
 
+  const defaultProfilePicture = 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';
+
   const fetchProfiles = async (page = 1) => {
     setLoading(true);
     try {
@@ -238,12 +240,12 @@ const ProfileList = () => {
             <div key={profile._id} className="profileList-profile-card">
               <div className="profileList-profile-header">
                 <img
-                  src={profile.personal.profilePicture}
-                  alt={profile.personal.fullName}
+                  src={profile.personal?.profilePicture || defaultProfilePicture}
+                  alt={`${profile.personal?.fullName || 'User'}'s profile picture`}
                   className="profileList-profile-picture"
                   onError={(e) => {
-                    e.target.src =
-                      'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';
+                    e.target.src = defaultProfilePicture;
+                    e.target.alt = 'Default profile picture';
                   }}
                 />
                 <div>
@@ -275,27 +277,6 @@ const ProfileList = () => {
                   </div>
                 )}
               </div>
-              {profile.educationHistory.length > 0 && (
-                <div className="profileList-profile-section">
-                  <h3 className="profileList-section-title">Education</h3>
-                  {profile.educationHistory.map((edu, index) => (
-                    <p key={index} className="profileList-section-content">
-                      {edu.degree} in {edu.field || 'N/A'}, {edu.institution} (
-                      {edu.graduationYear || 'N/A'})
-                    </p>
-                  ))}
-                </div>
-              )}
-              {profile.jobHistory.length > 0 && (
-                <div className="profileList-profile-section">
-                  <h3 className="profileList-section-title">Work Experience</h3>
-                  {profile.jobHistory.map((job, index) => (
-                    <p key={index} className="profileList-section-content">
-                      {job.position} at {job.company} ({job.startDate} - {job.endDate || 'Present'})
-                    </p>
-                  ))}
-                </div>
-              )}
               <div className="profileList-profile-actions">
                 <Link
                   to={`/profiles/${profile._id}`}

@@ -68,6 +68,9 @@ function Navbar() {
             <Link to="/dummyProfile">Search</Link>
           </li>
           <li className='NVL-tags'>
+            <Link to="/profileList">Job Seekers</Link>
+          </li>
+          <li className='NVL-tags'>
             <Link to="/jobPostingForm">Post Job</Link>
           </li>
           <li className='NVL-tags'>
